@@ -4,3 +4,4 @@ __pycache__/
 *.log
 data/
 _probe*.py
+.worktrees/

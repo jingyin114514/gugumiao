@@ -1,0 +1,6 @@
+# 核心依赖（akshare 会自动带上 pandas / requests / lxml 等）
+akshare>=1.18.0
+pandas>=2.0.0
+
+# 备选数据源（可装可不装；akshare 全部失败时才启用，如 install 失败可删掉本行）
+yfinance>=0.2.50

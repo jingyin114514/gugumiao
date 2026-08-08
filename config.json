@@ -110,8 +110,98 @@
       "margin_note": ""
     },
     {
-      "code": "600582",
+      "code": "000537",
+      "market": "sz",
+      "name": "",
+      "cost": null,
+      "target_weight": null,
+      "industry_light": "yellow",
+      "industry_note": "",
+      "margin_note": ""
+    },
+    {
+      "code": "601628",
       "market": "sh",
+      "name": "",
+      "cost": null,
+      "target_weight": null,
+      "industry_light": "yellow",
+      "industry_note": "",
+      "margin_note": ""
+    },
+    {
+      "code": "603259",
+      "market": "sh",
+      "name": "",
+      "cost": null,
+      "target_weight": null,
+      "industry_light": "yellow",
+      "industry_note": "",
+      "margin_note": ""
+    },
+    {
+      "code": "300750",
+      "market": "sz",
+      "name": "",
+      "cost": null,
+      "target_weight": null,
+      "industry_light": "yellow",
+      "industry_note": "",
+      "margin_note": ""
+    },
+    {
+      "code": "300308",
+      "market": "sz",
+      "name": "",
+      "cost": null,
+      "target_weight": null,
+      "industry_light": "yellow",
+      "industry_note": "",
+      "margin_note": ""
+    },
+    {
+      "code": "600487",
+      "market": "sh",
+      "name": "",
+      "cost": null,
+      "target_weight": null,
+      "industry_light": "yellow",
+      "industry_note": "",
+      "margin_note": ""
+    },
+    {
+      "code": "601899",
+      "market": "sh",
+      "name": "",
+      "cost": null,
+      "target_weight": null,
+      "industry_light": "yellow",
+      "industry_note": "",
+      "margin_note": ""
+    },
+    {
+      "code": "601225",
+      "market": "sh",
+      "name": "",
+      "cost": null,
+      "target_weight": null,
+      "industry_light": "yellow",
+      "industry_note": "",
+      "margin_note": ""
+    },
+    {
+      "code": "000333",
+      "market": "sz",
+      "name": "",
+      "cost": null,
+      "target_weight": null,
+      "industry_light": "yellow",
+      "industry_note": "",
+      "margin_note": ""
+    },
+    {
+      "code": "002371",
+      "market": "sz",
       "name": "",
       "cost": null,
       "target_weight": null,

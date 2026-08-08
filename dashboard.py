@@ -261,7 +261,9 @@ button:disabled{opacity:.45;cursor:default}
 
 main{max-width:1180px;margin:0 auto;padding:20px 22px 40px}
 .hidden{display:none!important}
-.banner-info{display:flex;align-items:center;gap:10px;background:rgba(201,162,75,.08);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:16px;color:var(--muted)}
+.banner-info{display:flex;align-items:center;gap:10px;background:rgba(201,162,75,.08);border:1px solid var(--line);border-radius:12px;padding:10px 48px 10px 14px;margin-bottom:16px;color:var(--muted);position:relative}
+.deep-cancel{position:absolute;top:50%;right:10px;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:none;background:rgba(227,200,126,.12);color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.deep-cancel:hover{background:rgba(227,200,126,.24);color:var(--ink)}
 .spinner-sm{width:14px;height:14px;border:2px solid rgba(201,162,75,.25);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 .meta-line{display:flex;gap:18px;color:var(--dim);font-size:12.5px;margin-bottom:14px;flex-wrap:wrap}
@@ -326,12 +328,12 @@ td .cd{color:var(--dim);font-size:12px}
 footer{text-align:center;color:var(--dim);font-size:12px;padding:20px}
 
 .modal-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(12,10,6,.6);backdrop-filter:blur(6px);padding:20px}
-.modal{width:min(560px,94vw);max-height:88vh;overflow:auto;background:rgba(28,23,14,.97);border:1px solid rgba(205,170,90,.28);border-radius:20px;padding:22px;color:#E9E1CD;box-shadow:0 30px 80px rgba(0,0,0,.75);backdrop-filter:blur(20px);animation:pop .22s cubic-bezier(.2,.9,.3,1.2)}
+.modal{position:relative;width:min(560px,94vw);max-height:88vh;overflow:auto;background:rgba(28,23,14,.97);border:1px solid rgba(205,170,90,.28);border-radius:20px;padding:22px;color:#E9E1CD;box-shadow:0 30px 80px rgba(0,0,0,.75);backdrop-filter:blur(20px);animation:pop .22s cubic-bezier(.2,.9,.3,1.2)}
 @keyframes pop{from{transform:scale(.92) translateY(8px);opacity:0}to{transform:none;opacity:1}}
-.m-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.m-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-right:36px}
 .m-name{font-size:19px;font-weight:700;color:#F0E9D6}
 .m-code{font-size:12.5px;color:var(--dim)}
-.m-close{border:none;background:rgba(227,200,126,.1);color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;line-height:1;flex-shrink:0;transition:all .15s}
+.m-close{position:absolute;top:14px;right:14px;border:none;background:rgba(227,200,126,.1);color:var(--muted);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .m-close:hover{background:rgba(227,200,126,.2);color:#F0E9D6}
 .m-lights{font-size:22px;letter-spacing:4px;background:rgba(227,200,126,.06);border-radius:12px;padding:9px 12px;margin-bottom:14px}
 .m-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 18px;margin-bottom:12px}
@@ -357,6 +359,7 @@ footer{text-align:center;color:var(--dim);font-size:12px;padding:20px}
   <div id="deepBanner" class="banner-info hidden">
     <span class="spinner-sm"></span>
     <span id="deepText">正在抓取灯号分析数据（约1~2分钟）…</span>
+    <button class="deep-cancel" id="deepCancel" onclick="cancelDeep()" title="取消等待">×</button>
   </div>
 
   <section class="fan-panel">
@@ -464,6 +467,7 @@ const fmtPct = (v,d=2) => v == null ? "--" : (v > 0 ? "+" : "") + v.toFixed(d) +
 const cls = v => v > 0 ? "up" : (v < 0 ? "down" : "flat");
 const $ = id => document.getElementById(id);
 let busy = false;
+let pollCancelled = false;
 let STOCKS = [];
 let fanPage = 0;
 const PAGE_N = 10;
@@ -630,8 +634,10 @@ async function removeStock(code){
   await loadWatchlist(); await loadQuotes(); deepRefresh();
 }
 async function pollDeep(){
+  pollCancelled = false;
   for (;;){
     await sleep(2000);
+    if (pollCancelled) return;
     const s = await (await fetch("/api/status")).json();
     const last = (s.log || []).slice(-1)[0] || "";
     $("deepText").textContent = "正在抓取灯号分析数据（约1~2分钟）… " + last;
@@ -639,8 +645,16 @@ async function pollDeep(){
   }
 }
 async function deepRefresh(){
+  pollCancelled = false;
   await fetch("/api/refresh", {method:"POST"});
   if (!busy){ busy = true; $("deepBtn").disabled = true; showDeep(true); $("deepText").textContent = "正在启动灯号分析…"; pollDeep(); }
+}
+function cancelDeep(){
+  pollCancelled = true;
+  busy = false;
+  $("deepBtn").disabled = false;
+  showDeep(false);
+  $("quoteStatus").textContent = "已取消等待。分析在后台继续，完成后点「灯号分析」查看结果。";
 }
 window.addEventListener("load", async () => {
   loadQuotes(); loadWatchlist();

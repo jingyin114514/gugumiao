@@ -20,6 +20,74 @@ from .models import StockSnapshot
 from .reporter import append_history, load_previous_buildable, render_markdown
 
 
+def _fmt_flow(v: Optional[float]) -> str:
+    if v is None:
+        return "数据缺失"
+    direction = "流入" if v >= 0 else "流出"
+    s = abs(v)
+    if s >= 10000:
+        return f"{direction} {s / 10000:.2f}亿"
+    return f"{direction} {s:.0f}万"
+
+
+def _build_analysis_text(stock: StockSnapshot) -> str:
+    """按已抓取数据自动生成客观金融说明（研报式口吻，不预测、不构成投资建议）。"""
+    parts = []
+    # 基本面
+    if stock.rev_yoy is not None or stock.profit_yoy is not None:
+        fb = []
+        if stock.rev_yoy is not None:
+            fb.append(f"营收同比 {stock.rev_yoy:+.1f}%")
+        if stock.profit_yoy is not None:
+            fb.append(f"归母净利同比 {stock.profit_yoy:+.1f}%")
+        if stock.gross_margin is not None:
+            fb.append(f"毛利率 {stock.gross_margin:.1f}%")
+        if stock.prev_rev_yoy is not None:
+            fb.append(f"上期营收同比 {stock.prev_rev_yoy:+.1f}%")
+        parts.append("基本面：" + "，".join(fb))
+    # 估值
+    if stock.pe_ttm is not None or stock.pb is not None or stock.pe_pct is not None or stock.pb_pct is not None:
+        va = []
+        if stock.pe_ttm is not None:
+            va.append(f"PE(TTM) {stock.pe_ttm:.1f}倍")
+        if stock.pb is not None:
+            va.append(f"PB {stock.pb:.2f}倍")
+        if stock.pe_pct is not None:
+            va.append(f"PE 3年分位 {stock.pe_pct:.0f}%")
+        if stock.pb_pct is not None:
+            va.append(f"PB 3年分位 {stock.pb_pct:.0f}%")
+        parts.append("估值：" + "，".join(va))
+    # 主力资金
+    if stock.flow_5d_wan is not None or stock.flow_20d_wan is not None:
+        fl = []
+        if stock.flow_5d_wan is not None:
+            fl.append(f"近5日主力净{_fmt_flow(stock.flow_5d_wan)}")
+        if stock.flow_20d_wan is not None:
+            fl.append(f"近20日主力净{_fmt_flow(stock.flow_20d_wan)}")
+        if stock.threshold_wan:
+            fl.append(f"档位阈值 {stock.threshold_wan / 10000:.0f}亿")
+        parts.append("资金：" + "，".join(fl))
+    # 机构持仓
+    if stock.inst_count is not None:
+        inst = [f"机构持仓 {stock.inst_count} 家"]
+        if stock.inst_count_chg is not None:
+            inst.append(f"家数环比 {stock.inst_count_chg:+d}")
+        if stock.inst_ratio_pct is not None:
+            inst.append(f"占流通股 {stock.inst_ratio_pct:.2f}%")
+        if stock.inst_ratio_chg is not None:
+            inst.append(f"比例环比 {stock.inst_ratio_chg:+.2f}pp")
+        parts.append("筹码：" + "，".join(inst))
+    # 产业 / 边际备注
+    if stock.industry_note:
+        parts.append(f"产业逻辑：{stock.industry_note}")
+    if stock.margin_note:
+        parts.append(f"边际变化：{stock.margin_note}")
+    # 灯号结论
+    status = stock.status or ("可建仓" if stock.buildable else "暂不可建仓")
+    parts.append(f"六灯 {stock.green_count}绿{stock.red_count}红，综合判定：{status}")
+    return "；".join(parts)
+
+
 def process_stock(item: Dict[str, Any], cfg: Dict[str, Any], fetcher: DataFetcher,
                   spot: Optional[Any], prev_buildable: Dict[str, bool]) -> StockSnapshot:
     code = item["code"]
@@ -121,6 +189,7 @@ def process_stock(item: Dict[str, Any], cfg: Dict[str, Any], fetcher: DataFetche
 
     # ---- 灯号 ----
     evaluate(stock, cfg)
+    stock.analysis_text = _build_analysis_text(stock)
 
     # ---- 状态变化提醒 ----
     was_buildable = prev_buildable.get(code)

@@ -494,7 +494,10 @@ function drawFan(){
   const items = filteredStocks();
   $("fanCount").textContent = `共 ${items.length} 只`;
   $("names").innerHTML = ""; $("pages").innerHTML = ""; $("fanG").innerHTML = ""; $("ribG").innerHTML = "";
-  if (!items.length) return;
+  if (!items.length){
+    $("pages").innerHTML = `<span class="page-note">暂无数据。点击右上角「灯号分析」开始抓取，或稍后刷新页面。</span>`;
+    return;
+  }
   const pages = Math.ceil(items.length / PAGE_N);
   if (fanPage >= pages) fanPage = pages - 1;
   const slice = items.slice(fanPage*PAGE_N, (fanPage+1)*PAGE_N);
@@ -659,9 +662,7 @@ function cancelDeep(){
 window.addEventListener("load", async () => {
   loadQuotes(); loadWatchlist();
   const s = await (await fetch("/api/status")).json();
-  if (s.stocks && s.stocks.length){ render(s); }
-  else if (s.running || s.pending){ if (!busy){ busy = true; $("deepBtn").disabled = true; showDeep(true); pollDeep(); } }
-  else { deepRefresh(); }
+  render(s);
 });
 </script>
 </body>

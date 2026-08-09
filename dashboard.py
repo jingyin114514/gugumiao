@@ -284,13 +284,18 @@ td .cd{color:var(--muted);font-size:12px}
 .badge.ok{background:var(--green-bg);color:var(--green-deep)}
 .badge.warn{background:var(--amber-bg);color:var(--amber-deep)}
 .badge.bad{background:var(--red-bg);color:var(--red-deep)}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
-.card{border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden}
-.card-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:10px 12px;cursor:pointer;transition:box-shadow .15s,transform .15s,border-color .15s}
+.card:hover{border-color:#9CA3AF;box-shadow:0 4px 14px rgba(0,0,0,.07);transform:translateY(-1px)}
+.card .c-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card .who{font-size:13.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .who .cd{color:var(--muted);font-weight:400;font-size:11px;margin-left:5px}
+.card .price{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.card .c-lights{font-size:14px;letter-spacing:1px;margin:5px 0 6px;line-height:1}
+.card .c-meta{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--muted)}
+.card .c-meta .badge{font-size:10.5px;padding:1px 8px}
 .card-head .who{font-size:15px;font-weight:650}
 .card-head .who .cd{color:var(--muted);font-weight:400;font-size:12px;margin-left:6px}
-.card-head .px{text-align:right}
-.card-head .px .price{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
 .card-body{padding:6px 16px 12px}
 .row{display:flex;justify-content:space-between;gap:14px;padding:6px 0;border-bottom:1px dashed #F0F1F3;font-size:13px}
 .row:last-child{border-bottom:none}
@@ -317,12 +322,23 @@ td .cd{color:var(--muted);font-size:12px}
 .banner{background:var(--red-bg);color:var(--red-deep);border:1px solid #FECACA;border-radius:10px;padding:12px 16px;margin-bottom:16px}
 footer{max-width:1080px;margin:0 auto;padding:18px 20px 30px;color:var(--muted);font-size:12px;text-align:center}
 .hidden{display:none}
-.banner-info{background:var(--ink);color:#F9FAFB;border-radius:10px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px}
+.banner-info{background:var(--ink);color:#F9FAFB;border-radius:10px;padding:10px 44px 10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;position:relative}
 .banner-info .spinner-sm{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
 .banner-info .dim{color:#9CA3AF}
+.deep-cancel{position:absolute;top:50%;right:10px;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;border:none;background:rgba(255,255,255,.16);color:#D1D5DB;cursor:pointer;font-size:13px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.deep-cancel:hover{background:rgba(255,255,255,.3);color:#fff}
 #quoteStatus{margin-top:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (max-width:640px){.cards{grid-template-columns:1fr}}
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(17,24,39,.45);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.22);width:min(620px,94vw);max-height:86vh;overflow:auto;padding:20px 22px}
+.m-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-right:40px}
+.m-name{font-size:18px;font-weight:700}
+.m-code{color:var(--muted);font-size:12px}
+.m-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;border:none;background:#F3F4F6;color:#6B7280;font-size:15px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.m-close:hover{background:#E5E7EB;color:#111827}
+.m-lights{font-size:20px;letter-spacing:3px;background:#F9FAFB;border-radius:10px;padding:8px 12px;margin-bottom:12px}
+.m-body .row{font-size:13px}
 </style>
 </head>
 <body>
@@ -342,6 +358,7 @@ footer{max-width:1080px;margin:0 auto;padding:18px 20px 30px;color:var(--muted);
   <div id="deepBanner" class="banner-info hidden">
     <span class="spinner-sm"></span>
     <span id="deepText">正在抓取灯号分析数据（约1~2分钟）…</span>
+    <button class="deep-cancel" onclick="cancelDeep()" title="取消等待">×</button>
   </div>
   <section class="panel">
     <h2>今日行情<span class="hint">实时 · 秒级刷新</span></h2>
@@ -383,6 +400,18 @@ footer{max-width:1080px;margin:0 auto;padding:18px 20px 30px;color:var(--muted);
     <div id="watch"><span class="warn-line">暂无。</span></div>
   </section>
 </main>
+<div class="modal-overlay hidden" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="m-head">
+      <span class="m-name" id="mName"></span>
+      <span class="m-code" id="mCode"></span>
+      <span id="mBadge"></span>
+      <button class="m-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="m-lights" id="mLights"></div>
+    <div class="m-body" id="mBody"></div>
+  </div>
+</div>
 <footer>数据来自公开接口，仅供个人研究参考，不构成投资建议 · 灯号框架</footer>
 <script>
 const DIMS = [
@@ -400,6 +429,8 @@ const fmtPct = (v,d=2) => v == null ? "--" : (v > 0 ? "+" : "") + v.toFixed(d) +
 const cls = v => v > 0 ? "up" : (v < 0 ? "down" : "flat");
 const $ = id => document.getElementById(id);
 let busy = false;
+let pollCancelled = false;
+let STOCKS = [];
 
 function badge(s){
   if (s.buildable) return '<span class="badge ok">可建仓</span>';
@@ -433,7 +464,8 @@ function render(s){
     rows += `<td>${x.green_count}</td><td>${x.red_count}</td><td>${badge(x)}</td></tr>`;
   });
   $("matrix").innerHTML = rows;
-  $("cards").innerHTML = stocks.map(cardHtml).join("");
+  STOCKS = stocks;
+  $("cards").innerHTML = stocks.map((x,i) => cardHtml(x,i)).join("");
 
   const bHtml = buildable
     ? stocks.filter(x => x.buildable).map(x => `<div class="warn-line">→ ${esc(x.name)} ${esc(x.code)}${x.alert ? " · 🔥 " + esc(x.alert) : ""}</div>`).join("")
@@ -448,22 +480,23 @@ function render(s){
   $("bannerWrap").innerHTML = banner;
 }
 
-function cardHtml(x){
+function cardHtml(x, i){
   const lights = DIMS.map(d => LIGHT[x.lights[d[0]]] || "🟡").join("");
-  let h = `
-  <div class="card">
-    <div class="card-head">
-      <div>
-        <div class="who">${esc(x.name)}<span class="cd">${esc(x.code)}</span></div>
-        <div class="lights-lg">${lights}</div>
-      </div>
-      <div class="px">
-        <div class="price ${cls(x.pct_chg)}">${x.price == null ? "--" : x.price.toFixed(2)}</div>
-        <div class="${cls(x.pct_chg)}">${fmtPct(x.pct_chg)}</div>
-        ${badge(x)}
-      </div>
+  return `
+  <div class="card" onclick="showDetail(${i})">
+    <div class="c-top">
+      <span class="who">${esc(x.name)}<span class="cd">${esc(x.code)}</span></span>
+      <span class="price ${cls(x.pct_chg)}">${x.price == null ? "--" : x.price.toFixed(2)}</span>
     </div>
-    <div class="card-body">`;
+    <div class="c-lights">${lights}</div>
+    <div class="c-meta">
+      <span class="${cls(x.pct_chg)}">${fmtPct(x.pct_chg)}</span>
+      ${badge(x)}
+    </div>
+  </div>`;
+}
+
+function detailRowsHtml(x){
   const rows = [];
   rows.push(["估值",
     `PE ${x.pe_ttm == null ? "--" : x.pe_ttm.toFixed(1)}倍<span class="dim">（分位 ${x.pe_pct == null ? "--" : x.pe_pct.toFixed(0)}%）</span> · ` +
@@ -498,11 +531,27 @@ function cardHtml(x){
   }
   if (x.industry_note) rows.push(["产业逻辑", esc(x.industry_note)]);
   if (x.margin_note) rows.push(["边际备注", esc(x.margin_note)]);
-  rows.forEach(([l,v]) => h += `<div class="row"><span class="lbl">${l}</span><span class="val">${v}</span></div>`);
+  let h = rows.map(([l,v]) => `<div class="row"><span class="lbl">${l}</span><span class="val">${v}</span></div>`).join("");
   if ((x.warnings || []).length) h += `<div class="note">⚠ ${(x.warnings||[]).map(esc).join("；")}</div>`;
-  h += `</div></div>`;
   return h;
 }
+
+function showDetail(i){
+  const x = STOCKS[i];
+  if (!x) return;
+  $("mName").textContent = x.name;
+  $("mCode").textContent = x.code;
+  $("mBadge").innerHTML = badge(x);
+  $("mLights").textContent = DIMS.map(d => LIGHT[x.lights[d[0]]] || "🟡").join("");
+  $("mBody").innerHTML = detailRowsHtml(x);
+  $("modal").classList.remove("hidden");
+}
+
+function closeModal(){
+  $("modal").classList.add("hidden");
+}
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
@@ -591,8 +640,10 @@ async function removeStock(code){
 }
 
 async function pollDeep(){
+  pollCancelled = false;
   for (;;){
     await sleep(2000);
+    if (pollCancelled) return;
     const s = await (await fetch("/api/status")).json();
     const last = (s.log || []).slice(-1)[0] || "";
     $("deepText").textContent = "正在抓取灯号分析数据（约1~2分钟）… " + last;
@@ -607,6 +658,7 @@ async function pollDeep(){
 }
 
 async function deepRefresh(){
+  pollCancelled = false;
   await fetch("/api/refresh", {method:"POST"});
   if (!busy){
     busy = true;
@@ -617,21 +669,19 @@ async function deepRefresh(){
   }
 }
 
+function cancelDeep(){
+  pollCancelled = true;
+  busy = false;
+  $("deepBtn").disabled = false;
+  showDeep(false);
+  $("quoteStatus").textContent = "已取消等待。分析在后台继续，完成后点「灯号分析」查看结果。";
+}
+
 window.addEventListener("load", async () => {
   loadQuotes();
   loadWatchlist();
   const s = await (await fetch("/api/status")).json();
-  if (s.stocks && s.stocks.length){ render(s); }
-  else if (s.running || s.pending){
-    // 分析已在后台进行：只观察进度，不重复提交
-    if (!busy){
-      busy = true;
-      $("deepBtn").disabled = true;
-      showDeep(true);
-      pollDeep();
-    }
-  }
-  else { deepRefresh(); }
+  render(s);
 });
 </script>
 </body>

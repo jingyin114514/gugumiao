@@ -15,13 +15,14 @@ from .indicators import (
     summarize_valuation,
     to_num,
 )
-from .lights import evaluate
+from .lights import DIMENSIONS, DIM_LABELS, evaluate
 from .models import StockSnapshot
-from .reporter import append_history, load_previous_buildable, render_markdown
+from .reporter import append_history, load_previous_buildable, load_previous_lights, render_markdown
 
 
 def process_stock(item: Dict[str, Any], cfg: Dict[str, Any], fetcher: DataFetcher,
-                  spot: Optional[Any], prev_buildable: Dict[str, bool]) -> StockSnapshot:
+                  spot: Optional[Any], prev_buildable: Dict[str, bool],
+                  prev_lights: Optional[Dict[str, Dict[str, str]]] = None) -> StockSnapshot:
     code = item["code"]
     market = item["market"]
     stock = StockSnapshot(
@@ -121,12 +122,27 @@ def process_stock(item: Dict[str, Any], cfg: Dict[str, Any], fetcher: DataFetche
 
     # ---- 灯号 ----
     evaluate(stock, cfg)
+    stock.light_changes = _build_light_changes(stock, (prev_lights or {}).get(code, {}))
 
     # ---- 状态变化提醒 ----
     was_buildable = prev_buildable.get(code)
     if was_buildable is False and stock.buildable:
         stock.alert = "新进入可建仓清单"
     return stock
+
+
+def _build_light_changes(stock: StockSnapshot, prev: Dict[str, str]) -> str:
+    """对比上次六灯，生成转换说明（如"估值 🟡→🔴；主力 🟢→🟡"）。"""
+    if not prev:
+        return ""
+    icons = {"green": "🟢", "yellow": "🟡", "red": "🔴"}
+    changes = []
+    for dim in DIMENSIONS:
+        old = (prev.get(dim) or "").strip()
+        new = (stock.lights.get(dim) or "").strip()
+        if old in icons and new in icons and old != new:
+            changes.append(f"{DIM_LABELS.get(dim, dim)} {icons[old]}→{icons[new]}")
+    return "；".join(changes)
 
 
 def run_pipeline(cfg: Dict[str, Any], codes: Optional[str] = None,
@@ -150,6 +166,7 @@ def run_pipeline(cfg: Dict[str, Any], codes: Optional[str] = None,
     reports_dir = Path(cfg["data"]["reports_dir"])
     reports_dir.mkdir(parents=True, exist_ok=True)
     prev_buildable = {} if not save_history else load_previous_buildable(history_path)
+    prev_lights = {} if not save_history else load_previous_lights(history_path)
 
     fetcher = DataFetcher(cfg)
     log("正在拉取实时行情 …")
@@ -163,7 +180,7 @@ def run_pipeline(cfg: Dict[str, Any], codes: Optional[str] = None,
         log(f"开始抓取 {len(watchlist)} 只自选股数据 …")
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = {
-                executor.submit(process_stock, item, cfg, fetcher, spot, prev_buildable): item
+                executor.submit(process_stock, item, cfg, fetcher, spot, prev_buildable, prev_lights): item
                 for item in watchlist
             }
             for future in as_completed(futures):

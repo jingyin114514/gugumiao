@@ -35,6 +35,36 @@ STATE: Dict[str, Any] = {
     "log": [],
 }
 LOCK = threading.Lock()
+LAST_STATE_PATH = Path("data/last_state.json")
+
+
+def _restore_last_state() -> None:
+    """服务启动时恢复上次成功结果，保证打开界面即显示上次数据。"""
+    try:
+        if LAST_STATE_PATH.exists():
+            data = json.loads(LAST_STATE_PATH.read_text(encoding="utf-8"))
+            with LOCK:
+                STATE["stocks"] = data.get("stocks", [])
+                STATE["meta"] = data.get("meta", {})
+                STATE["report_path"] = data.get("report_path", "")
+                STATE["done"] = True
+    except Exception:
+        pass
+
+
+def _save_last_state() -> None:
+    """把最近一次成功结果保存到本地，供下次启动恢复。"""
+    try:
+        LAST_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with LOCK:
+            payload = {k: STATE[k] for k in ("stocks", "meta", "report_path")}
+        LAST_STATE_PATH.write_text(
+            json.dumps(payload, ensure_ascii=False, default=str), encoding="utf-8")
+    except Exception:
+        pass
+
+
+_restore_last_state()
 
 
 def _log(line: str) -> None:
@@ -48,8 +78,8 @@ def _start_refresh() -> bool:
         if STATE["running"] or STATE["pending"]:
             STATE["pending"] = True
             return False
-        STATE.update(running=True, pending=False, done=False, error="", stocks=[],
-                     meta={}, report_path="", log=[])
+        # 保留上次成功数据（stocks/meta/report_path），抓取期间界面继续显示上次结果
+        STATE.update(running=True, pending=False, done=False, error="", log=[])
     cfg = load_config("config.json")
     thread = threading.Thread(target=refresh_background, args=(cfg,), daemon=True)
     thread.start()
@@ -69,6 +99,7 @@ def refresh_background(initial_cfg: Dict[str, Any]) -> None:
                 STATE["meta"] = result.get("meta", {})
                 STATE["report_path"] = str(result.get("report_path") or "")
                 STATE["done"] = True
+            _save_last_state()
             _log("数据抓取完成。")
         except Exception as exc:  # noqa: BLE001
             with LOCK:
@@ -127,8 +158,9 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/api/status":
             with LOCK:
                 payload = {k: STATE[k] for k in ("running", "pending", "done", "error", "stocks", "meta", "report_path", "log")}
-                payload["updated"] = STATE["meta"].get("run_time", "").strftime("%Y-%m-%d %H:%M:%S") \
-                    if STATE["meta"].get("run_time") else ""
+                rt = STATE["meta"].get("run_time", "")
+                payload["updated"] = rt.strftime("%Y-%m-%d %H:%M:%S") \
+                    if hasattr(rt, "strftime") else str(rt or "")
                 payload["data_sources"] = STATE["meta"].get("data_sources", "")
             self._json(payload)
         elif path == "/report":
@@ -237,7 +269,7 @@ PAGE = """<!doctype html>
 <title>灯号监控面板</title>
 <style>
 :root{
-  --ink:#1F2937; --muted:#6B7280; --line:#E5E7EB; --bg:#F7F8FA;
+  --ink:#1F2937; --muted:#6B7280; --line:#E9E2D0; --bg:#FAF5E6;
   --green:#16A34A; --green-bg:#ECFDF5; --green-deep:#15803D;
   --amber:#D97706; --amber-bg:#FFFBEB; --amber-deep:#B45309;
   --red:#DC2626; --red-bg:#FEF2F2; --red-deep:#B91C1C;
@@ -273,7 +305,7 @@ main{max-width:1080px;margin:0 auto;padding:20px}
 .tbl-wrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:center;white-space:nowrap}
-th{font-size:12px;color:var(--muted);font-weight:500;background:#FAFAFB}
+th{font-size:12px;color:var(--muted);font-weight:500;background:#F6F1E0}
 td.name-cell,th.name-cell{text-align:left}
 td .nm{font-weight:650}
 td .cd{color:var(--muted);font-size:12px}
@@ -285,10 +317,10 @@ td .cd{color:var(--muted);font-size:12px}
 .badge.warn{background:var(--amber-bg);color:var(--amber-deep)}
 .badge.bad{background:var(--red-bg);color:var(--red-deep)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
-.card{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:10px 12px;cursor:pointer;transition:box-shadow .15s,transform .15s,border-color .15s}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:10px 12px;cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cpath d='M4 24 L15 9 L19 13 L6 26 Z' fill='%23181818'/%3E%3Cpath d='M15 9 Q18 4 23 3 Q24 8 19 13 Z' fill='%23282828'/%3E%3C/svg%3E") 5 12,pointer;transition:box-shadow .15s,transform .15s,border-color .15s}
 .card:hover{border-color:#9CA3AF;box-shadow:0 4px 14px rgba(0,0,0,.07);transform:translateY(-1px)}
 .card .c-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.card .who{font-size:13.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .who{font-size:13.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:"STKaiti","KaiTi","Microsoft YaHei",serif}
 .card .who .cd{color:var(--muted);font-weight:400;font-size:11px;margin-left:5px}
 .card .price{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 .card .c-lights{font-size:14px;letter-spacing:1px;margin:5px 0 6px;line-height:1}
@@ -320,7 +352,9 @@ td .cd{color:var(--muted);font-size:12px}
 .wl-item .del{background:none;border:none;color:var(--red);cursor:pointer;font-size:15px;padding:2px 7px;border-radius:6px}
 .wl-item .del:hover{background:var(--red-bg)}
 .banner{background:var(--red-bg);color:var(--red-deep);border:1px solid #FECACA;border-radius:10px;padding:12px 16px;margin-bottom:16px}
-footer{max-width:1080px;margin:0 auto;padding:18px 20px 30px;color:var(--muted);font-size:12px;text-align:center}
+footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);font-size:12px;text-align:center}
+.footer-quote{color:var(--amber-deep);font-weight:600;font-size:13px;margin-bottom:6px;font-family:"STKaiti","KaiTi","Microsoft YaHei",serif}
+.footer-note{color:var(--muted);font-size:11px;opacity:.8}
 .hidden{display:none}
 .banner-info{background:var(--ink);color:#F9FAFB;border-radius:10px;padding:10px 44px 10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;position:relative}
 .banner-info .spinner-sm{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
@@ -340,6 +374,29 @@ footer{max-width:1080px;margin:0 auto;padding:18px 20px 30px;color:var(--muted);
 .m-close:hover{background:#E5E7EB;color:#111827}
 .m-lights{font-size:20px;letter-spacing:3px;background:#F9FAFB;border-radius:10px;padding:8px 12px;margin-bottom:12px}
 .m-body .row{font-size:13px}
+.view-tabs{display:inline-flex;gap:4px;background:#EEF0F3;border-radius:999px;padding:3px;margin-bottom:12px}
+.vt{border:none;background:transparent;border-radius:999px;padding:6px 16px;font:inherit;font-size:13px;color:var(--muted);cursor:pointer;transition:all .15s}
+.vt:hover{color:var(--ink)}
+.vt.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1);font-weight:600}
+.fan-view .legend{display:flex;gap:16px;font-size:12px;color:var(--muted)}
+.fan-view .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.fan-view .search-row{display:flex;gap:10px;align-items:center;margin:12px 0 4px}
+.fan-view .search-row input{flex:1;max-width:300px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 16px;color:var(--ink);font:inherit;outline:none}
+.fan-view .search-row input:focus{border-color:var(--amber)}
+.fan-view .search-row .count{color:var(--muted);font-size:12px}
+.stage{position:relative;width:100%;max-width:660px;height:440px;margin:8px auto 0;background:radial-gradient(120% 90% at 50% 105%,#FBF6E9 0%,#F4ECD6 55%,#EADFC2 100%);border-radius:22px;border:1px solid rgba(184,134,11,.28);box-shadow:0 18px 45px rgba(120,90,30,.12),inset 0 1px 0 rgba(255,255,255,.6);overflow:hidden;user-select:none}
+.stage::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(60% 45% at 50% 78%,rgba(255,255,255,.35),transparent 70%)}
+.stage svg{position:absolute;inset:0;width:100%;height:100%}
+.names{position:absolute;inset:0}
+.nm{position:absolute;writing-mode:vertical-rl;text-orientation:upright;font-family:"STKaiti","KaiTi","Microsoft YaHei",serif;font-size:14px;font-weight:600;letter-spacing:2px;padding:3px;border-radius:6px;line-height:1.25;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;transform-origin:center}
+.nm.g{color:var(--green-deep)} .nm.y{color:var(--amber-deep)} .nm.r{color:var(--red-deep)}
+.nm:hover{transform:scale(1.12);z-index:5;background:rgba(255,255,255,.75);box-shadow:0 0 0 1px rgba(184,134,11,.25),0 8px 22px rgba(120,90,30,.16)}
+.pages{display:flex;justify-content:center;gap:8px;margin:14px 0 4px;flex-wrap:wrap}
+.pg{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:6px 16px;font:inherit;font-size:13px;cursor:pointer;transition:all .18s ease}
+.pg:hover{background:#F3EAD2;border-color:var(--amber);transform:translateY(-1px)}
+.pg.on{background:linear-gradient(135deg,#C9A24B,#A67C2E);color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(166,124,46,.3)}
+.page-note{width:100%;text-align:center;font-size:12px;color:var(--muted);margin-top:6px}
+.c-chg{font-size:10.5px;color:var(--amber-deep);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -389,8 +446,56 @@ footer{max-width:1080px;margin:0 auto;padding:18px 20px 30px;color:var(--muted);
     <div class="tbl-wrap"><table id="matrix"></table></div>
   </section>
   <section class="panel">
-    <h2>个股明细</h2>
-    <div class="cards" id="cards"></div>
+    <h2>个股明细<span class="hint">点击股票名查看详情</span></h2>
+    <div class="view-tabs">
+      <button class="vt on" data-view="fan" onclick="switchView('fan')">折骨扇</button>
+      <button class="vt" data-view="cards" onclick="switchView('cards')">卡片</button>
+    </div>
+    <div id="fanView" class="fan-view">
+      <div class="fan-head" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <span class="legend">
+          <span><i style="background:var(--green)"></i>建仓</span>
+          <span><i style="background:var(--amber)"></i>观察</span>
+          <span><i style="background:var(--red)"></i>危险</span>
+        </span>
+      </div>
+      <div class="search-row">
+        <input id="fanSearch" placeholder="搜索名称 / 代码…" autocomplete="off">
+        <span class="count" id="fanCount"></span>
+      </div>
+      <div class="stage" id="stage">
+        <svg viewBox="0 0 660 440" xmlns="http://www.w3.org/2000/svg" id="svgFan">
+          <defs>
+            <radialGradient id="paper" cx="50%" cy="100%" r="82%">
+              <stop offset="0%" stop-color="#F7EED9"/>
+              <stop offset="58%" stop-color="#EFE1BF"/>
+              <stop offset="100%" stop-color="#DCC79B"/>
+            </radialGradient>
+            <linearGradient id="rib" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#D9BE80"/>
+              <stop offset="50%" stop-color="#F0E0B4"/>
+              <stop offset="100%" stop-color="#C3A25C"/>
+            </linearGradient>
+            <linearGradient id="handle" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#6F4A1F"/>
+              <stop offset="45%" stop-color="#96662B"/>
+              <stop offset="100%" stop-color="#573A16"/>
+            </linearGradient>
+            <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="4" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.5"/>
+            </filter>
+          </defs>
+          <g id="fanG" filter="url(#shadow)"></g>
+          <g id="ribG"></g>
+          <g id="accG"></g>
+        </svg>
+        <div class="names" id="names"></div>
+      </div>
+      <div class="pages" id="pages"></div>
+    </div>
+    <div id="cardsView" class="cards-view hidden">
+      <div class="cards" id="cards"></div>
+    </div>
   </section>
   <section class="panel">
     <h2>建仓清单<span class="hint">绿灯 ≥ 4 且无红灯</span></h2>
@@ -413,7 +518,10 @@ footer{max-width:1080px;margin:0 auto;padding:18px 20px 30px;color:var(--muted);
     <div class="m-body" id="mBody"></div>
   </div>
 </div>
-<footer>数据来自公开接口，仅供个人研究参考，不构成投资建议 · 灯号框架</footer>
+<footer>
+  <div class="footer-quote">不怕新人入行就亏钱，就怕新人入行就挣钱，却误把运气当成实力</div>
+  <div class="footer-note">数据来自公开接口，仅供个人研究参考，不构成投资建议 · 灯号框架</div>
+</footer>
 <script>
 const DIMS = [
   ["industry","产业"],["fundamental","基本面"],["valuation","估值"],
@@ -432,6 +540,70 @@ const $ = id => document.getElementById(id);
 let busy = false;
 let pollCancelled = false;
 let STOCKS = [];
+let fanPage = 0;
+const PAGE_N = 10;
+
+/* ---------- 折骨扇 ---------- */
+const CX=330, CY=402, R=292, R0=46, ANG=84;
+const TAU = Math.PI/180;
+function pt(r,deg){ const a=(90-deg)*TAU; return [CX+r*Math.cos(a), CY-r*Math.sin(a)]; }
+function arcPath(r,deg0,deg1,inner){
+  const [x0,y0]=pt(r,-deg0), [x1,y1]=pt(r,deg1);
+  const [a0,b0]=pt(inner,-deg0), [a1,b1]=pt(inner,deg1);
+  const big=(deg0+deg1)>180?1:0;
+  return `M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L ${a1.toFixed(1)} ${b1.toFixed(1)} A ${inner} ${inner} 0 0 0 ${a0.toFixed(1)} ${b0.toFixed(1)} Z`;
+}
+function tierOf(s){ if (s.buildable) return "g"; if (s.red_count >= 2) return "r"; return "y"; }
+function filteredStocks(){
+  const q = ($("fanSearch").value || "").trim().toLowerCase();
+  if (!q) return STOCKS;
+  return STOCKS.filter(s => (s.name||"").toLowerCase().includes(q) || (s.code||"").includes(q));
+}
+function drawFan(){
+  const items = filteredStocks();
+  $("fanCount").textContent = `共 ${items.length} 只`;
+  $("names").innerHTML = ""; $("pages").innerHTML = ""; $("fanG").innerHTML = ""; $("ribG").innerHTML = "";
+  if (!items.length){
+    $("pages").innerHTML = `<span class="page-note">暂无数据。点击右上角「灯号分析」开始抓取，或稍后刷新页面。</span>`;
+    return;
+  }
+  const pages = Math.ceil(items.length / PAGE_N);
+  if (fanPage >= pages) fanPage = pages - 1;
+  const slice = items.slice(fanPage*PAGE_N, (fanPage+1)*PAGE_N);
+  const n = slice.length;
+  const step = n > 1 ? (2*ANG)/(n-1) : 0;
+  const angles = slice.map((_,i) => -ANG + i*step);
+  const d0=-ANG, d1=ANG;
+  let fan = `<path d="${arcPath(R,d0,d1,R0)}" fill="url(#paper)" stroke="#C3A25C" stroke-width="1.5"/>`;
+  for(let rr=R0+55; rr<R; rr+=48){ fan += `<path d="${arcPath(rr,d0,d1,rr)}" fill="none" stroke="#C3A25C" stroke-width=".8" opacity=".22"/>`; }
+  $("fanG").innerHTML = fan;
+  let ribs = "";
+  angles.forEach(a=>{ const [x0,y0]=pt(R0,a), [x1,y1]=pt(R,a); ribs += `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="url(#rib)" stroke-width="2.4"/>`; });
+  const [bx0,by0]=pt(R,-ANG), [bx1,by1]=pt(R,ANG);
+  ribs += `<line x1="${CX}" y1="${CY}" x2="${bx0.toFixed(1)}" y2="${by0.toFixed(1)}" stroke="url(#rib)" stroke-width="3"/>`;
+  ribs += `<line x1="${CX}" y1="${CY}" x2="${bx1.toFixed(1)}" y2="${by1.toFixed(1)}" stroke="url(#rib)" stroke-width="3"/>`;
+  $("ribG").innerHTML = ribs;
+  $("accG").innerHTML = `<rect x="${CX-13}" y="${CY}" width="26" height="34" rx="6" fill="url(#handle)" stroke="#3E2A10"/><circle cx="${CX}" cy="${CY}" r="6.5" fill="#2E1F0B" stroke="#C3A25C"/>`;
+  const mid = 172;
+  $("names").innerHTML = slice.map((s,i)=>{
+    const a = angles[i];
+    const [x,y] = pt(mid,a);
+    const t = tierOf(s);
+    return `<div class="nm ${t}" style="left:${x}px;top:${y}px;transform:translate(-50%,-50%) rotate(${a}deg)" onclick="showDetail(${STOCKS.indexOf(s)})">${esc(s.name)}</div>`;
+  }).join("");
+  $("pages").innerHTML =
+    `<button class="pg" onclick="fanGo(-1)">‹</button>` +
+    Array.from({length:pages},(_,i)=>`<button class="pg ${i===fanPage?'on':''}" onclick="fanGoTo(${i})">扇面 ${i+1}</button>`).join("") +
+    `<button class="pg" onclick="fanGo(1)">›</button>` +
+    `<span class="page-note">每面最多 ${PAGE_N} 只 · 当前第 ${fanPage+1}/${pages} 面</span>`;
+}
+function fanGo(d){ const items=filteredStocks(); const pages=Math.ceil(items.length/PAGE_N)||1; fanPage=Math.max(0,Math.min(pages-1,fanPage+d)); drawFan(); }
+function fanGoTo(i){ fanPage=i; drawFan(); }
+function switchView(name){
+  document.querySelectorAll(".vt").forEach(b => b.classList.toggle("on", b.dataset.view === name));
+  $("fanView").classList.toggle("hidden", name !== "fan");
+  $("cardsView").classList.toggle("hidden", name !== "cards");
+}
 
 function badge(s){
   if (s.buildable) return '<span class="badge ok">可建仓</span>';
@@ -467,6 +639,7 @@ function render(s){
   $("matrix").innerHTML = rows;
   STOCKS = stocks;
   $("cards").innerHTML = stocks.map((x,i) => cardHtml(x,i)).join("");
+  drawFan();
 
   const bHtml = buildable
     ? stocks.filter(x => x.buildable).map(x => `<div class="warn-line">→ ${esc(x.name)} ${esc(x.code)}${x.alert ? " · 🔥 " + esc(x.alert) : ""}</div>`).join("")
@@ -494,11 +667,13 @@ function cardHtml(x, i){
       <span class="${cls(x.pct_chg)}">${fmtPct(x.pct_chg)}</span>
       ${badge(x)}
     </div>
+    ${x.light_changes ? `<div class="c-chg">⇄ ${esc(x.light_changes)}</div>` : ""}
   </div>`;
 }
 
 function detailRowsHtml(x){
   const rows = [];
+  if (x.light_changes) rows.push(["灯号变化", esc(x.light_changes)]);
   rows.push(["估值",
     `PE ${x.pe_ttm == null ? "--" : x.pe_ttm.toFixed(1)}倍<span class="dim">（分位 ${x.pe_pct == null ? "--" : x.pe_pct.toFixed(0)}%）</span> · ` +
     `PB ${x.pb == null ? "--" : x.pb.toFixed(1)}倍<span class="dim">（分位 ${x.pb_pct == null ? "--" : x.pb_pct.toFixed(0)}%）</span>`]);
@@ -553,6 +728,7 @@ function closeModal(){
 }
 
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+$("fanSearch").addEventListener("input", () => { fanPage = 0; drawFan(); });
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 

@@ -79,6 +79,7 @@ class StockSnapshot:
     warnings: List[str] = field(default_factory=list)
     threshold_wan: Optional[float] = None  # 本次命中的主力阈值（万元）
     tier_name: str = ""
+    light_changes: str = ""                # 灯号转换说明（对比上次，如"估值 🟡→🔴"）
 
     @property
     def pnl_pct(self) -> Optional[float]:
@@ -111,5 +112,6 @@ def stock_to_dict(stock: StockSnapshot) -> Dict[str, Any]:
         "lights", "light_reasons", "green_count", "red_count", "buildable", "status", "alert",
         "warnings", "threshold_wan", "tier_name",
         "pnl_pct", "inst_count_chg", "inst_ratio_chg",
+        "light_changes",
     ]
     return {key: getattr(stock, key) for key in keys}

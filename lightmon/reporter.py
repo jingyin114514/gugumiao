@@ -411,3 +411,21 @@ def load_previous_buildable(path: Path) -> Dict[str, bool]:
             except (TypeError, ValueError):
                 result[code] = False
     return result
+
+
+def load_previous_lights(path: Path) -> Dict[str, Dict[str, str]]:
+    """读取历史里每只股票最近一次的六灯状态（用于灯号转换提示）。"""
+    if not path.exists():
+        return {}
+    light_cols = ["industry_light", "fundamental_light", "valuation_light",
+                  "chips_light", "capital_light", "margin_light"]
+    result: Dict[str, Dict[str, str]] = {}
+    with open(path, "r", encoding="utf-8-sig") as fh:
+        reader = csv.DictReader(fh)
+        for row in reader:
+            code = (row.get("code") or "").strip()
+            if not code:
+                continue
+            result[code] = {col[:-6]: (row.get(col) or "").strip()
+                            for col in light_cols if row.get(col)}
+    return result

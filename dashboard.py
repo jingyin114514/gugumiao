@@ -374,40 +374,7 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .m-close:hover{background:#E5E7EB;color:#111827}
 .m-lights{font-size:20px;letter-spacing:3px;background:#F9FAFB;border-radius:10px;padding:8px 12px;margin-bottom:12px}
 .m-body .row{font-size:13px}
-.view-tabs{display:inline-flex;gap:4px;background:#EEF0F3;border-radius:999px;padding:3px;margin-bottom:12px}
-.vt{border:none;background:transparent;border-radius:999px;padding:6px 16px;font:inherit;font-size:13px;color:var(--muted);cursor:pointer;transition:all .15s}
-.vt:hover{color:var(--ink)}
-.vt.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1);font-weight:600}
-.fan-view .legend{display:flex;gap:16px;font-size:12px;color:var(--muted)}
-.fan-view .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
-.fan-view .search-row{display:flex;gap:10px;align-items:center;margin:12px 0 4px}
-.fan-view .search-row input{flex:1;max-width:300px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 16px;color:var(--ink);font:inherit;outline:none}
-.fan-view .search-row input:focus{border-color:var(--amber)}
-.fan-view .search-row .count{color:var(--muted);font-size:12px}
-.stage{position:relative;width:100%;max-width:660px;height:440px;margin:8px auto 0;background:radial-gradient(120% 90% at 50% 105%,#FBF6E9 0%,#F4ECD6 55%,#EADFC2 100%);border-radius:22px;border:1px solid rgba(184,134,11,.28);box-shadow:0 18px 45px rgba(120,90,30,.12),inset 0 1px 0 rgba(255,255,255,.6);overflow:hidden;user-select:none}
-.stage::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(60% 45% at 50% 78%,rgba(255,255,255,.35),transparent 70%)}
-.stage svg{position:absolute;inset:0;width:100%;height:100%}
-.names{position:absolute;inset:0}
-.nm{position:absolute;writing-mode:vertical-rl;text-orientation:upright;font-family:"STKaiti","KaiTi","Microsoft YaHei",serif;font-size:14px;font-weight:600;letter-spacing:2px;padding:3px;border-radius:6px;line-height:1.25;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;transform-origin:center}
-.nm.g{color:var(--green-deep)} .nm.y{color:var(--amber-deep)} .nm.r{color:var(--red-deep)}
-.nm:hover{transform:scale(1.12);z-index:5;background:rgba(255,255,255,.75);box-shadow:0 0 0 1px rgba(184,134,11,.25),0 8px 22px rgba(120,90,30,.16)}
-.pages{display:flex;justify-content:center;gap:8px;margin:14px 0 4px;flex-wrap:wrap}
-.pg{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:6px 16px;font:inherit;font-size:13px;cursor:pointer;transition:all .18s ease}
-.pg:hover{background:#F3EAD2;border-color:var(--amber);transform:translateY(-1px)}
-.pg.on{background:linear-gradient(135deg,#C9A24B,#A67C2E);color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(166,124,46,.3)}
-.page-note{width:100%;text-align:center;font-size:12px;color:var(--muted);margin-top:6px}
 .c-chg{font-size:10.5px;color:var(--amber-deep);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fan-rack{display:flex;justify-content:center;align-items:flex-end;gap:48px;flex-wrap:wrap;padding:14px 8px 8px}
-.fan-item{position:relative;width:220px;height:300px;cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M5 25 L16 9 L20 13 L7 27 Z' fill='%23181818'/%3E%3Cpath d='M16 9 Q19 4 24 3 Q25 8 20 13 Z' fill='%23282828'/%3E%3Cpath d='M11 17 L13 11 L15 13 L10 18 Z' fill='%235B3A1E'/%3E%3C/svg%3E") 5 14,pointer;-webkit-tap-highlight-color:transparent}
-.fan-closed{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:opacity .3s ease;z-index:2}
-.fan-closed svg{width:auto;height:268px;filter:drop-shadow(0 8px 14px rgba(120,90,30,.18));transition:transform .3s ease}
-.fan-open{position:absolute;left:50%;bottom:10px;width:420px;height:290px;margin-left:-210px;opacity:0;transform:scale(.55);transform-origin:50% 92%;pointer-events:none;transition:opacity .35s ease,transform .35s ease;z-index:20}
-.fan-open svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 14px 22px rgba(120,90,30,.22))}
-.f-names{position:absolute;inset:0}
-.fan-item:hover .fan-closed,.fan-item.open .fan-closed{opacity:0}
-.fan-item:hover .fan-open,.fan-item.open .fan-open{opacity:1;transform:scale(1);pointer-events:auto}
-.fan-item:hover .fan-closed svg{transform:translateY(-6px)}
-.fan-tag{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:11px;color:var(--muted);z-index:3}
 </style>
 </head>
 <body>
@@ -457,29 +424,8 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
     <div class="tbl-wrap"><table id="matrix"></table></div>
   </section>
   <section class="panel">
-    <h2>个股明细<span class="hint">点击股票名查看详情</span></h2>
-    <div class="view-tabs">
-      <button class="vt on" data-view="fan" onclick="switchView('fan')">折骨扇</button>
-      <button class="vt" data-view="cards" onclick="switchView('cards')">卡片</button>
-    </div>
-    <div id="fanView" class="fan-view">
-      <div class="fan-head" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-        <span class="legend">
-          <span><i style="background:var(--green)"></i>建仓</span>
-          <span><i style="background:var(--amber)"></i>观察</span>
-          <span><i style="background:var(--red)"></i>危险</span>
-        </span>
-      </div>
-      <div class="search-row">
-        <input id="fanSearch" placeholder="搜索名称 / 代码…" autocomplete="off">
-        <span class="count" id="fanCount"></span>
-      </div>
-      <div class="fan-rack" id="fanRack"></div>
-      <div class="page-note" id="fanNote"></div>
-    </div>
-    <div id="cardsView" class="cards-view hidden">
-      <div class="cards" id="cards"></div>
-    </div>
+    <h2>个股明细<span class="hint">点击卡片查看详情</span></h2>
+    <div class="cards" id="cards"></div>
   </section>
   <section class="panel">
     <h2>建仓清单<span class="hint">绿灯 ≥ 4 且无红灯</span></h2>
@@ -524,118 +470,6 @@ const $ = id => document.getElementById(id);
 let busy = false;
 let pollCancelled = false;
 let STOCKS = [];
-let fanPage = 0;
-const PAGE_N = 10;
-
-/* ---------- 折骨扇（中国真扇：闭合待展） ---------- */
-const FCX=210, FCY=258, FR=228, FR0=38, FANG=70;
-const TAU = Math.PI/180;
-function ptF(r,deg){ const a=(90-deg)*TAU; return [FCX+r*Math.cos(a), FCY-r*Math.sin(a)]; }
-function arcPathF(r,deg0,deg1,inner){
-  const [x0,y0]=ptF(r,-deg0), [x1,y1]=ptF(r,deg1);
-  const [a0,b0]=ptF(inner,-deg0), [a1,b1]=ptF(inner,deg1);
-  const big=(deg0+deg1)>180?1:0;
-  return `M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L ${a1.toFixed(1)} ${b1.toFixed(1)} A ${inner} ${inner} 0 0 0 ${a0.toFixed(1)} ${b0.toFixed(1)} Z`;
-}
-function tierOf(s){ if (s.buildable) return "g"; if (s.red_count >= 2) return "r"; return "y"; }
-function filteredStocks(){
-  const q = ($("fanSearch").value || "").trim().toLowerCase();
-  if (!q) return STOCKS;
-  return STOCKS.filter(s => (s.name||"").toLowerCase().includes(q) || (s.code||"").includes(q));
-}
-function closedFanSvg(){
-  return `<svg viewBox="0 0 120 310" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="cpaper" cx="50%" cy="8%" r="90%">
-        <stop offset="0%" stop-color="#FBF3DF"/>
-        <stop offset="100%" stop-color="#E9D9B4"/>
-      </radialGradient>
-      <linearGradient id="chandle" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#6F4A1F"/>
-        <stop offset="45%" stop-color="#96662B"/>
-        <stop offset="100%" stop-color="#573A16"/>
-      </linearGradient>
-    </defs>
-    <path d="M60 14 Q80 38 76 96 L90 246 L30 246 L44 96 Q40 38 60 14 Z" fill="url(#cpaper)" stroke="#C3A25C" stroke-width="1.4"/>
-    <line x1="46" y1="34" x2="40" y2="244" stroke="#C3A25C" stroke-width=".8" opacity=".55"/>
-    <line x1="60" y1="16" x2="60" y2="246" stroke="#C3A25C" stroke-width=".9" opacity=".6"/>
-    <line x1="74" y1="34" x2="80" y2="244" stroke="#C3A25C" stroke-width=".8" opacity=".55"/>
-    <ellipse cx="60" cy="12" rx="11" ry="6" fill="#C9A24B" stroke="#9A6B0A" stroke-width="1"/>
-    <rect x="52" y="246" width="16" height="58" rx="5" fill="url(#chandle)" stroke="#4A3013"/>
-    <circle cx="60" cy="248" r="5" fill="#2E1F0B" stroke="#C3A25C"/>
-  </svg>`;
-}
-function openFanSvg(angles){
-  const d0=-FANG, d1=FANG;
-  let fan = `<path d="${arcPathF(FR,d0,d1,FR0)}" fill="url(#paper)" stroke="#C3A25C" stroke-width="1.5"/>`;
-  for(let rr=FR0+42; rr<FR; rr+=42){ fan += `<path d="${arcPathF(rr,d0,d1,rr)}" fill="none" stroke="#C3A25C" stroke-width=".7" opacity=".2"/>`; }
-  let ribs = "";
-  angles.forEach(a=>{ const [x0,y0]=ptF(FR0,a), [x1,y1]=ptF(FR,a); ribs += `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="url(#rib)" stroke-width="2.2"/>`; });
-  const [bx0,by0]=ptF(FR,-FANG), [bx1,by1]=ptF(FR,FANG);
-  ribs += `<line x1="${FCX}" y1="${FCY}" x2="${bx0.toFixed(1)}" y2="${by0.toFixed(1)}" stroke="url(#rib)" stroke-width="2.8"/>`;
-  ribs += `<line x1="${FCX}" y1="${FCY}" x2="${bx1.toFixed(1)}" y2="${by1.toFixed(1)}" stroke="url(#rib)" stroke-width="2.8"/>`;
-  const acc = `<rect x="${FCX-11}" y="${FCY}" width="22" height="26" rx="5" fill="url(#handle)" stroke="#3E2A10"/><circle cx="${FCX}" cy="${FCY}" r="6" fill="#2E1F0B" stroke="#C3A25C"/>`;
-  return `<svg viewBox="0 0 420 290" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="paper" cx="50%" cy="100%" r="82%">
-        <stop offset="0%" stop-color="#F7EED9"/>
-        <stop offset="58%" stop-color="#EFE1BF"/>
-        <stop offset="100%" stop-color="#DCC79B"/>
-      </radialGradient>
-      <linearGradient id="rib" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#D9BE80"/>
-        <stop offset="50%" stop-color="#F0E0B4"/>
-        <stop offset="100%" stop-color="#C3A25C"/>
-      </linearGradient>
-      <linearGradient id="handle" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#6F4A1F"/>
-        <stop offset="45%" stop-color="#96662B"/>
-        <stop offset="100%" stop-color="#573A16"/>
-      </linearGradient>
-      <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-        <feDropShadow dx="4" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.4"/>
-      </filter>
-    </defs>
-    <g filter="url(#shadow)">${fan}${ribs}${acc}</g>
-  </svg>`;
-}
-function drawFans(){
-  const items = filteredStocks();
-  $("fanCount").textContent = `共 ${items.length} 只`;
-  $("fanRack").innerHTML = "";
-  if (!items.length){
-    $("fanNote").textContent = "暂无数据。点击右上角「灯号分析」开始抓取，或稍后刷新页面。";
-    return;
-  }
-  const pages = Math.ceil(items.length / PAGE_N);
-  let html = "";
-  for (let p=0; p<pages; p++){
-    const slice = items.slice(p*PAGE_N, (p+1)*PAGE_N);
-    const n = slice.length;
-    const step = n>1 ? (2*FANG)/(n-1) : 0;
-    const angles = slice.map((_,i)=>-FANG+i*step);
-    const mid = 140;
-    const names = slice.map((s,i)=>{
-      const a = angles[i];
-      const [x,y] = ptF(mid,a);
-      const t = tierOf(s);
-      return `<div class="nm ${t}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;transform:translate(-50%,-50%) rotate(${a}deg)" onclick="event.stopPropagation();showDetail(${STOCKS.indexOf(s)})">${esc(s.name)}</div>`;
-    }).join("");
-    html += `
-    <div class="fan-item" tabindex="0" onclick="this.classList.toggle('open')">
-      <div class="fan-closed">${closedFanSvg()}</div>
-      <div class="fan-open">${openFanSvg(angles)}<div class="f-names">${names}</div></div>
-      <div class="fan-tag">第 ${p+1} 柄 · ${n} 只</div>
-    </div>`;
-  }
-  $("fanRack").innerHTML = html;
-  $("fanNote").textContent = `共 ${items.length} 只 · ${pages} 柄扇 · 鼠标划过展开，点击名字看详情`;
-}
-function switchView(name){
-  document.querySelectorAll(".vt").forEach(b => b.classList.toggle("on", b.dataset.view === name));
-  $("fanView").classList.toggle("hidden", name !== "fan");
-  $("cardsView").classList.toggle("hidden", name !== "cards");
-}
 
 function badge(s){
   if (s.buildable) return '<span class="badge ok">可建仓</span>';
@@ -671,7 +505,6 @@ function render(s){
   $("matrix").innerHTML = rows;
   STOCKS = stocks;
   $("cards").innerHTML = stocks.map((x,i) => cardHtml(x,i)).join("");
-  drawFans();
 
   const bHtml = buildable
     ? stocks.filter(x => x.buildable).map(x => `<div class="warn-line">→ ${esc(x.name)} ${esc(x.code)}${x.alert ? " · 🔥 " + esc(x.alert) : ""}</div>`).join("")
@@ -760,7 +593,6 @@ function closeModal(){
 }
 
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
-$("fanSearch").addEventListener("input", () => { drawFans(); });
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 

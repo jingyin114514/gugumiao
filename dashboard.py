@@ -331,6 +331,7 @@ footer{max-width:1080px;margin:0 auto;padding:18px 20px 30px;color:var(--muted);
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (max-width:640px){.cards{grid-template-columns:1fr}}
 .modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(17,24,39,.45);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.hidden{display:none}
 .modal{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.22);width:min(620px,94vw);max-height:86vh;overflow:auto;padding:20px 22px}
 .m-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-right:40px}
 .m-name{font-size:18px;font-weight:700}

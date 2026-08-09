@@ -397,6 +397,17 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .pg.on{background:linear-gradient(135deg,#C9A24B,#A67C2E);color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(166,124,46,.3)}
 .page-note{width:100%;text-align:center;font-size:12px;color:var(--muted);margin-top:6px}
 .c-chg{font-size:10.5px;color:var(--amber-deep);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fan-rack{display:flex;justify-content:center;align-items:flex-end;gap:48px;flex-wrap:wrap;padding:14px 8px 8px}
+.fan-item{position:relative;width:220px;height:300px;cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M5 25 L16 9 L20 13 L7 27 Z' fill='%23181818'/%3E%3Cpath d='M16 9 Q19 4 24 3 Q25 8 20 13 Z' fill='%23282828'/%3E%3Cpath d='M11 17 L13 11 L15 13 L10 18 Z' fill='%235B3A1E'/%3E%3C/svg%3E") 5 14,pointer;-webkit-tap-highlight-color:transparent}
+.fan-closed{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:opacity .3s ease;z-index:2}
+.fan-closed svg{width:auto;height:268px;filter:drop-shadow(0 8px 14px rgba(120,90,30,.18));transition:transform .3s ease}
+.fan-open{position:absolute;left:50%;bottom:10px;width:420px;height:290px;margin-left:-210px;opacity:0;transform:scale(.55);transform-origin:50% 92%;pointer-events:none;transition:opacity .35s ease,transform .35s ease;z-index:20}
+.fan-open svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 14px 22px rgba(120,90,30,.22))}
+.f-names{position:absolute;inset:0}
+.fan-item:hover .fan-closed,.fan-item.open .fan-closed{opacity:0}
+.fan-item:hover .fan-open,.fan-item.open .fan-open{opacity:1;transform:scale(1);pointer-events:auto}
+.fan-item:hover .fan-closed svg{transform:translateY(-6px)}
+.fan-tag{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:11px;color:var(--muted);z-index:3}
 </style>
 </head>
 <body>
@@ -463,35 +474,8 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
         <input id="fanSearch" placeholder="搜索名称 / 代码…" autocomplete="off">
         <span class="count" id="fanCount"></span>
       </div>
-      <div class="stage" id="stage">
-        <svg viewBox="0 0 660 440" xmlns="http://www.w3.org/2000/svg" id="svgFan">
-          <defs>
-            <radialGradient id="paper" cx="50%" cy="100%" r="82%">
-              <stop offset="0%" stop-color="#F7EED9"/>
-              <stop offset="58%" stop-color="#EFE1BF"/>
-              <stop offset="100%" stop-color="#DCC79B"/>
-            </radialGradient>
-            <linearGradient id="rib" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#D9BE80"/>
-              <stop offset="50%" stop-color="#F0E0B4"/>
-              <stop offset="100%" stop-color="#C3A25C"/>
-            </linearGradient>
-            <linearGradient id="handle" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#6F4A1F"/>
-              <stop offset="45%" stop-color="#96662B"/>
-              <stop offset="100%" stop-color="#573A16"/>
-            </linearGradient>
-            <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-              <feDropShadow dx="4" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.5"/>
-            </filter>
-          </defs>
-          <g id="fanG" filter="url(#shadow)"></g>
-          <g id="ribG"></g>
-          <g id="accG"></g>
-        </svg>
-        <div class="names" id="names"></div>
-      </div>
-      <div class="pages" id="pages"></div>
+      <div class="fan-rack" id="fanRack"></div>
+      <div class="page-note" id="fanNote"></div>
     </div>
     <div id="cardsView" class="cards-view hidden">
       <div class="cards" id="cards"></div>
@@ -543,13 +527,13 @@ let STOCKS = [];
 let fanPage = 0;
 const PAGE_N = 10;
 
-/* ---------- 折骨扇 ---------- */
-const CX=330, CY=402, R=292, R0=46, ANG=84;
+/* ---------- 折骨扇（中国真扇：闭合待展） ---------- */
+const FCX=210, FCY=258, FR=228, FR0=38, FANG=70;
 const TAU = Math.PI/180;
-function pt(r,deg){ const a=(90-deg)*TAU; return [CX+r*Math.cos(a), CY-r*Math.sin(a)]; }
-function arcPath(r,deg0,deg1,inner){
-  const [x0,y0]=pt(r,-deg0), [x1,y1]=pt(r,deg1);
-  const [a0,b0]=pt(inner,-deg0), [a1,b1]=pt(inner,deg1);
+function ptF(r,deg){ const a=(90-deg)*TAU; return [FCX+r*Math.cos(a), FCY-r*Math.sin(a)]; }
+function arcPathF(r,deg0,deg1,inner){
+  const [x0,y0]=ptF(r,-deg0), [x1,y1]=ptF(r,deg1);
+  const [a0,b0]=ptF(inner,-deg0), [a1,b1]=ptF(inner,deg1);
   const big=(deg0+deg1)>180?1:0;
   return `M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L ${a1.toFixed(1)} ${b1.toFixed(1)} A ${inner} ${inner} 0 0 0 ${a0.toFixed(1)} ${b0.toFixed(1)} Z`;
 }
@@ -559,46 +543,94 @@ function filteredStocks(){
   if (!q) return STOCKS;
   return STOCKS.filter(s => (s.name||"").toLowerCase().includes(q) || (s.code||"").includes(q));
 }
-function drawFan(){
+function closedFanSvg(){
+  return `<svg viewBox="0 0 120 310" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="cpaper" cx="50%" cy="8%" r="90%">
+        <stop offset="0%" stop-color="#FBF3DF"/>
+        <stop offset="100%" stop-color="#E9D9B4"/>
+      </radialGradient>
+      <linearGradient id="chandle" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#6F4A1F"/>
+        <stop offset="45%" stop-color="#96662B"/>
+        <stop offset="100%" stop-color="#573A16"/>
+      </linearGradient>
+    </defs>
+    <path d="M60 14 Q80 38 76 96 L90 246 L30 246 L44 96 Q40 38 60 14 Z" fill="url(#cpaper)" stroke="#C3A25C" stroke-width="1.4"/>
+    <line x1="46" y1="34" x2="40" y2="244" stroke="#C3A25C" stroke-width=".8" opacity=".55"/>
+    <line x1="60" y1="16" x2="60" y2="246" stroke="#C3A25C" stroke-width=".9" opacity=".6"/>
+    <line x1="74" y1="34" x2="80" y2="244" stroke="#C3A25C" stroke-width=".8" opacity=".55"/>
+    <ellipse cx="60" cy="12" rx="11" ry="6" fill="#C9A24B" stroke="#9A6B0A" stroke-width="1"/>
+    <rect x="52" y="246" width="16" height="58" rx="5" fill="url(#chandle)" stroke="#4A3013"/>
+    <circle cx="60" cy="248" r="5" fill="#2E1F0B" stroke="#C3A25C"/>
+  </svg>`;
+}
+function openFanSvg(angles){
+  const d0=-FANG, d1=FANG;
+  let fan = `<path d="${arcPathF(FR,d0,d1,FR0)}" fill="url(#paper)" stroke="#C3A25C" stroke-width="1.5"/>`;
+  for(let rr=FR0+42; rr<FR; rr+=42){ fan += `<path d="${arcPathF(rr,d0,d1,rr)}" fill="none" stroke="#C3A25C" stroke-width=".7" opacity=".2"/>`; }
+  let ribs = "";
+  angles.forEach(a=>{ const [x0,y0]=ptF(FR0,a), [x1,y1]=ptF(FR,a); ribs += `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="url(#rib)" stroke-width="2.2"/>`; });
+  const [bx0,by0]=ptF(FR,-FANG), [bx1,by1]=ptF(FR,FANG);
+  ribs += `<line x1="${FCX}" y1="${FCY}" x2="${bx0.toFixed(1)}" y2="${by0.toFixed(1)}" stroke="url(#rib)" stroke-width="2.8"/>`;
+  ribs += `<line x1="${FCX}" y1="${FCY}" x2="${bx1.toFixed(1)}" y2="${by1.toFixed(1)}" stroke="url(#rib)" stroke-width="2.8"/>`;
+  const acc = `<rect x="${FCX-11}" y="${FCY}" width="22" height="26" rx="5" fill="url(#handle)" stroke="#3E2A10"/><circle cx="${FCX}" cy="${FCY}" r="6" fill="#2E1F0B" stroke="#C3A25C"/>`;
+  return `<svg viewBox="0 0 420 290" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="paper" cx="50%" cy="100%" r="82%">
+        <stop offset="0%" stop-color="#F7EED9"/>
+        <stop offset="58%" stop-color="#EFE1BF"/>
+        <stop offset="100%" stop-color="#DCC79B"/>
+      </radialGradient>
+      <linearGradient id="rib" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#D9BE80"/>
+        <stop offset="50%" stop-color="#F0E0B4"/>
+        <stop offset="100%" stop-color="#C3A25C"/>
+      </linearGradient>
+      <linearGradient id="handle" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#6F4A1F"/>
+        <stop offset="45%" stop-color="#96662B"/>
+        <stop offset="100%" stop-color="#573A16"/>
+      </linearGradient>
+      <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="4" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.4"/>
+      </filter>
+    </defs>
+    <g filter="url(#shadow)">${fan}${ribs}${acc}</g>
+  </svg>`;
+}
+function drawFans(){
   const items = filteredStocks();
   $("fanCount").textContent = `共 ${items.length} 只`;
-  $("names").innerHTML = ""; $("pages").innerHTML = ""; $("fanG").innerHTML = ""; $("ribG").innerHTML = "";
+  $("fanRack").innerHTML = "";
   if (!items.length){
-    $("pages").innerHTML = `<span class="page-note">暂无数据。点击右上角「灯号分析」开始抓取，或稍后刷新页面。</span>`;
+    $("fanNote").textContent = "暂无数据。点击右上角「灯号分析」开始抓取，或稍后刷新页面。";
     return;
   }
   const pages = Math.ceil(items.length / PAGE_N);
-  if (fanPage >= pages) fanPage = pages - 1;
-  const slice = items.slice(fanPage*PAGE_N, (fanPage+1)*PAGE_N);
-  const n = slice.length;
-  const step = n > 1 ? (2*ANG)/(n-1) : 0;
-  const angles = slice.map((_,i) => -ANG + i*step);
-  const d0=-ANG, d1=ANG;
-  let fan = `<path d="${arcPath(R,d0,d1,R0)}" fill="url(#paper)" stroke="#C3A25C" stroke-width="1.5"/>`;
-  for(let rr=R0+55; rr<R; rr+=48){ fan += `<path d="${arcPath(rr,d0,d1,rr)}" fill="none" stroke="#C3A25C" stroke-width=".8" opacity=".22"/>`; }
-  $("fanG").innerHTML = fan;
-  let ribs = "";
-  angles.forEach(a=>{ const [x0,y0]=pt(R0,a), [x1,y1]=pt(R,a); ribs += `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="url(#rib)" stroke-width="2.4"/>`; });
-  const [bx0,by0]=pt(R,-ANG), [bx1,by1]=pt(R,ANG);
-  ribs += `<line x1="${CX}" y1="${CY}" x2="${bx0.toFixed(1)}" y2="${by0.toFixed(1)}" stroke="url(#rib)" stroke-width="3"/>`;
-  ribs += `<line x1="${CX}" y1="${CY}" x2="${bx1.toFixed(1)}" y2="${by1.toFixed(1)}" stroke="url(#rib)" stroke-width="3"/>`;
-  $("ribG").innerHTML = ribs;
-  $("accG").innerHTML = `<rect x="${CX-13}" y="${CY}" width="26" height="34" rx="6" fill="url(#handle)" stroke="#3E2A10"/><circle cx="${CX}" cy="${CY}" r="6.5" fill="#2E1F0B" stroke="#C3A25C"/>`;
-  const mid = 172;
-  $("names").innerHTML = slice.map((s,i)=>{
-    const a = angles[i];
-    const [x,y] = pt(mid,a);
-    const t = tierOf(s);
-    return `<div class="nm ${t}" style="left:${x}px;top:${y}px;transform:translate(-50%,-50%) rotate(${a}deg)" onclick="showDetail(${STOCKS.indexOf(s)})">${esc(s.name)}</div>`;
-  }).join("");
-  $("pages").innerHTML =
-    `<button class="pg" onclick="fanGo(-1)">‹</button>` +
-    Array.from({length:pages},(_,i)=>`<button class="pg ${i===fanPage?'on':''}" onclick="fanGoTo(${i})">扇面 ${i+1}</button>`).join("") +
-    `<button class="pg" onclick="fanGo(1)">›</button>` +
-    `<span class="page-note">每面最多 ${PAGE_N} 只 · 当前第 ${fanPage+1}/${pages} 面</span>`;
+  let html = "";
+  for (let p=0; p<pages; p++){
+    const slice = items.slice(p*PAGE_N, (p+1)*PAGE_N);
+    const n = slice.length;
+    const step = n>1 ? (2*FANG)/(n-1) : 0;
+    const angles = slice.map((_,i)=>-FANG+i*step);
+    const mid = 140;
+    const names = slice.map((s,i)=>{
+      const a = angles[i];
+      const [x,y] = ptF(mid,a);
+      const t = tierOf(s);
+      return `<div class="nm ${t}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;transform:translate(-50%,-50%) rotate(${a}deg)" onclick="event.stopPropagation();showDetail(${STOCKS.indexOf(s)})">${esc(s.name)}</div>`;
+    }).join("");
+    html += `
+    <div class="fan-item" tabindex="0" onclick="this.classList.toggle('open')">
+      <div class="fan-closed">${closedFanSvg()}</div>
+      <div class="fan-open">${openFanSvg(angles)}<div class="f-names">${names}</div></div>
+      <div class="fan-tag">第 ${p+1} 柄 · ${n} 只</div>
+    </div>`;
+  }
+  $("fanRack").innerHTML = html;
+  $("fanNote").textContent = `共 ${items.length} 只 · ${pages} 柄扇 · 鼠标划过展开，点击名字看详情`;
 }
-function fanGo(d){ const items=filteredStocks(); const pages=Math.ceil(items.length/PAGE_N)||1; fanPage=Math.max(0,Math.min(pages-1,fanPage+d)); drawFan(); }
-function fanGoTo(i){ fanPage=i; drawFan(); }
 function switchView(name){
   document.querySelectorAll(".vt").forEach(b => b.classList.toggle("on", b.dataset.view === name));
   $("fanView").classList.toggle("hidden", name !== "fan");
@@ -639,7 +671,7 @@ function render(s){
   $("matrix").innerHTML = rows;
   STOCKS = stocks;
   $("cards").innerHTML = stocks.map((x,i) => cardHtml(x,i)).join("");
-  drawFan();
+  drawFans();
 
   const bHtml = buildable
     ? stocks.filter(x => x.buildable).map(x => `<div class="warn-line">→ ${esc(x.name)} ${esc(x.code)}${x.alert ? " · 🔥 " + esc(x.alert) : ""}</div>`).join("")
@@ -728,7 +760,7 @@ function closeModal(){
 }
 
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
-$("fanSearch").addEventListener("input", () => { fanPage = 0; drawFan(); });
+$("fanSearch").addEventListener("input", () => { drawFans(); });
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 

@@ -317,7 +317,7 @@ td .cd{color:var(--muted);font-size:12px}
 .badge.warn{background:var(--amber-bg);color:var(--amber-deep)}
 .badge.bad{background:var(--red-bg);color:var(--red-deep)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
-.card{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:10px 12px;cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'%3E%3Cpath d='M4 24 L15 9 L19 13 L6 26 Z' fill='%23181818'/%3E%3Cpath d='M15 9 Q18 4 23 3 Q24 8 19 13 Z' fill='%23282828'/%3E%3C/svg%3E") 5 12,pointer;transition:box-shadow .15s,transform .15s,border-color .15s}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:10px 12px;cursor:pointer;transition:box-shadow .15s,transform .15s,border-color .15s}
 .card:hover{border-color:#9CA3AF;box-shadow:0 4px 14px rgba(0,0,0,.07);transform:translateY(-1px)}
 .card .c-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .card .who{font-size:13.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:"STKaiti","KaiTi","Microsoft YaHei",serif}

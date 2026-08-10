@@ -406,6 +406,28 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
   .actions{width:100%}
   .actions button{flex:1}
 }
+.dim{color:var(--muted)}
+.stock-tools{position:sticky;top:52px;z-index:5;background:var(--card);padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:10px}
+#stockSearch{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;color:var(--ink);background:#fff}
+#stockSearch:focus{outline:none;border-color:#9CA3AF;box-shadow:0 0 0 2px #E5E7EB}
+.letter-bar{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px}
+.letter-bar button{border:1px solid transparent;background:none;border-radius:6px;padding:2px 7px;font-size:12px;color:var(--muted);cursor:pointer;min-width:24px}
+.letter-bar button:hover{background:#F3F4F6;color:var(--ink)}
+.letter-bar button.active{background:var(--ink);color:#fff}
+.group{margin-bottom:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden}
+.group-head{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;background:none;border:none;cursor:pointer;font:inherit;text-align:left}
+.group-head:hover{background:#FAFAFB}
+.group-head .gl{font-size:16px;font-weight:700;color:var(--ink);width:22px}
+.group-head .gc{color:var(--muted);font-size:12px;flex:1}
+.group-head .arrow{transition:transform .25s ease;color:var(--muted)}
+.group.open .group-head .arrow{transform:rotate(90deg)}
+.group-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s ease}
+.group.open .group-body{grid-template-rows:1fr}
+.group-body-inner{overflow:hidden;min-height:0}
+.group-body-inner .cards{padding:12px}
+.hl{background:#FDE68A;border-radius:2px;padding:0 1px}
+.empty{text-align:center;color:var(--muted);padding:30px 0;font-size:13px}
+@media (prefers-reduced-motion:reduce){.group-head .arrow,.group-body{transition:none}}
 @media (max-width:640px){.cards{grid-template-columns:1fr}}
 </style>
 </head>
@@ -457,8 +479,13 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
     <div class="tbl-wrap"><table id="matrix"></table></div>
   </section>
   <section class="panel">
-    <h2>个股明细<span class="hint">点击卡片查看详情</span></h2>
-    <div class="cards" id="cards"></div>
+    <h2>个股明细<span class="hint">按拼音首字母分组 · 点击组头展开 · 支持搜索</span></h2>
+    <div class="stock-tools">
+      <input id="stockSearch" type="search" placeholder="搜索名称 / 代码 / 拼音首字母（如 ywk）">
+      <div id="letterBar" class="letter-bar"></div>
+    </div>
+    <div id="stockGroups" class="groups"></div>
+    <div id="groupEmpty" class="empty hidden">没有匹配的股票</div>
   </section>
   <section class="panel">
     <h2>建仓清单<span class="hint">绿灯 ≥ 4 且无红灯</span></h2>
@@ -500,6 +527,93 @@ const fmtWan = v => {
 const fmtPct = (v,d=2) => v == null ? "--" : (v > 0 ? "+" : "") + v.toFixed(d) + "%";
 const cls = v => v > 0 ? "up" : (v < 0 ? "down" : "flat");
 const $ = id => document.getElementById(id);
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".split("");
+let stockList = [];
+let curQuery = "";
+let groupState = {};
+let spy = null;
+
+function hl(text, q){
+  if (!q || text == null) return esc(text);
+  const s = String(text);
+  const idx = s.toLowerCase().indexOf(q.toLowerCase());
+  if (idx < 0) return esc(s);
+  return esc(s.slice(0, idx)) + '<span class="hl">' + esc(s.slice(idx, idx + q.length)) + '</span>' + esc(s.slice(idx + q.length));
+}
+
+function matchesQuery(s, q){
+  return String(s.name || "").toLowerCase().includes(q) ||
+    String(s.code || "").includes(q) ||
+    String(s.pinyin_initials || "").toLowerCase().includes(q);
+}
+
+function renderStocks(stocks){
+  stockList = stocks || [];
+  const q = curQuery.trim().toLowerCase();
+  const groups = {};
+  let shown = 0;
+  stockList.forEach((s, idx) => {
+    if (q && !matchesQuery(s, q)) return;
+    shown++;
+    const L = (s.initial || "#").toUpperCase();
+    (groups[L] = groups[L] || []).push({s, idx});
+  });
+  const letters = Object.keys(groups).sort((a, b) =>
+    a === "#" ? 1 : (b === "#" ? -1 : a.localeCompare(b)));
+
+  $("letterBar").innerHTML = LETTERS.map(L =>
+    `<button data-letter="${L}" class="${letters.includes(L) ? "" : "dim"}">${L}</button>`).join("");
+  Array.from($("letterBar").children).forEach(btn => {
+    btn.addEventListener("click", () => jumpTo(btn.dataset.letter));
+  });
+
+  $("stockGroups").innerHTML = letters.map(L => {
+    const open = q ? true : !!groupState[L];
+    return `<div class="group ${open ? "open" : ""}" id="group-${L}" data-letter="${L}">
+      <button class="group-head">
+        <span class="gl">${L}</span><span class="gc">${groups[L].length} 只</span><span class="arrow">▶</span>
+      </button>
+      <div class="group-body"><div class="group-body-inner"><div class="cards">${groups[L].map(({s, idx}) => cardHtml(s, idx)).join("")}</div></div></div>
+    </div>`;
+  }).join("");
+  Array.from($("stockGroups").querySelectorAll(".group-head")).forEach(head => {
+    head.addEventListener("click", () => {
+      const L = head.closest(".group").dataset.letter;
+      groupState[L] = !groupState[L];
+      renderStocks(stockList);
+    });
+  });
+  $("groupEmpty").classList.toggle("hidden", shown > 0);
+  setupSpy();
+}
+
+function jumpTo(L){
+  const el = document.getElementById("group-" + L);
+  if (el) el.scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+function setActiveLetter(L){
+  Array.from($("letterBar").children).forEach(b =>
+    b.classList.toggle("active", b.dataset.letter === L));
+}
+
+function setupSpy(){
+  if (spy) spy.disconnect();
+  const els = Array.from(document.querySelectorAll(".group"));
+  if (!els.length) return;
+  spy = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting) setActiveLetter(en.target.dataset.letter); });
+  }, {rootMargin: "-15% 0px -70% 0px"});
+  els.forEach(el => spy.observe(el));
+}
+
+let searchTimer = null;
+document.addEventListener("input", e => {
+  if (e.target && e.target.id === "stockSearch"){
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { curQuery = e.target.value; renderStocks(stockList); }, 150);
+  }
+});
 let busy = false;
 let pollCancelled = false;
 let STOCKS = [];
@@ -538,7 +652,7 @@ function render(s){
   });
   $("matrix").innerHTML = rows;
   STOCKS = stocks;
-  $("cards").innerHTML = stocks.map((x,i) => cardHtml(x,i)).join("");
+  renderStocks(stocks);
 
   const bHtml = buildable
     ? stocks.filter(x => x.buildable).map(x => `<div class="warn-line">→ ${esc(x.name)} ${esc(x.code)}${x.alert ? " · 状态变化 " + esc(x.alert) : ""}</div>`).join("")
@@ -568,7 +682,7 @@ function cardHtml(x, i){
        aria-label="${esc(x.name)} ${esc(x.code)}，${lights}，涨跌${fmtPct(x.pct_chg)}，${badge(x).replace(/<[^>]+>/g,"")}"
        onclick="showDetail(${i})" onkeydown="cardKey(event,${i})">
     <div class="c-top">
-      <span class="who">${esc(x.name)}<span class="cd">${esc(x.code)}</span></span>
+      <span class="who">${hl(x.name, curQuery)}<span class="cd">${hl(x.code, curQuery)}</span></span>
       <span class="price ${cls(x.pct_chg)}">${x.price == null ? "--" : x.price.toFixed(2)}</span>
     </div>
     <div class="c-lights">${lights}</div>

@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>个股深度分析 · 咕咕喵</title>
+<style>
+:root{
+  --bg:#FAF5E6; --bg-soft:#F3ECDA; --card:#FFFFFF;
+  --ink:#1F2937; --ink-soft:#374151; --muted:#6B7280;
+  --line:#E9E2D0; --line-strong:#D8CDB4;
+  --green:#16A34A; --green-bg:#ECFDF5; --green-deep:#15803D; --green-line:#BBF7D0;
+  --amber:#D97706; --amber-bg:#FFFBEB; --amber-deep:#B45309; --amber-line:#FDE68A;
+  --red:#DC2626; --red-bg:#FEF2F2; --red-deep:#B91C1C; --red-line:#FECACA;
+  --ring:#92400E;
+  --radius-sm:8px; --radius-md:10px; --radius-lg:14px;
+  --shadow-sm:0 1px 2px rgba(31,41,55,.05);
+  --shadow-md:0 6px 18px rgba(31,41,55,.09);
+  --shadow-lg:0 24px 60px rgba(31,41,55,.24);
+  --font-body:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  --font-kai:"STKaiti","KaiTi","STKaiti SC","Microsoft YaHei",serif;
+  --t-fast:150ms; --t-norm:200ms;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:linear-gradient(180deg,#FAF5E6 0%,#F4ECD9 100%);color:var(--ink);line-height:1.7;font-size:14px;min-height:100vh}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:4px}
+.up{color:var(--red-deep)} .down{color:var(--green-deep)} .flat{color:var(--muted)}
+header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.head-inner{max-width:1080px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;letter-spacing:.3px;font-family:var(--font-kai)}
+.brand .logo{display:inline-flex;gap:3px;align-items:center;background:#F6F1E3;border:1px solid var(--line);border-radius:999px;padding:4px 7px}
+.brand .logo i{display:inline-block;width:8px;height:8px;border-radius:50%}
+.brand .logo i.g{background:var(--green)} .brand .logo i.y{background:var(--amber)} .brand .logo i.r{background:var(--red)}
+.brand .sub{color:var(--muted);font-weight:400;font-size:12.5px;margin-left:2px}
+.picker{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.picker select,.picker input{border:1px solid var(--line);border-radius:var(--radius-sm);padding:7px 10px;font:inherit;font-size:13px;color:var(--ink);background:#fff;min-width:0}
+.picker select{max-width:190px}
+.picker input{width:150px}
+.picker input:focus,.picker select:focus{outline:none;border-color:var(--line-strong);box-shadow:0 0 0 3px rgba(217,119,6,.12)}
+.picker button{border:1px solid var(--line-strong);background:#fff;color:var(--ink);border-radius:var(--radius-sm);padding:7px 13px;font:inherit;font-size:13px;cursor:pointer;transition:background var(--t-fast),border-color var(--t-fast)}
+.picker button:hover{background:var(--bg);border-color:var(--amber)}
+main{max-width:1080px;margin:0 auto;padding:20px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+.panel h2{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--ink);letter-spacing:.3px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.panel h2 .no{color:var(--amber-deep);font-family:var(--font-kai);font-weight:700}
+.panel h2 .hint{color:var(--muted);font-weight:400;font-size:12px}
+.banner{background:var(--amber-bg);color:var(--amber-deep);border:1px solid var(--amber-line);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12.5px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--line-strong)}
+.stat.hot::before{background:var(--red)} .stat.warn::before{background:var(--amber)} .stat.good::before{background:var(--green)}
+.stat .num{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat .num.green{color:var(--green-deep)} .stat .num.amber{color:var(--amber-deep)} .stat .num.red{color:var(--red-deep)}
+.stat .lbl{color:var(--muted);font-size:12px;margin-top:2px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:center;white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:12.5px}
+td:first-child,th:first-child{text-align:left}
+.tbl-wrap{overflow-x:auto;border-radius:8px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.kv .item{border:1px solid var(--line);border-radius:var(--radius-md);padding:11px 13px;background:#FFFDF7}
+.kv .k{color:var(--muted);font-size:12px}
+.kv .v{font-size:14.5px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.bars{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:end;padding:6px 2px 0}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.bar-track{width:100%;max-width:76px;height:150px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.bar-fill{width:100%;background:linear-gradient(180deg,#E8B04B 0%,#D97706 100%);border-radius:6px 6px 0 0;transition:height .4s ease}
+.bar-fill.green{background:linear-gradient(180deg,#6EE7B7 0%,#16A34A 100%)}
+.bar-fill.red{background:linear-gradient(180deg,#FCA5A5 0%,#DC2626 100%)}
+.bar-q{font-size:12px;color:var(--muted);white-space:nowrap}
+.bar-v{font-size:13px;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.col{border:1px solid var(--line);border-radius:var(--radius-md);padding:13px 15px}
+.col.good{background:linear-gradient(180deg,#F7FDF9 0%,#FFFFFF 70%);border-color:var(--green-line)}
+.col.bad{background:linear-gradient(180deg,#FFF7F7 0%,#FFFFFF 70%);border-color:var(--red-line)}
+.col h3{font-size:13.5px;font-weight:700;margin-bottom:8px;font-family:var(--font-kai);letter-spacing:.3px}
+.col.good h3{color:var(--green-deep)} .col.bad h3{color:var(--red-deep)}
+.col ul{list-style:none}
+.col li{padding:5px 0 5px 16px;position:relative;font-size:13px;color:var(--ink-soft)}
+.col.good li::before{content:"＋";position:absolute;left:0;color:var(--green-deep);font-weight:700}
+.col.bad li::before{content:"－";position:absolute;left:0;color:var(--red-deep);font-weight:700}
+.note{font-size:12.5px;color:var(--muted);background:var(--bg-soft);border-left:3px solid var(--amber);padding:9px 12px;border-radius:0 8px 8px 0;margin-top:10px}
+.verdict{background:linear-gradient(180deg,#FFFDF6 0%,#FFFFFF 80%);border:1px solid var(--line-strong);border-radius:var(--radius-lg);padding:18px 20px}
+.verdict h2{font-size:15px;font-weight:700;margin-bottom:10px;color:var(--ink);font-family:var(--font-kai);letter-spacing:.4px}
+.verdict p{font-size:13.5px;color:var(--ink-soft);margin-bottom:8px}
+.price-zone{margin-top:12px;background:var(--amber-bg);border:1px solid var(--amber-line);border-radius:var(--radius-md);padding:11px 14px;font-size:13px}
+.price-zone b{color:var(--amber-deep)}
+footer{max-width:1080px;margin:0 auto;padding:18px 20px 32px;color:var(--muted);font-size:12px;text-align:center}
+.footer-quote{color:var(--amber-deep);font-weight:600;font-size:13.5px;margin-bottom:6px;font-family:var(--font-kai);letter-spacing:.5px}
+.footer-note{color:var(--muted);font-size:11px;opacity:.85}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div class="brand"><span class="logo"><i class="g"></i><i class="y"></i><i class="r"></i></span>咕咕喵<span class="sub">个股深度分析</span></div>
+    <div class="picker">
+      <select id="stockSel" aria-label="选择自选股"></select>
+      <input id="stockCode" type="text" inputmode="numeric" maxlength="6" placeholder="或输入6位代码">
+      <button id="stockGo" type="button">查看</button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <div class="banner">数据待接入：NeoData 金融搜索（财务 / 宏观）+ WeStock Data（行情 / 财报 / 资金流 / 技术指标）。当前为页面框架，数值均为占位。</div>
+
+  <div class="stats">
+    <div class="stat hot"><div class="num red">—</div><div class="lbl">最新价</div></div>
+    <div class="stat"><div class="num">—</div><div class="lbl">今日涨跌</div></div>
+    <div class="stat warn"><div class="num amber">—</div><div class="lbl">PE（TTM）</div></div>
+    <div class="stat"><div class="num">—</div><div class="lbl">总市值</div></div>
+  </div>
+
+  <section class="panel">
+    <h2><span class="no">一</span><span id="secOverview">公司概况与估值</span><span class="hint">主营 · 市值 · PE/PB 分位</span></h2>
+    <div class="tbl-wrap"><table>
+      <tr><th>项目</th><th>数值</th><th>说明</th></tr>
+      <tr><td>主营业务</td><td>—</td><td class="flat">待数据源</td></tr>
+      <tr><td>总市值 / 流通市值</td><td>—</td><td class="flat">待数据源</td></tr>
+      <tr><td>PE（TTM） / 3年分位</td><td>—</td><td class="flat">待数据源</td></tr>
+      <tr><td>PB / 3年分位</td><td>—</td><td class="flat">待数据源</td></tr>
+    </table></div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="no">二</span>近四季营收 / 净利润 / 毛利率趋势<span class="hint">营收与净利润为柱，毛利率为线（待接入）</span></h2>
+    <div class="bars">
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><div class="bar-v">—</div><div class="bar-q">近四季 1</div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><div class="bar-v">—</div><div class="bar-q">近四季 2</div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><div class="bar-v">—</div><div class="bar-q">近四季 3</div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><div class="bar-v">—</div><div class="bar-q">近四季 4</div></div>
+    </div>
+    <div class="note">接入数据后：红柱 = 营收同比上行，绿柱 = 下行；柱顶标注净利润；毛利率用折线叠加。</div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="no">三</span>关键财务指标<span class="hint">ROE · 盈利质量 · 偿债能力</span></h2>
+    <div class="kv">
+      <div class="item"><div class="k">ROE（最新报告期）</div><div class="v">—</div></div>
+      <div class="item"><div class="k">毛利率</div><div class="v">—</div></div>
+      <div class="item"><div class="k">净利率</div><div class="v">—</div></div>
+      <div class="item"><div class="k">营收同比 / 环比</div><div class="v">—</div></div>
+      <div class="item"><div class="k">净利润同比 / 环比</div><div class="v">—</div></div>
+      <div class="item"><div class="k">资产负债率</div><div class="v">—</div></div>
+      <div class="item"><div class="k">经营现金流 / 净利润</div><div class="v">—</div></div>
+      <div class="item"><div class="k">存货周转 / 应收周转</div><div class="v">—</div></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="no">四</span>行情与主力资金<span class="hint">价格区间 · 主力净流入 · 技术信号</span></h2>
+    <div class="tbl-wrap"><table>
+      <tr><th>项目</th><th>数值</th><th>说明</th></tr>
+      <tr><td>最新价 / 今日涨跌</td><td class="flat">—</td><td class="flat">A股习惯：<span class="up">涨红</span> · <span class="down">跌绿</span></td></tr>
+      <tr><td>52周区间 / 当前分位</td><td>—</td><td class="flat">待数据源</td></tr>
+      <tr><td>主力净流入（1日 / 5日 / 20日）</td><td>—</td><td class="flat">待数据源</td></tr>
+      <tr><td>技术信号（MA / RSI / KDJ）</td><td>—</td><td class="flat">待数据源</td></tr>
+    </table></div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="no">五</span><span id="secPeer">同业对比</span><span class="hint" id="secPeerHint">可比公司</span></h2>
+    <div class="tbl-wrap"><table id="peerTable">
+      <tr><th>公司</th><th>代码</th><th>PE(TTM)</th><th>PB</th><th>ROE</th><th>营收增速</th><th>净利增速</th></tr>
+    </table></div>
+    <div class="note" id="linkNote">行业联动提示（待接入）：联动方向会随所选行业更新。</div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="no">六</span>投资亮点与风险</h2>
+    <div class="two">
+      <div class="col good"><h3>亮点</h3><ul>
+        <li>待数据源接入</li>
+        <li>待数据源接入</li>
+        <li>待数据源接入</li>
+      </ul></div>
+      <div class="col bad"><h3>风险</h3><ul>
+        <li>待数据源接入</li>
+        <li>待数据源接入</li>
+        <li>待数据源接入</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="verdict">
+    <h2>综合评价（非投资建议）</h2>
+    <p>待数据源接入后，这里会基于财务、估值、资金面与行业对比给出客观结论；不考虑短期博弈，只评估以时间换确定性的长期逻辑。</p>
+    <div class="price-zone">适合建仓的价格区间：<b>待数据源接入后估算</b>（仅为个人分析参考，非投资建议）</div>
+  </section>
+</main>
+<footer>
+  <div class="footer-quote">不怕新人入行就亏钱，就怕新人入行就挣钱，却误把运气当成实力</div>
+  <div class="footer-note">本页内容由数据服务与公开信息整理生成，仅供个人研究参考，不构成任何投资建议。</div>
+</footer>
+<script>
+const STOCK_DB = [
+  {code:"002837", name:"英维克", industry:"液冷温控", peers:[["300499","高澜股份"],["300990","同飞股份"],["301018","申菱环境"]],
+   link:"数据中心资本开支与 AI 算力扩张上行时，液冷/温控需求同步受益；若上游铜、铝等原材料价格大涨，则成本端承压。"},
+  {code:"300602", name:"飞荣达", industry:"散热与电磁屏蔽", peers:[["300684","中石科技"],["002600","领益智造"],["002384","东山精密"]],
+   link:"消费电子与 AI 服务器需求上行时公司受益；若上游铜箔、铝材等材料涨价，毛利率可能被压缩。"},
+  {code:"301018", name:"申菱环境", industry:"专业温控", peers:[["002837","英维克"],["300990","同飞股份"],["300499","高澜股份"]],
+   link:"数据中心与工业温控需求上行时受益；若电网/新能源发电投资放缓，相关项目订单可能延后。"},
+  {code:"003018", name:"金富科技", industry:"塑料包装", peers:[["002831","裕同科技"],["002228","合兴包装"],["002191","劲嘉股份"]],
+   link:"下游快消品需求与纸浆、塑料粒子等原材料价格联动：原材料涨价会压缩利润，下游景气上行则量增。"},
+  {code:"000537", name:"绿发电力", industry:"新能源电力运营", peers:[["600905","三峡能源"],["001289","龙源电力"],["601016","节能风电"]],
+   link:"电力需求与电价政策影响营收；来水/风资源波动影响发电量。若煤炭价格大涨，火电成本上升，新能源运营的相对吸引力可能上升。"},
+  {code:"601628", name:"中国人寿", industry:"保险", peers:[["601318","中国平安"],["601601","中国太保"],["601336","新华保险"]],
+   link:"长端利率下行压制保险投资端与内含价值，权益市场走强则投资收益改善；利率上行通常对保险股估值更友好。"},
+  {code:"603259", name:"药明康德", industry:"医药外包（CXO）", peers:[["002821","凯莱英"],["300347","泰格医药"],["300759","康龙化成"]],
+   link:"全球医药研发投入与融资环境决定行业景气；若海外生物医药融资回暖，CXO 订单预期改善，反之承压。"},
+  {code:"300750", name:"宁德时代", industry:"动力电池", peers:[["002594","比亚迪"],["300014","亿纬锂能"],["002074","国轩高科"],["300207","欣旺达"]],
+   link:"锂盐/碳酸锂价格大幅上行会压缩电池环节利润，带动电池股行情相对承压；锂价下行通常利好电池环节成本端。"},
+  {code:"300308", name:"中际旭创", industry:"光模块", peers:[["300502","新易盛"],["300394","天孚通信"],["002281","光迅科技"]],
+   link:"AI 算力资本开支决定需求；若海外云厂商资本开支指引下修，光模块板块易同步回落，上游光芯片供给紧张则利好龙头份额。"},
+  {code:"600487", name:"亨通光电", industry:"光纤光缆与海缆", peers:[["600522","中天科技"],["603606","东方电缆"],["601869","长飞光纤"]],
+   link:"海上风电与电网投资驱动海缆需求；光纤价格与运营商集采节奏影响光通信板块，铜价上涨利好线缆价格但成本同步上升。"},
+  {code:"601899", name:"紫金矿业", industry:"铜金矿业", peers:[["603993","洛阳钼业"],["600362","江西铜业"],["600547","山东黄金"]],
+   link:"铜金价格与美元指数、全球通胀预期联动；铜价上涨直接利好盈利，若美元走强或需求走弱则板块承压。"},
+  {code:"601225", name:"陕西煤业", industry:"煤炭", peers:[["601088","中国神华"],["600188","兖矿能源"],["601898","中煤能源"]],
+   link:"动力煤价格与用电需求、进口煤价联动；煤价上行直接利好盈利，若电价市场化改革压价或需求走弱则承压。"},
+  {code:"000333", name:"美的集团", industry:"家电", peers:[["000651","格力电器"],["600690","海尔智家"],["000921","海信家电"]],
+   link:"地产景气与消费复苏决定需求；铜、铝、钢等原材料涨价压缩毛利，人民币贬值通常有利于出口占比高的家电龙头。"},
+  {code:"002371", name:"北方华创", industry:"半导体设备", peers:[["688012","中微公司"],["688072","拓荆科技"],["688082","盛美上海"]],
+   link:"晶圆厂资本开支与国产化率决定订单；若下游存储/逻辑扩产放缓或美国出口管制升级，板块估值易受压制。"},
+  {code:"600721", name:"百花医药", industry:"医药制造", peers:[["600521","华海药业"],["000739","普洛药业"],["300026","红日药业"]],
+   link:"医药政策（集采、医保谈判）影响价格预期；原料药价格与汇率波动影响出口利润。"},
+  {code:"600160", name:"巨化股份", industry:"氟化工", peers:[["603379","三美股份"],["605020","永和股份"],["600378","昊华科技"]],
+   link:"制冷剂配额制与价格上行周期直接利好盈利；若下游空调、汽车需求走弱或配额政策变化，则景气回落。"}
+];
+
+const $ = id => document.getElementById(id);
+const dash = v => v == null || v === "" ? "—" : v;
+
+function peersOf(stock){
+  return [{code:stock.code, name:stock.name, self:true}].concat(stock.peers || []);
+}
+
+function applyStock(stock){
+  document.title = stock.name + " · 个股深度分析";
+  $("secOverview").textContent = stock.name + " · 公司概况与估值";
+  $("secPeer").textContent = stock.industry + "同业对比";
+  $("secPeerHint").textContent = stock.name + " vs " + (stock.peers || []).map(p => p[1]).join("、");
+  $("linkNote").textContent = "行业联动提示：" + stock.link;
+
+  const rows = peersOf(stock).map(p =>
+    "<tr><td>" + (p.self ? "<b>" + p.name + "</b>" : p.name) + "</td><td>" + p.code + "</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>"
+  ).join("");
+  $("peerTable").innerHTML = "<tr><th>公司</th><th>代码</th><th>PE(TTM)</th><th>PB</th><th>ROE</th><th>营收增速</th><th>净利增速</th></tr>" + rows;
+}
+
+function initPicker(){
+  const sel = $("stockSel");
+  sel.innerHTML = STOCK_DB.map(s => "<option value=\"" + s.code + "\">" + s.name + " " + s.code + "</option>").join("");
+  sel.value = "300750";
+  applyStock(STOCK_DB[0] && STOCK_DB.find(s => s.code === "300750") || STOCK_DB[0]);
+}
+
+function lookup(code){
+  code = (code || "").trim();
+  return STOCK_DB.find(s => s.code === code);
+}
+
+function handleGo(){
+  const code = ($("stockCode").value || "").trim() || $("stockSel").value;
+  const stock = lookup(code);
+  if (stock){
+    $("stockSel").value = stock.code;
+    $("stockCode").value = "";
+    applyStock(stock);
+  } else if (/^\d{6}$/.test(code)){
+    applyStock({code:code, name:"股票" + code, industry:"自定义", peers:[],
+      link:"自定义标的：同业对比与行业联动暂未配置，接入数据源后补充。"});
+  } else {
+    $("stockCode").focus();
+  }
+}
+
+$("stockSel").addEventListener("change", () => {
+  const stock = lookup($("stockSel").value);
+  if (stock) applyStock(stock);
+});
+$("stockGo").addEventListener("click", handleGo);
+$("stockCode").addEventListener("keydown", e => { if (e.key === "Enter") handleGo(); });
+
+initPicker();
+</script>
+</body>
+</html>

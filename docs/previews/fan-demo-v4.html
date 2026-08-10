@@ -3,207 +3,166 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>自选股折扇 · 交互预览 v4</title>
+<title>自选股折扇</title>
 <style>
 :root{
-  --ink:#3F3A33; --muted:#8A7F6D;
-  --green:#15803D; --red:#B91C1C; --amber:#B45309;
-  --wood-dark:#6E5430; --wood:#B08A52; --wood-light:#E8D5A8;
-  --card:#FFFFFF; --line:#E9E2D0;
+  --bg:#F6F4EF;
+  --paper:#FFFFFF;
+  --ink:#1F2937;
+  --muted:#6B7280;
+  --line:#E5E1D8;
+  --accent:#B45309;
+  --green:#15803D; --red:#B91C1C;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-  background:linear-gradient(180deg,#FAF5E6 0%,#F1E7D0 100%);
-  color:var(--ink); min-height:100vh; display:flex; flex-direction:column;
-  align-items:center; padding:26px 16px;
+  background:var(--bg); color:var(--ink); min-height:100vh;
+  display:flex; flex-direction:column; align-items:center;
+  padding:48px 16px 24px;
 }
-h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-spacing:2px; margin-bottom:4px}
-.caption{color:var(--muted); font-size:12.5px; margin-bottom:16px}
-.controls{display:flex; gap:10px; align-items:center; margin-bottom:10px}
-.controls button{
-  font:inherit; font-size:12.5px; padding:6px 14px; border-radius:999px;
-  border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer;
-  transition:all .15s;
+h1{font-size:15px; font-weight:600; letter-spacing:4px; margin-bottom:8px}
+.caption{color:var(--muted); font-size:12px; margin-bottom:24px}
+.toggle{
+  font:inherit; font-size:12px; color:var(--muted); background:none;
+  border:none; padding:6px 10px; cursor:pointer; border-radius:6px;
+  transition:color .2s ease-in-out, background .2s ease-in-out;
 }
-.controls button:hover{border-color:#C9B98F; background:#FBF6E8}
-.controls .hint{color:var(--muted); font-size:11.5px}
+.toggle:hover{color:var(--ink); background:rgba(31,41,55,.05)}
 
 .fan-wrapper{position:relative; width:820px; max-width:96vw; height:440px; margin:0 auto}
 .fan-stage{position:absolute; inset:0; outline:none}
 .fan{
   position:absolute; left:50%; bottom:42px; width:760px; height:380px;
-  margin-left:-380px;
-  transform-origin:50% 100%;
-  transform:rotate(-90deg) scaleX(.12);
-  transition:transform .7s cubic-bezier(.2,.75,.25,1);
+  margin-left:-380px; transform-origin:50% 100%;
+  transform:rotate(-90deg) scaleX(.1);
+  transition:transform .6s cubic-bezier(.2,.7,.2,1);
 }
-.fan-stage:hover .fan, .fan-stage.open .fan{
-  transform:rotate(0deg) scaleX(1);
-}
+.fan-stage:hover .fan, .fan-stage.open .fan{transform:rotate(0deg) scaleX(1)}
 
-/* 扇面：每片独立楔形，带层叠阴影 + 折痕纹理 */
+/* 扇叶：白纸楔形，极简 */
 .blade{
   position:absolute; left:380px; top:342.5px; width:380px; height:75px;
   transform-origin:left center;
   transform:rotate(var(--a, 0deg));
   clip-path:path("M 0 37.5 L 378.17 0.254 A 380 380 0 0 1 378.17 74.746 Z");
-  cursor:pointer;
   background:
-    linear-gradient(180deg, rgba(140,100,45,.20) 0%, rgba(140,100,45,0) 16%),
-    repeating-linear-gradient(0deg, rgba(120,90,40,.07) 0 1px, transparent 1px 5px),
-    linear-gradient(180deg, #FDF6E3 0%, #F6EBD0 100%);
-  filter:drop-shadow(0 2px 2px rgba(110,80,35,.28));
-  transition:transform .2s ease-in-out, filter .2s ease-in-out;
-  z-index:1;
+    repeating-linear-gradient(0deg, rgba(31,41,55,.025) 0 1px, transparent 1px 6px),
+    var(--paper);
+  cursor:pointer; z-index:1;
+  transition:transform .2s ease-in-out;
 }
 .blade::after{
   content:""; position:absolute; inset:0; clip-path:inherit;
-  background:transparent; pointer-events:none; transition:background .15s;
+  background:transparent; pointer-events:none; transition:background .2s ease-in-out;
 }
 .blade:hover{
-  transform:rotate(var(--a, 0deg)) scale(1.06);
-  filter:drop-shadow(0 5px 5px rgba(110,80,35,.38));
+  transform:rotate(var(--a, 0deg)) scale(1.03);
   z-index:30;
 }
-.blade:hover::after{background:rgba(150,110,50,.12)}
+.blade:hover::after{background:rgba(180,83,9,.05)}
 .blade.sel{
-  transform:rotate(var(--a, 0deg)) scale(1.05);
-  filter:drop-shadow(0 4px 6px rgba(110,80,35,.40));
+  transform:rotate(var(--a, 0deg)) scale(1.03);
   z-index:40;
 }
-.blade.sel::after{background:rgba(190,120,40,.26)}
+.blade.sel::after{background:rgba(180,83,9,.08)}
 
-/* 叶片自身包边：悬停突起时沿外弧显示（clip-path 圆弧带，不用 border） */
+/* 包边：2px 圆弧细线，悬停/选中浮现 */
 .blade-rim{
   position:absolute; inset:0;
   clip-path:path("M 376.2 0.45 L 378.17 0.254 A 380 380 0 0 1 378.17 74.746 L 376.2 74.55 A 378 378 0 0 0 376.2 0.45 Z");
-  background:#D4A017;
-  box-shadow:0 0 4px rgba(212,160,23,.75);
+  background:var(--accent);
   opacity:0; transition:opacity .2s ease-in-out; pointer-events:none;
 }
 .blade:hover .blade-rim, .blade.sel .blade-rim{opacity:1}
-/* 兜底发光：drop-shadow 跟随扇形轮廓（clip-path 下 outline/box-shadow 会被裁掉） */
-.blade:hover{filter:drop-shadow(0 0 3px rgba(212,160,23,.65)) drop-shadow(0 6px 6px rgba(110,80,35,.35))}
 
-/* 文字：正立居中，反向旋转抵消扇面 */
+/* 文字：正立居中 */
 .blade-text{
   position:absolute; left:253px; top:50%;
   transform:translate(-50%,-50%) rotate(calc(-1 * var(--a, 0deg)));
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  text-align:center; line-height:1.2; white-space:nowrap;
-  font-family:"STKaiti","KaiTi",serif; color:var(--ink);
-  text-shadow:0 1px 0 rgba(255,255,255,.6);
-  pointer-events:none; max-width:48px; overflow:hidden;
+  text-align:center; line-height:1.25; white-space:nowrap;
+  color:var(--ink); pointer-events:none; max-width:48px; overflow:hidden;
 }
 .blade-text .nm{font-weight:600}
-.blade-text .cd{color:var(--muted); font-variant-numeric:tabular-nums}
+.blade-text .cd{color:var(--muted); font-size:10px; font-variant-numeric:tabular-nums}
 
-/* 扇骨：深色细条，从中心向外辐射 */
+/* 扇骨：细线 */
 .rib{
-  position:absolute; left:380px; top:380px; width:380px; height:1.5px;
-  background:rgba(100,74,38,.55);
+  position:absolute; left:380px; top:380px; width:380px; height:1px;
+  background:rgba(31,41,55,.08);
   transform-origin:left center; pointer-events:none; z-index:5;
 }
 
-/* 包边：沿外弧的一圈饰边 */
+/* 外弧：发丝线 */
 .rim{
-  position:absolute; left:-3.5px; top:-3.5px; width:767px; height:383.5px;
-  border-radius:383.5px 383.5px 0 0;
-  border-top:7px solid #C9A96A;
-  box-shadow:
-    inset 0 -1px 0 rgba(120,85,35,.35),
-    inset 0 2px 3px rgba(255,248,225,.85),
-    0 3px 7px rgba(110,80,35,.28);
+  position:absolute; left:0; top:0; width:760px; height:380px;
+  border-radius:380px 380px 0 0;
+  border:1px solid rgba(31,41,55,.14); border-bottom:none;
   pointer-events:none; z-index:6;
 }
 
 .center-pin{
-  position:absolute; left:50%; bottom:31px; width:22px; height:22px;
-  margin-left:-11px; border-radius:50%;
-  background:radial-gradient(circle at 34% 30%, #C99F62, var(--wood) 55%, var(--wood-dark));
-  box-shadow:0 2px 5px rgba(70,50,20,.45), inset 0 0 0 2px rgba(255,255,255,.28);
-  z-index:7;
-}
-.center-pin::after{
-  content:""; position:absolute; left:50%; top:50%; width:5px; height:5px;
-  margin:-2.5px 0 0 -2.5px; border-radius:50%; background:#4A3519;
+  position:absolute; left:50%; bottom:34px; width:14px; height:14px;
+  margin-left:-7px; border-radius:50%;
+  background:#8C8377; z-index:7;
 }
 
-.ribbon{
-  position:absolute; left:50%; bottom:34px; width:34px; height:250px;
-  margin-left:-17px; border-radius:7px;
-  background:linear-gradient(90deg,#C9A96A 0%, #EFDFB2 28%, #D9BC83 62%, #B8965D 100%);
-  border:1px solid #A98B55;
-  box-shadow:0 3px 8px rgba(90,65,25,.25), inset 0 0 12px rgba(120,85,35,.25);
-  display:flex; align-items:center; justify-content:center;
-  font-family:"STKaiti","KaiTi",serif; font-size:13px; letter-spacing:4px; color:#5C4A28;
-  writing-mode:vertical-rl; text-orientation:upright;
-  opacity:1; transition:opacity .3s ease; z-index:4;
-}
-.fan-stage:hover .ribbon, .fan-stage.open .ribbon{opacity:0; pointer-events:none}
-
-/* 点击弹窗 */
+/* 弹窗 */
 .modal-overlay{
-  position:fixed; inset:0; z-index:100; background:rgba(40,30,15,.38);
-  backdrop-filter:blur(2px); display:flex; align-items:center; justify-content:center;
-  opacity:0; visibility:hidden; transition:opacity .18s ease, visibility .18s;
+  position:fixed; inset:0; z-index:100; background:rgba(31,41,55,.28);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; visibility:hidden; transition:opacity .2s ease-in-out, visibility .2s;
 }
 .modal-overlay.show{opacity:1; visibility:visible}
 .modal{
-  position:relative; width:min(380px,92vw); background:var(--card);
-  border:1px solid var(--line); border-radius:16px; padding:20px 22px;
-  box-shadow:0 22px 50px rgba(60,45,20,.28);
-  transform:translateY(10px) scale(.98); transition:transform .18s ease;
+  position:relative; width:min(360px,92vw); background:#fff;
+  border:1px solid var(--line); border-radius:12px; padding:20px 22px;
+  box-shadow:0 10px 30px rgba(31,41,55,.08);
+  transform:translateY(8px); transition:transform .2s ease-in-out;
 }
-.modal-overlay.show .modal{transform:translateY(0) scale(1)}
-.m-head{display:flex; align-items:baseline; gap:8px; margin-bottom:10px; padding-right:30px}
-.m-name{font-family:"STKaiti","KaiTi",serif; font-size:18px; font-weight:600}
-.m-code{color:var(--muted); font-size:11.5px}
-.m-price{margin-left:auto; font-weight:700; font-size:16px; font-variant-numeric:tabular-nums}
+.modal-overlay.show .modal{transform:translateY(0)}
+.m-head{display:flex; align-items:baseline; gap:8px; margin-bottom:12px; padding-right:28px}
+.m-name{font-size:16px; font-weight:600}
+.m-code{color:var(--muted); font-size:11px}
+.m-price{margin-left:auto; font-weight:600; font-size:15px; font-variant-numeric:tabular-nums}
 .m-close{
-  position:absolute; top:12px; right:12px; width:26px; height:26px; border-radius:50%;
-  border:none; background:#F3F0E8; color:var(--muted); cursor:pointer; font-size:14px;
+  position:absolute; top:10px; right:10px; width:26px; height:26px; border-radius:50%;
+  border:none; background:transparent; color:var(--muted); cursor:pointer; font-size:14px;
   line-height:1; display:flex; align-items:center; justify-content:center;
+  transition:background .15s, color .15s;
 }
-.m-close:hover{background:#E9E4D8; color:var(--ink)}
+.m-close:hover{background:rgba(31,41,55,.06); color:var(--ink)}
 .m-lights{font-size:16px; letter-spacing:1px; margin-bottom:10px}
 .m-row{display:flex; justify-content:space-between; font-size:12.5px; padding:3px 0; color:var(--muted)}
-.m-row b{color:var(--ink); font-variant-numeric:tabular-nums}
+.m-row b{color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums}
 .verdict{
-  display:inline-block; margin-top:8px; padding:2px 10px; border-radius:999px;
+  display:inline-block; margin-top:10px; padding:2px 10px; border-radius:999px;
   font-size:11.5px; font-weight:600;
 }
-.v-ok{background:#ECFDF5; color:var(--green); border:1px solid #BBF7D0}
-.v-warn{background:#FFFBEB; color:var(--amber); border:1px solid #FDE68A}
-.v-bad{background:#FEF2F2; color:var(--red); border:1px solid #FECACA}
+.v-ok{background:#ECFDF5; color:var(--green)}
+.v-warn{background:#FFFBEB; color:#B45309}
+.v-bad{background:#FEF2F2; color:var(--red)}
 .up{color:var(--red)} .down{color:var(--green)}
 
 @media (max-width:860px){
   .fan-wrapper{transform:scale(.72); transform-origin:top center; height:320px; margin-bottom:24px}
 }
 @media (prefers-reduced-motion:reduce){
-  .fan,.blade,.modal-overlay,.modal{transition:none}
+  .fan,.blade,.blade::after,.blade-rim,.modal-overlay,.modal{transition:none}
 }
 </style>
 </head>
 <body>
 <h1>自选股折扇</h1>
-<div class="caption">悬停展开 · 扇面悬停凸起 · 点击高亮并查看灯号</div>
-<div class="controls">
-  <button onclick="togglePin()">展开 / 合拢</button>
-  <span class="hint" id="countHint"></span>
-</div>
+<div class="caption">悬停展开 · 点击查看灯号</div>
+<button class="toggle" onclick="togglePin()">展开 / 合拢</button>
 
 <div class="fan-wrapper">
   <div class="fan-stage" id="fanStage" tabindex="0"
        onmouseenter="hoverOpen(true)" onmouseleave="hoverOpen(false)"
        onfocus="hoverOpen(true)" onblur="hoverOpen(false)">
-    <div class="fan" id="fanContainer">
-      <div class="rim"></div>
-      <!-- JS 将在这里注入扇面与扇骨 -->
-    </div>
-    <div class="ribbon">自选股</div>
+    <div class="fan" id="fanContainer"></div>
     <div class="center-pin"></div>
   </div>
 </div>
@@ -245,18 +204,16 @@ const STOCKS = [
 ];
 
 const N = STOCKS.length;
-const PIN_X = 380, PIN_Y = 380;
 const LIGHT = {green:"🟢", yellow:"🟡", red:"🔴"};
 const fan = document.getElementById("fanContainer");
 const stage = document.getElementById("fanStage");
 let pinned = false;
 
-document.getElementById("countHint").textContent = `共 ${N} 只 · 每片扇面一只`;
 if (location.search.indexOf("open=1") !== -1){
   pinned = true;
   stage.classList.add("open");
 }
-// 扇骨：深色细条从中心向外辐射（N+1 条）
+
 for (let i = 0; i <= N; i++){
   const a = i * (180 / N) - 180;
   const rib = document.createElement("div");
@@ -265,7 +222,6 @@ for (let i = 0; i <= N; i++){
   fan.appendChild(rib);
 }
 
-// 扇面：每片楔形纸面 + 正立居中文字
 STOCKS.forEach((s, i) => {
   const a = (i + 0.5) * (180 / N) - 180;
   const blade = document.createElement("div");
@@ -283,12 +239,10 @@ STOCKS.forEach((s, i) => {
   const txt = document.createElement("div");
   txt.className = "blade-text";
   const nmLen = [...s[1]].length;
-  const fs = Math.max(8, Math.min(16, Math.floor(44 / nmLen)));
+  const fs = Math.max(11, Math.min(15, Math.floor(40 / nmLen)));
   txt.innerHTML = `<span class="nm" style="font-size:${fs}px">${s[1]}</span>` +
-                  `<span class="cd" style="font-size:${Math.max(6, fs - 3)}px">${s[0].slice(-4)}</span>`;
-  const rim = document.createElement("div");
-  rim.className = "blade-rim";
-  blade.appendChild(rim);
+                  `<span class="cd">${s[0].slice(-4)}</span>`;
+  blade.appendChild(document.createElement("div")).className = "blade-rim";
   blade.appendChild(txt);
   fan.appendChild(blade);
 });

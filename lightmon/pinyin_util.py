@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """股票名称 -> 拼音首字母。"""
 from typing import Optional
 

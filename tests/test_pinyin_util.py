@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from lightmon.pinyin_util import initial_of_name, initials_of_name
 
 

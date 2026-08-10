@@ -393,8 +393,9 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .fan-view{position:relative}
 .fan-scroll{overflow-x:auto;padding-bottom:6px}
 .fan-stage{position:relative;height:400px;cursor:default;outline:none}
-.fan{position:absolute;left:50%;bottom:14px;width:760px;height:380px;margin-left:-380px;transform-origin:50% 100%}
-.fan-rim{position:absolute;left:50%;bottom:14px;width:760px;height:380px;margin-left:-380px;border-radius:380px 380px 0 0;border:1px solid rgba(31,41,55,.14);border-bottom:none;pointer-events:none;z-index:6}
+.fan,.fan-rim{position:absolute;left:50%;bottom:14px;width:760px;height:380px;margin-left:-380px;transform-origin:50% 100%;transform:rotate(-90deg) scaleX(.1);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.fan-stage.open .fan,.fan-stage.open .fan-rim{transform:rotate(0deg) scaleX(1)}
+.fan-rim{border-radius:380px 380px 0 0;border:1px solid rgba(31,41,55,.14);border-bottom:none;pointer-events:none;z-index:6}
 .blade{position:absolute;left:380px;top:342.5px;width:380px;height:75px;transform-origin:left center;transform:rotate(var(--a,0deg));clip-path:path("M 0 37.5 L 378.17 0.254 A 380 380 0 0 1 378.17 74.746 Z");background:repeating-linear-gradient(0deg,rgba(31,41,55,.025) 0 1px,transparent 1px 6px),#fff;cursor:pointer;z-index:1;transition:transform .2s ease-in-out}
 .blade::after{content:"";position:absolute;inset:0;clip-path:inherit;background:transparent;pointer-events:none;transition:background .2s ease-in-out}
 .blade:hover{transform:rotate(var(--a,0deg)) scale(1.03);z-index:30}
@@ -407,8 +408,10 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .blade-text .nm{font-weight:600}
 .blade-text .cd{color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}
 .rib{position:absolute;left:380px;top:380px;width:380px;height:1px;background:rgba(31,41,55,.08);transform-origin:left center;pointer-events:none;z-index:5}
-.center-pin{position:absolute;left:50%;bottom:6px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#8C8377;z-index:7}
-.fan-hint{color:var(--muted);font-size:12px;margin-top:10px;text-align:center}
+.center-pin{position:absolute;left:50%;bottom:7px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#8C8377;z-index:7}
+.fan-hint{display:flex;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:12px;margin-top:10px}
+.fan-hint .toggle{font:inherit;font-size:12px;color:var(--muted);background:none;border:none;padding:4px 8px;cursor:pointer;border-radius:6px;min-height:0;transition:color .15s,background .15s}
+.fan-hint .toggle:hover{color:var(--ink);background:rgba(31,41,55,.05)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (max-width:768px){
   .stats{grid-template-columns:repeat(2,1fr)}
@@ -483,7 +486,10 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
           <div class="center-pin"></div>
         </div>
       </div>
-      <div class="fan-hint">悬停扇叶凸起 · 点击查看详情</div>
+      <div class="fan-hint">
+        <button class="toggle" onclick="toggleFan()">展开 / 合拢</button>
+        <span>悬停扇叶凸起 · 点击查看详情</span>
+      </div>
     </div>
   </section>
   <section class="panel">
@@ -613,15 +619,30 @@ function cardKey(e, i){
 
 let currentView = "cards";
 let fanBuilt = false;
+let fanPinned = true;
+let fanHideTimer = null;
 
 function setView(v){
   currentView = v;
   const isCards = v === "cards";
+  clearTimeout(fanHideTimer);
+  if (isCards){
+    $("fanStage").classList.remove("open");
+    fanHideTimer = setTimeout(() => $("fanView").classList.add("hidden"), 620);
+  } else {
+    $("fanView").classList.remove("hidden");
+    if (!fanBuilt){ buildFan(); fanBuilt = true; }
+    fanPinned = true;
+    $("fanStage").classList.add("open");
+  }
   $("cards").classList.toggle("hidden", !isCards);
-  $("fanView").classList.toggle("hidden", isCards);
   $("viewCards").classList.toggle("active", isCards);
   $("viewFan").classList.toggle("active", !isCards);
-  if (!isCards && !fanBuilt){ buildFan(); fanBuilt = true; }
+}
+
+function toggleFan(){
+  fanPinned = !fanPinned;
+  $("fanStage").classList.toggle("open", fanPinned);
 }
 
 function buildFan(){

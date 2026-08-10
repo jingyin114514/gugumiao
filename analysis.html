@@ -16,7 +16,6 @@
   --radius-sm:8px; --radius-md:10px; --radius-lg:14px;
   --shadow-sm:0 1px 2px rgba(31,41,55,.05);
   --shadow-md:0 6px 18px rgba(31,41,55,.09);
-  --shadow-lg:0 24px 60px rgba(31,41,55,.24);
   --font-body:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
   --font-kai:"STKaiti","KaiTi","STKaiti SC","Microsoft YaHei",serif;
   --t-fast:150ms; --t-norm:200ms;
@@ -35,41 +34,43 @@ header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdro
 .brand .sub{color:var(--muted);font-weight:400;font-size:12.5px;margin-left:2px}
 .picker{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .picker select,.picker input{border:1px solid var(--line);border-radius:var(--radius-sm);padding:7px 10px;font:inherit;font-size:13px;color:var(--ink);background:#fff;min-width:0}
-.picker select{max-width:190px}
+.picker select{max-width:200px}
 .picker input{width:150px}
-.picker input:focus,.picker select:focus{outline:none;border-color:var(--line-strong);box-shadow:0 0 0 3px rgba(217,119,6,.12)}
-.picker button{border:1px solid var(--line-strong);background:#fff;color:var(--ink);border-radius:var(--radius-sm);padding:7px 13px;font:inherit;font-size:13px;cursor:pointer;transition:background var(--t-fast),border-color var(--t-fast)}
-.picker button:hover{background:var(--bg);border-color:var(--amber)}
+.picker select:focus,.picker input:focus{outline:none;border-color:var(--line-strong);box-shadow:0 0 0 3px rgba(217,119,6,.12)}
+.picker button{border:1px solid var(--line-strong);background:#fff;color:var(--ink);border-radius:var(--radius-sm);padding:7px 13px;font:inherit;font-size:13px;cursor:pointer;transition:background var(--t-fast),border-color var(--t-fast),transform var(--t-fast)}
+.picker button:hover{background:var(--bg);border-color:var(--amber);transform:translateY(-1px)}
 main{max-width:1080px;margin:0 auto;padding:20px}
+.banner{background:var(--amber-bg);color:var(--amber-deep);border:1px solid var(--amber-line);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12.5px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
 .panel h2{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--ink);letter-spacing:.3px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .panel h2 .no{color:var(--amber-deep);font-family:var(--font-kai);font-weight:700}
 .panel h2 .hint{color:var(--muted);font-weight:400;font-size:12px}
-.banner{background:var(--amber-bg);color:var(--amber-deep);border:1px solid var(--amber-line);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12.5px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;transition:transform var(--t-fast),box-shadow var(--t-fast)}
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
 .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--line-strong)}
 .stat.hot::before{background:var(--red)} .stat.warn::before{background:var(--amber)} .stat.good::before{background:var(--green)}
-.stat .num{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat .num{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
 .stat .num.green{color:var(--green-deep)} .stat .num.amber{color:var(--amber-deep)} .stat .num.red{color:var(--red-deep)}
 .stat .lbl{color:var(--muted);font-size:12px;margin-top:2px}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
-th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:center;white-space:nowrap}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:center;white-space:nowrap}
 th{font-weight:600;color:var(--muted);font-size:12.5px}
 td:first-child,th:first-child{text-align:left}
 .tbl-wrap{overflow-x:auto;border-radius:8px}
-.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .kv .item{border:1px solid var(--line);border-radius:var(--radius-md);padding:11px 13px;background:#FFFDF7}
 .kv .k{color:var(--muted);font-size:12px}
 .kv .v{font-size:14.5px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.posbar-wrap{margin-top:6px;height:8px;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.posbar{height:100%;width:0;background:linear-gradient(90deg,#FCD34D,#D97706);border-radius:999px;transition:width .5s ease}
 .bars{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:end;padding:6px 2px 0}
-.bar-col{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
-.bar-track{width:100%;max-width:76px;height:150px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
-.bar-fill{width:100%;background:linear-gradient(180deg,#E8B04B 0%,#D97706 100%);border-radius:6px 6px 0 0;transition:height .4s ease}
-.bar-fill.green{background:linear-gradient(180deg,#6EE7B7 0%,#16A34A 100%)}
-.bar-fill.red{background:linear-gradient(180deg,#FCA5A5 0%,#DC2626 100%)}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+.bar-track{width:100%;max-width:80px;height:150px;background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.bar-fill{width:100%;background:linear-gradient(180deg,#E8B04B 0%,#D97706 100%);border-radius:6px 6px 0 0;transition:height .5s ease}
 .bar-q{font-size:12px;color:var(--muted);white-space:nowrap}
 .bar-v{font-size:13px;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar-s{font-size:11.5px;white-space:nowrap}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:760px){.two{grid-template-columns:1fr}}
 .col{border:1px solid var(--line);border-radius:var(--radius-md);padding:13px 15px}
@@ -78,15 +79,13 @@ td:first-child,th:first-child{text-align:left}
 .col h3{font-size:13.5px;font-weight:700;margin-bottom:8px;font-family:var(--font-kai);letter-spacing:.3px}
 .col.good h3{color:var(--green-deep)} .col.bad h3{color:var(--red-deep)}
 .col ul{list-style:none}
-.col li{padding:5px 0 5px 16px;position:relative;font-size:13px;color:var(--ink-soft)}
+.col li{padding:4px 0 4px 16px;position:relative;font-size:13px;color:var(--ink-soft)}
 .col.good li::before{content:"＋";position:absolute;left:0;color:var(--green-deep);font-weight:700}
 .col.bad li::before{content:"－";position:absolute;left:0;color:var(--red-deep);font-weight:700}
 .note{font-size:12.5px;color:var(--muted);background:var(--bg-soft);border-left:3px solid var(--amber);padding:9px 12px;border-radius:0 8px 8px 0;margin-top:10px}
 .verdict{background:linear-gradient(180deg,#FFFDF6 0%,#FFFFFF 80%);border:1px solid var(--line-strong);border-radius:var(--radius-lg);padding:18px 20px}
 .verdict h2{font-size:15px;font-weight:700;margin-bottom:10px;color:var(--ink);font-family:var(--font-kai);letter-spacing:.4px}
 .verdict p{font-size:13.5px;color:var(--ink-soft);margin-bottom:8px}
-.price-zone{margin-top:12px;background:var(--amber-bg);border:1px solid var(--amber-line);border-radius:var(--radius-md);padding:11px 14px;font-size:13px}
-.price-zone b{color:var(--amber-deep)}
 footer{max-width:1080px;margin:0 auto;padding:18px 20px 32px;color:var(--muted);font-size:12px;text-align:center}
 .footer-quote{color:var(--amber-deep);font-weight:600;font-size:13.5px;margin-bottom:6px;font-family:var(--font-kai);letter-spacing:.5px}
 .footer-note{color:var(--muted);font-size:11px;opacity:.85}
@@ -105,97 +104,1112 @@ footer{max-width:1080px;margin:0 auto;padding:18px 20px 32px;color:var(--muted);
   </div>
 </header>
 <main id="main">
-  <div class="banner">数据待接入：NeoData 金融搜索（财务 / 宏观）+ WeStock Data（行情 / 财报 / 资金流 / 技术指标）。当前为页面框架，数值均为占位。</div>
+  <div class="banner">数据来源：WeStock Data（行情/财报/资金流/技术指标）+ akshare（估值/52周区间），数据截至 2026-08-10 收盘。切换股票即可查看实时数据。</div>
 
   <div class="stats">
-    <div class="stat hot"><div class="num red">—</div><div class="lbl">最新价</div></div>
-    <div class="stat"><div class="num">—</div><div class="lbl">今日涨跌</div></div>
-    <div class="stat warn"><div class="num amber">—</div><div class="lbl">PE（TTM）</div></div>
-    <div class="stat"><div class="num">—</div><div class="lbl">总市值</div></div>
+    <div class="stat"><div class="num" id="vPrice">—</div><div class="lbl">最新价</div></div>
+    <div class="stat"><div class="num" id="vChg">—</div><div class="lbl">今日涨跌（A股：涨红跌绿）</div></div>
+    <div class="stat warn"><div class="num amber" id="vPe">—</div><div class="lbl">PE（TTM）</div></div>
+    <div class="stat"><div class="num" id="vMv">—</div><div class="lbl">总市值</div></div>
   </div>
 
   <section class="panel">
-    <h2><span class="no">一</span><span id="secOverview">公司概况与估值</span><span class="hint">主营 · 市值 · PE/PB 分位</span></h2>
-    <div class="tbl-wrap"><table>
-      <tr><th>项目</th><th>数值</th><th>说明</th></tr>
-      <tr><td>主营业务</td><td>—</td><td class="flat">待数据源</td></tr>
-      <tr><td>总市值 / 流通市值</td><td>—</td><td class="flat">待数据源</td></tr>
-      <tr><td>PE（TTM） / 3年分位</td><td>—</td><td class="flat">待数据源</td></tr>
-      <tr><td>PB / 3年分位</td><td>—</td><td class="flat">待数据源</td></tr>
-    </table></div>
-  </section>
-
-  <section class="panel">
-    <h2><span class="no">二</span>近四季营收 / 净利润 / 毛利率趋势<span class="hint">营收与净利润为柱，毛利率为线（待接入）</span></h2>
-    <div class="bars">
-      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><div class="bar-v">—</div><div class="bar-q">近四季 1</div></div>
-      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><div class="bar-v">—</div><div class="bar-q">近四季 2</div></div>
-      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><div class="bar-v">—</div><div class="bar-q">近四季 3</div></div>
-      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="height:0%"></div></div><div class="bar-v">—</div><div class="bar-q">近四季 4</div></div>
-    </div>
-    <div class="note">接入数据后：红柱 = 营收同比上行，绿柱 = 下行；柱顶标注净利润；毛利率用折线叠加。</div>
-  </section>
-
-  <section class="panel">
-    <h2><span class="no">三</span>关键财务指标<span class="hint">ROE · 盈利质量 · 偿债能力</span></h2>
+    <h2><span class="no">一</span><span id="secOverview">公司概况与估值</span><span class="hint">主营 · 上市 · 股本 · PE/PB · 52周位置</span></h2>
     <div class="kv">
-      <div class="item"><div class="k">ROE（最新报告期）</div><div class="v">—</div></div>
-      <div class="item"><div class="k">毛利率</div><div class="v">—</div></div>
-      <div class="item"><div class="k">净利率</div><div class="v">—</div></div>
-      <div class="item"><div class="k">营收同比 / 环比</div><div class="v">—</div></div>
-      <div class="item"><div class="k">净利润同比 / 环比</div><div class="v">—</div></div>
-      <div class="item"><div class="k">资产负债率</div><div class="v">—</div></div>
-      <div class="item"><div class="k">经营现金流 / 净利润</div><div class="v">—</div></div>
-      <div class="item"><div class="k">存货周转 / 应收周转</div><div class="v">—</div></div>
+      <div class="item"><div class="k">主营业务</div><div class="v" id="ovBusiness">—</div></div>
+      <div class="item"><div class="k">行业</div><div class="v" id="ovIndustry">—</div></div>
+      <div class="item"><div class="k">上市日期 / 董事长</div><div class="v" id="ovListed">—</div></div>
+      <div class="item"><div class="k">总股本</div><div class="v" id="ovShares">—</div></div>
+      <div class="item"><div class="k">PE（TTM）</div><div class="v" id="ovPe">—</div></div>
+      <div class="item"><div class="k">PB</div><div class="v" id="ovPb">—</div></div>
+      <div class="item"><div class="k">总市值</div><div class="v" id="ovMv">—</div></div>
+      <div class="item"><div class="k">52周区间</div><div class="v" id="ovRange">—</div></div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="k flat" style="font-size:12px">当前价在 52 周区间位置：<b id="posText">—</b></div>
+      <div class="posbar-wrap"><div class="posbar" id="posBar"></div></div>
     </div>
   </section>
 
   <section class="panel">
-    <h2><span class="no">四</span>行情与主力资金<span class="hint">价格区间 · 主力净流入 · 技术信号</span></h2>
+    <h2><span class="no">二</span>近四季营收 / 净利润 / 毛利率<span class="hint">柱高为单季营收，净利与毛利率标注在柱下</span></h2>
+    <div class="bars" id="qBars"></div>
+    <div class="note" id="qNote">—</div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="no">三</span>关键财务指标<span class="hint">ROE · 盈利 · 负债 · 股本</span></h2>
+    <div class="kv" id="finGrid"></div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="no">四</span>行情与主力资金<span class="hint">主力净流入（WeStock 口径）· 技术信号</span></h2>
     <div class="tbl-wrap"><table>
-      <tr><th>项目</th><th>数值</th><th>说明</th></tr>
-      <tr><td>最新价 / 今日涨跌</td><td class="flat">—</td><td class="flat">A股习惯：<span class="up">涨红</span> · <span class="down">跌绿</span></td></tr>
-      <tr><td>52周区间 / 当前分位</td><td>—</td><td class="flat">待数据源</td></tr>
-      <tr><td>主力净流入（1日 / 5日 / 20日）</td><td>—</td><td class="flat">待数据源</td></tr>
-      <tr><td>技术信号（MA / RSI / KDJ）</td><td>—</td><td class="flat">待数据源</td></tr>
+      <tr><th>主力资金</th><th>当日</th><th>近5日</th><th>近10日</th><th>近20日</th></tr>
+      <tr><td>净流入（亿元）</td><td id="fD1">—</td><td id="fD5">—</td><td id="fD10">—</td><td id="fD20">—</td></tr>
+    </table></div>
+    <div class="tbl-wrap"><table>
+      <tr><th>技术指标</th><th>数值</th><th>解读</th></tr>
+      <tr><td>均线</td><td id="tMA">—</td><td id="tMAx">—</td></tr>
+      <tr><td>MACD</td><td id="tMACD">—</td><td id="tMACDx">—</td></tr>
+      <tr><td>KDJ</td><td id="tKDJ">—</td><td id="tKDJx">—</td></tr>
+      <tr><td>RSI</td><td id="tRSI">—</td><td id="tRSIx">—</td></tr>
     </table></div>
   </section>
 
   <section class="panel">
     <h2><span class="no">五</span><span id="secPeer">同业对比</span><span class="hint" id="secPeerHint">可比公司</span></h2>
     <div class="tbl-wrap"><table id="peerTable">
-      <tr><th>公司</th><th>代码</th><th>PE(TTM)</th><th>PB</th><th>ROE</th><th>营收增速</th><th>净利增速</th></tr>
+      <tr><th>公司</th><th>代码</th><th>最新价</th><th>今日涨跌</th><th>PE(TTM)</th><th>PB</th></tr>
     </table></div>
-    <div class="note" id="linkNote">行业联动提示（待接入）：联动方向会随所选行业更新。</div>
+    <div class="note" id="linkNote">行业联动提示：—</div>
   </section>
 
   <section class="panel">
-    <h2><span class="no">六</span>投资亮点与风险</h2>
+    <h2><span class="no">六</span>亮点与风险<span class="hint">根据当前数据自动归纳，仅供参考</span></h2>
     <div class="two">
-      <div class="col good"><h3>亮点</h3><ul>
-        <li>待数据源接入</li>
-        <li>待数据源接入</li>
-        <li>待数据源接入</li>
-      </ul></div>
-      <div class="col bad"><h3>风险</h3><ul>
-        <li>待数据源接入</li>
-        <li>待数据源接入</li>
-        <li>待数据源接入</li>
-      </ul></div>
+      <div class="col good"><h3>亮点</h3><ul id="hlList"><li>—</li></ul></div>
+      <div class="col bad"><h3>风险</h3><ul id="rkList"><li>—</li></ul></div>
     </div>
   </section>
 
   <section class="verdict">
     <h2>综合评价（非投资建议）</h2>
-    <p>待数据源接入后，这里会基于财务、估值、资金面与行业对比给出客观结论；不考虑短期博弈，只评估以时间换确定性的长期逻辑。</p>
-    <div class="price-zone">适合建仓的价格区间：<b>待数据源接入后估算</b>（仅为个人分析参考，非投资建议）</div>
+    <p id="verdictText">—</p>
+    <div class="note">完整深度评价与建仓区间建议以个股深度报告为准；本页仅展示客观数据，不构成任何投资建议。</div>
   </section>
 </main>
 <footer>
   <div class="footer-quote">不怕新人入行就亏钱，就怕新人入行就挣钱，却误把运气当成实力</div>
-  <div class="footer-note">本页内容由数据服务与公开信息整理生成，仅供个人研究参考，不构成任何投资建议。</div>
+  <div class="footer-note">数据来源：WeStock Data / akshare · 数据截至 2026-08-10 · 仅供个人研究参考，不构成投资建议</div>
 </footer>
 <script>
+const DATA = {
+ "sz002837": {
+  "code": "sz002837",
+  "name": "英维克",
+  "price": 55.24,
+  "chg": -1.18,
+  "pe": 145.9,
+  "pb": 20.33,
+  "mv": 704.0,
+  "high52": 121.74,
+  "low52": 45.82,
+  "pos52": 12.4,
+  "industry": "机械设备",
+  "business": "精密温控节能设备的研发、生产、销售;轨道交通列车空调、架修及维护服务、传统客车空调等",
+  "listed": "2016-12-29",
+  "chairman": "齐勇",
+  "shares": 12.74,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 9.33,
+    "np": 0.48,
+    "gm": 26.5
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 16.41,
+    "np": 1.68,
+    "gm": 26.0
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 14.53,
+    "np": 1.83,
+    "gm": 29.4
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 20.42,
+    "np": 1.23,
+    "gm": 28.9
+   }
+  ],
+  "rev_ann": 60.68,
+  "np_ann": 5.22,
+  "gm_ttm": 27.9,
+  "roe": 15.1,
+  "debt": 55.3,
+  "flow_d1": -0.78,
+  "flow_d5": 2.22,
+  "flow_d10": -6.64,
+  "flow_d20": -18.38,
+  "ma5": 53.17,
+  "ma10": 51.44,
+  "ma20": 56.94,
+  "ma60": 68.26,
+  "macd_dif": -4.67,
+  "macd_dea": -5.2,
+  "macd": 1.06,
+  "kdj_k": 57.17,
+  "kdj_d": 38.88,
+  "kdj_j": 93.77,
+  "rsi6": 55.34,
+  "rsi12": 44.88
+ },
+ "sz300602": {
+  "code": "sz300602",
+  "name": "飞荣达",
+  "price": 36.2,
+  "chg": -2.95,
+  "pe": 55.3,
+  "pb": 5.12,
+  "mv": 212.3,
+  "high52": 52.92,
+  "low52": 26.4,
+  "pos52": 37.0,
+  "industry": "电子",
+  "business": "从事电磁屏蔽材料及器件、导热材料及器件的研发、设计、生产与销售。",
+  "listed": "2017-01-26",
+  "chairman": "马飞",
+  "shares": 5.86,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 11.81,
+    "np": 0.58,
+    "gm": 17.5
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 17.02,
+    "np": 1.08,
+    "gm": 21.0
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 17.34,
+    "np": 1.2,
+    "gm": 21.3
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 19.09,
+    "np": 0.78,
+    "gm": 17.6
+   }
+  ],
+  "rev_ann": 65.27,
+  "np_ann": 3.65,
+  "gm_ttm": 19.5,
+  "roe": 9.0,
+  "debt": 55.4,
+  "flow_d1": -0.06,
+  "flow_d5": 0.37,
+  "flow_d10": 0.52,
+  "flow_d20": 0.56,
+  "ma5": 36.15,
+  "ma10": 34.22,
+  "ma20": 36.06,
+  "ma60": 42.03,
+  "macd_dif": -1.96,
+  "macd_dea": -2.48,
+  "macd": 1.03,
+  "kdj_k": 71.02,
+  "kdj_d": 54.75,
+  "kdj_j": 103.56,
+  "rsi6": 53.96,
+  "rsi12": 47.09
+ },
+ "sz301018": {
+  "code": "sz301018",
+  "name": "申菱环境",
+  "price": 89.42,
+  "chg": 3.16,
+  "pe": 175.3,
+  "pb": 12.13,
+  "mv": 334.7,
+  "high52": 170.0,
+  "low52": 48.31,
+  "pos52": 33.8,
+  "industry": "机械设备",
+  "business": "围绕专用性空调为代表的空气环境调节设备开展,集研发设计、生产制造、营销服务、工程安装",
+  "listed": "2021-07-07",
+  "chairman": "崔颖琦",
+  "shares": 3.74,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 6.28,
+    "np": 0.54,
+    "gm": 22.0
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 10.54,
+    "np": 0.96,
+    "gm": 25.9
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 8.25,
+    "np": -0.0,
+    "gm": 20.6
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 17.02,
+    "np": 0.67,
+    "gm": 25.2
+   }
+  ],
+  "rev_ann": 42.09,
+  "np_ann": 2.17,
+  "gm_ttm": 24.0,
+  "roe": 7.9,
+  "debt": 56.7,
+  "flow_d1": 2.3,
+  "flow_d5": 2.81,
+  "flow_d10": 4.36,
+  "flow_d20": 1.46,
+  "ma5": 84.31,
+  "ma10": 78.47,
+  "ma20": 86.14,
+  "ma60": 101.33,
+  "macd_dif": -5.78,
+  "macd_dea": -7.07,
+  "macd": 2.57,
+  "kdj_k": 63.34,
+  "kdj_d": 47.41,
+  "kdj_j": 95.19,
+  "rsi6": 62.9,
+  "rsi12": 50.76
+ },
+ "sz003018": {
+  "code": "sz003018",
+  "name": "金富科技",
+  "price": 38.3,
+  "chg": -3.72,
+  "pe": 125.3,
+  "pb": 7.42,
+  "mv": 120.2,
+  "high52": 81.38,
+  "low52": 11.13,
+  "pos52": 38.7,
+  "industry": "轻工制造",
+  "business": "饮料、食品等领域用的包装产品研发、设计、生产和销售。",
+  "listed": "2020-11-06",
+  "chairman": "陈珊珊",
+  "shares": 3.14,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 1.69,
+    "np": 0.26,
+    "gm": 27.2
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 2.36,
+    "np": 0.24,
+    "gm": 24.9
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 2.57,
+    "np": 0.44,
+    "gm": 32.1
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 0.98,
+    "np": 0.07,
+    "gm": 34.4
+   }
+  ],
+  "rev_ann": 7.6,
+  "np_ann": 1.01,
+  "gm_ttm": 29.1,
+  "roe": 6.3,
+  "debt": 21.6,
+  "flow_d1": -0.22,
+  "flow_d5": 2.3,
+  "flow_d10": 1.14,
+  "flow_d20": -1.37,
+  "ma5": 38.1,
+  "ma10": 34.9,
+  "ma20": 38.74,
+  "ma60": 48.36,
+  "macd_dif": -3.39,
+  "macd_dea": -4.19,
+  "macd": 1.61,
+  "kdj_k": 74.3,
+  "kdj_d": 58.88,
+  "kdj_j": 105.15,
+  "rsi6": 54.72,
+  "rsi12": 45.78
+ },
+ "sz000537": {
+  "code": "sz000537",
+  "name": "绿发电力",
+  "price": 8.32,
+  "chg": 10.05,
+  "pe": 26.9,
+  "pb": 0.86,
+  "mv": 171.0,
+  "high52": 13.76,
+  "low52": 6.77,
+  "pos52": 22.2,
+  "industry": "公用事业",
+  "business": "以住宅类为主的房地产开发业务。",
+  "listed": "1993-12-10",
+  "chairman": "周现坤",
+  "shares": 20.56,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 10.26,
+    "np": 2.54,
+    "gm": 52.8
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 13.08,
+    "np": 3.64,
+    "gm": 60.4
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 13.74,
+    "np": 1.87,
+    "gm": 43.8
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 11.86,
+    "np": -0.05,
+    "gm": 31.3
+   }
+  ],
+  "rev_ann": 48.93,
+  "np_ann": 8.01,
+  "gm_ttm": 47.1,
+  "roe": 4.0,
+  "debt": 73.8,
+  "flow_d1": 1.54,
+  "flow_d5": -0.19,
+  "flow_d10": -0.66,
+  "flow_d20": -0.35,
+  "ma5": 7.81,
+  "ma10": 7.75,
+  "ma20": 7.66,
+  "ma60": 8.44,
+  "macd_dif": -0.01,
+  "macd_dea": -0.1,
+  "macd": 0.17,
+  "kdj_k": 64.56,
+  "kdj_d": 59.42,
+  "kdj_j": 74.85,
+  "rsi6": 74.59,
+  "rsi12": 63.24
+ },
+ "sh601628": {
+  "code": "sh601628",
+  "name": "中国人寿",
+  "price": 37.7,
+  "chg": -2.26,
+  "pe": 7.4,
+  "pb": 1.78,
+  "mv": 10655.8,
+  "high52": 51.92,
+  "low52": 32.32,
+  "pos52": 27.4,
+  "industry": "非银金融",
+  "business": "提供人寿保险及年金产品。",
+  "listed": "2007-01-09",
+  "chairman": "利明光",
+  "shares": 282.65,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 1101.77,
+    "np": 288.02,
+    "gm": null
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 1290.58,
+    "np": 121.29,
+    "gm": null
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 2986.6,
+    "np": 1268.73,
+    "gm": null
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 777.83,
+    "np": -137.26,
+    "gm": null
+   }
+  ],
+  "rev_ann": 6156.78,
+  "np_ann": 1540.78,
+  "gm_ttm": null,
+  "roe": 25.9,
+  "debt": 92.0,
+  "flow_d1": -2.32,
+  "flow_d5": -5.97,
+  "flow_d10": -9.07,
+  "flow_d20": -4.5,
+  "ma5": 38.03,
+  "ma10": 38.75,
+  "ma20": 39.41,
+  "ma60": 36.28,
+  "macd_dif": 0.21,
+  "macd_dea": 0.61,
+  "macd": -0.79,
+  "kdj_k": 26.11,
+  "kdj_d": 28.38,
+  "kdj_j": 21.58,
+  "rsi6": 34.61,
+  "rsi12": 44.22
+ },
+ "sh603259": {
+  "code": "sh603259",
+  "name": "药明康德",
+  "price": 161.34,
+  "chg": 4.21,
+  "pe": 22.2,
+  "pb": 5.78,
+  "mv": 4814.0,
+  "high52": 166.66,
+  "low52": 87.09,
+  "pos52": 93.3,
+  "industry": "医药生物",
+  "business": "小分子化学药的发现、研发及生产全方位、一体化平台服务,以全产业链平台的形式面向全球制",
+  "listed": "2018-05-08",
+  "chairman": "Ge Li(李革)",
+  "shares": 29.84,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 96.55,
+    "np": 36.72,
+    "gm": 42.3
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 111.45,
+    "np": 48.89,
+    "gm": 46.3
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 120.57,
+    "np": 35.15,
+    "gm": 50.4
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 125.99,
+    "np": 70.75,
+    "gm": 50.3
+   }
+  ],
+  "rev_ann": 454.56,
+  "np_ann": 191.51,
+  "gm_ttm": 47.6,
+  "roe": 24.0,
+  "debt": 22.2,
+  "flow_d1": -2.31,
+  "flow_d5": 13.78,
+  "flow_d10": 25.77,
+  "flow_d20": 35.25,
+  "ma5": 149.54,
+  "ma10": 137.96,
+  "ma20": 131.86,
+  "ma60": 115.5,
+  "macd_dif": 8.89,
+  "macd_dea": 5.96,
+  "macd": 5.87,
+  "kdj_k": 86.14,
+  "kdj_d": 79.84,
+  "kdj_j": 98.75,
+  "rsi6": 84.8,
+  "rsi12": 77.87
+ },
+ "sz300750": {
+  "code": "sz300750",
+  "name": "宁德时代",
+  "price": 393.87,
+  "chg": 1.86,
+  "pe": 21.4,
+  "pb": 4.8,
+  "mv": 18223.0,
+  "high52": 468.75,
+  "low52": 257.72,
+  "pos52": 64.5,
+  "industry": "电力设备",
+  "business": "宁德时代新能源科技股份有限公司是一家主要从事主要从事动力电池、储能电池的研发、生产、",
+  "listed": "2018-06-11",
+  "chairman": "曾毓群",
+  "shares": 46.27,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 847.05,
+    "np": 139.63,
+    "gm": 24.4
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 941.82,
+    "np": 165.23,
+    "gm": 25.6
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 1041.86,
+    "np": 185.49,
+    "gm": 25.8
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 1406.3,
+    "np": 231.67,
+    "gm": 28.2
+   }
+  ],
+  "rev_ann": 4237.02,
+  "np_ann": 722.01,
+  "gm_ttm": 26.3,
+  "roe": 21.4,
+  "debt": 61.9,
+  "flow_d1": 5.46,
+  "flow_d5": -21.88,
+  "flow_d10": -21.11,
+  "flow_d20": 15.74,
+  "ma5": 394.05,
+  "ma10": 394.95,
+  "ma20": 385.63,
+  "ma60": 393.16,
+  "macd_dif": 2.82,
+  "macd_dea": 1.72,
+  "macd": 2.21,
+  "kdj_k": 47.7,
+  "kdj_d": 60.27,
+  "kdj_j": 22.58,
+  "rsi6": 53.01,
+  "rsi12": 53.06
+ },
+ "sz300308": {
+  "code": "sz300308",
+  "name": "中际旭创",
+  "price": 864.58,
+  "chg": -6.01,
+  "pe": 67.7,
+  "pb": 28.42,
+  "mv": 10113.3,
+  "high52": 1416.88,
+  "low52": 209.99,
+  "pos52": 54.2,
+  "industry": "通信",
+  "business": "中际旭创股份有限公司是一家主要从事高速光模块研发、设计、制造与销售的中国公司。该公司",
+  "listed": "2012-04-10",
+  "chairman": "刘圣",
+  "shares": 11.7,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 66.74,
+    "np": 15.83,
+    "gm": 36.7
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 81.15,
+    "np": 24.12,
+    "gm": 41.5
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 102.16,
+    "np": 31.37,
+    "gm": 42.8
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 132.35,
+    "np": 36.65,
+    "gm": 44.5
+   }
+  ],
+  "rev_ann": 382.4,
+  "np_ann": 107.97,
+  "gm_ttm": 42.0,
+  "roe": 36.3,
+  "debt": 30.2,
+  "flow_d1": -72.42,
+  "flow_d5": -33.48,
+  "flow_d10": -90.72,
+  "flow_d20": -151.57,
+  "ma5": 941.84,
+  "ma10": 923.67,
+  "ma20": 1003.99,
+  "ma60": 1118.98,
+  "macd_dif": -60.74,
+  "macd_dea": -54.43,
+  "macd": -12.62,
+  "kdj_k": 43.75,
+  "kdj_d": 44.63,
+  "kdj_j": 41.98,
+  "rsi6": 34.16,
+  "rsi12": 38.27
+ },
+ "sh600487": {
+  "code": "sh600487",
+  "name": "亨通光电",
+  "price": 59.62,
+  "chg": 0.17,
+  "pe": 45.5,
+  "pb": 4.54,
+  "mv": 1470.5,
+  "high52": 125.16,
+  "low52": 17.25,
+  "pos52": 39.3,
+  "industry": "通信",
+  "business": "通信网络和能源互联领域高端技术、产品研发生产及系统集成服务,全球海缆通信网络的建设业",
+  "listed": "2003-08-22",
+  "chairman": "张建峰",
+  "shares": 24.66,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 132.68,
+    "np": 5.57,
+    "gm": 13.6
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 187.81,
+    "np": 10.56,
+    "gm": 13.6
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 175.72,
+    "np": 7.63,
+    "gm": 12.9
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 172.34,
+    "np": 3.04,
+    "gm": 9.9
+   }
+  ],
+  "rev_ann": 668.55,
+  "np_ann": 26.8,
+  "gm_ttm": 12.5,
+  "roe": 8.4,
+  "debt": 51.7,
+  "flow_d1": -1.69,
+  "flow_d5": 28.56,
+  "flow_d10": 20.0,
+  "flow_d20": -52.01,
+  "ma5": 55.99,
+  "ma10": 52.19,
+  "ma20": 56.29,
+  "ma60": 79.77,
+  "macd_dif": -6.89,
+  "macd_dea": -9.0,
+  "macd": 4.22,
+  "kdj_k": 76.03,
+  "kdj_d": 56.74,
+  "kdj_j": 114.59,
+  "rsi6": 67.88,
+  "rsi12": 47.36
+ },
+ "sh601899": {
+  "code": "sh601899",
+  "name": "紫金矿业",
+  "price": 35.45,
+  "chg": 0.85,
+  "pe": 15.3,
+  "pb": 4.78,
+  "mv": 9426.4,
+  "high52": 44.94,
+  "low52": 20.14,
+  "pos52": 61.7,
+  "industry": "有色金属",
+  "business": "矿产资源勘查和开发。",
+  "listed": "2008-04-25",
+  "chairman": "邹来昌",
+  "shares": 26.59,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 789.28,
+    "np": 101.67,
+    "gm": 22.9
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 887.83,
+    "np": 131.25,
+    "gm": 24.5
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 864.89,
+    "np": 145.72,
+    "gm": 27.2
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 948.8,
+    "np": 139.14,
+    "gm": 35.2
+   }
+  ],
+  "rev_ann": 3490.79,
+  "np_ann": 517.77,
+  "gm_ttm": 27.7,
+  "roe": 27.9,
+  "debt": 51.6,
+  "flow_d1": 1.23,
+  "flow_d5": 18.56,
+  "flow_d10": 30.58,
+  "flow_d20": 67.12,
+  "ma5": 34.26,
+  "ma10": 33.34,
+  "ma20": 31.85,
+  "ma60": 29.76,
+  "macd_dif": 1.56,
+  "macd_dea": 1.2,
+  "macd": 0.71,
+  "kdj_k": 82.65,
+  "kdj_d": 77.09,
+  "kdj_j": 93.77,
+  "rsi6": 82.16,
+  "rsi12": 73.3
+ },
+ "sh601225": {
+  "code": "sh601225",
+  "name": "陕西煤业",
+  "price": 26.04,
+  "chg": 3.99,
+  "pe": 15.6,
+  "pb": 2.47,
+  "mv": 2524.6,
+  "high52": 28.2,
+  "low52": 19.73,
+  "pos52": 74.5,
+  "industry": "煤炭",
+  "business": "煤炭开采、洗选、运输、销售以及生产服务等业务",
+  "listed": "2014-01-28",
+  "chairman": "赵福堂",
+  "shares": 96.95,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 401.62,
+    "np": 48.05,
+    "gm": 28.9
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 378.21,
+    "np": 28.34,
+    "gm": 27.3
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 401.0,
+    "np": 50.75,
+    "gm": 28.4
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 400.95,
+    "np": 40.52,
+    "gm": 31.6
+   }
+  ],
+  "rev_ann": 1581.79,
+  "np_ann": 167.65,
+  "gm_ttm": 29.1,
+  "roe": 17.3,
+  "debt": 41.8,
+  "flow_d1": 0.47,
+  "flow_d5": -2.71,
+  "flow_d10": -4.94,
+  "flow_d20": -13.86,
+  "ma5": 24.75,
+  "ma10": 24.65,
+  "ma20": 24.61,
+  "ma60": 23.84,
+  "macd_dif": 0.41,
+  "macd_dea": 0.34,
+  "macd": 0.14,
+  "kdj_k": 72.46,
+  "kdj_d": 57.37,
+  "kdj_j": 102.65,
+  "rsi6": 76.95,
+  "rsi12": 66.12
+ },
+ "sz000333": {
+  "code": "sz000333",
+  "name": "美的集团",
+  "price": 85.3,
+  "chg": 2.16,
+  "pe": 14.7,
+  "pb": 2.8,
+  "mv": 6506.9,
+  "high52": 89.5,
+  "low52": 71.02,
+  "pos52": 77.3,
+  "industry": "家用电器",
+  "business": "美的集团股份有限公司是一家主要从事家用电器的制造和销售的中国公司。该公司主要产品分为",
+  "listed": "2013-09-18",
+  "chairman": "方洪波",
+  "shares": 76.28,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 1278.39,
+    "np": 124.22,
+    "gm": 25.4
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 1232.85,
+    "np": 135.91,
+    "gm": 25.8
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 1119.33,
+    "np": 118.7,
+    "gm": 26.4
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 933.95,
+    "np": 60.62,
+    "gm": 28.4
+   }
+  ],
+  "rev_ann": 4564.52,
+  "np_ann": 439.45,
+  "gm_ttm": 26.4,
+  "roe": 19.7,
+  "debt": 61.2,
+  "flow_d1": -1.25,
+  "flow_d5": -9.65,
+  "flow_d10": -9.37,
+  "flow_d20": -25.49,
+  "ma5": 84.95,
+  "ma10": 85.96,
+  "ma20": 84.73,
+  "ma60": 79.82,
+  "macd_dif": 1.53,
+  "macd_dea": 1.9,
+  "macd": -0.73,
+  "kdj_k": 33.35,
+  "kdj_d": 43.84,
+  "kdj_j": 12.39,
+  "rsi6": 51.7,
+  "rsi12": 56.29
+ },
+ "sz002371": {
+  "code": "sz002371",
+  "name": "北方华创",
+  "price": 760.0,
+  "chg": 1.07,
+  "pe": 98.9,
+  "pb": 14.04,
+  "mv": 5515.2,
+  "high52": 968.0,
+  "low52": 325.99,
+  "pos52": 67.6,
+  "industry": "电子",
+  "business": "半导体基础产品的研发、生产、销售和技术服务。",
+  "listed": "2010-03-16",
+  "chairman": "赵晋荣",
+  "shares": 7.26,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 82.06,
+    "np": 15.81,
+    "gm": 43.0
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 79.36,
+    "np": 16.27,
+    "gm": 41.3
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 111.6,
+    "np": 19.22,
+    "gm": 40.3
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 120.52,
+    "np": 3.92,
+    "gm": 37.2
+   }
+  ],
+  "rev_ann": 393.53,
+  "np_ann": 55.22,
+  "gm_ttm": 40.1,
+  "roe": 14.6,
+  "debt": 51.1,
+  "flow_d1": 3.39,
+  "flow_d5": 5.21,
+  "flow_d10": -6.95,
+  "flow_d20": -29.07,
+  "ma5": 735.14,
+  "ma10": 709.35,
+  "ma20": 722.13,
+  "ma60": 715.79,
+  "macd_dif": -3.3,
+  "macd_dea": -6.88,
+  "macd": 7.15,
+  "kdj_k": 71.69,
+  "kdj_d": 55.9,
+  "kdj_j": 103.27,
+  "rsi6": 63.53,
+  "rsi12": 54.9
+ },
+ "sh600721": {
+  "code": "sh600721",
+  "name": "百花医药",
+  "price": 11.59,
+  "chg": 9.96,
+  "pe": 167.5,
+  "pb": 5.51,
+  "mv": 44.6,
+  "high52": 12.6,
+  "low52": 6.25,
+  "pos52": 84.1,
+  "industry": "医药生物",
+  "business": "新药早期发现与筛选、药物CMC开发、临床试验、注册申报、BE/PK、生物样品分析及药",
+  "listed": "1996-06-26",
+  "chairman": "郑彩红",
+  "shares": 3.85,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 0.97,
+    "np": 0.21,
+    "gm": 51.4
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 1.05,
+    "np": 0.05,
+    "gm": 47.5
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 0.97,
+    "np": 0.07,
+    "gm": 48.7
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 0.9,
+    "np": 0.08,
+    "gm": 33.4
+   }
+  ],
+  "rev_ann": 3.88,
+  "np_ann": 0.41,
+  "gm_ttm": 45.5,
+  "roe": 5.1,
+  "debt": 26.9,
+  "flow_d1": 0.37,
+  "flow_d5": 0.31,
+  "flow_d10": 0.27,
+  "flow_d20": 0.14,
+  "ma5": 9.67,
+  "ma10": 8.36,
+  "ma20": 7.76,
+  "ma60": 7.41,
+  "macd_dif": 0.75,
+  "macd_dea": 0.27,
+  "macd": 0.96,
+  "kdj_k": 95.04,
+  "kdj_d": 84.76,
+  "kdj_j": 115.59,
+  "rsi6": 94.29,
+  "rsi12": 84.82
+ },
+ "sh600160": {
+  "code": "sh600160",
+  "name": "巨化股份",
+  "price": 44.26,
+  "chg": 2.24,
+  "pe": 28.8,
+  "pb": 5.53,
+  "mv": 1194.9,
+  "high52": 58.0,
+  "low52": 28.02,
+  "pos52": 54.2,
+  "industry": "基础化工",
+  "business": "基础化工原料、食品包装材料、氟化工原料及后续产品的研发、生产与销售。",
+  "listed": "1998-06-26",
+  "chairman": "周黎旸",
+  "shares": 27.0,
+  "quarters": [
+   {
+    "d": "2025-03-31",
+    "rev": 58.0,
+    "np": 8.04,
+    "gm": 28.4
+   },
+   {
+    "d": "2025-06-30",
+    "rev": 75.31,
+    "np": 12.42,
+    "gm": 29.0
+   },
+   {
+    "d": "2025-09-30",
+    "rev": 70.62,
+    "np": 11.97,
+    "gm": 29.1
+   },
+   {
+    "d": "2025-12-31",
+    "rev": 65.97,
+    "np": 5.35,
+    "gm": 26.3
+   }
+  ],
+  "rev_ann": 269.91,
+  "np_ann": 37.83,
+  "gm_ttm": 28.2,
+  "roe": 18.5,
+  "debt": 38.5,
+  "flow_d1": 0.24,
+  "flow_d5": -0.16,
+  "flow_d10": -1.76,
+  "flow_d20": -10.35,
+  "ma5": 43.17,
+  "ma10": 41.24,
+  "ma20": 40.72,
+  "ma60": 41.87,
+  "macd_dif": -0.15,
+  "macd_dea": -0.77,
+  "macd": 1.23,
+  "kdj_k": 90.2,
+  "kdj_d": 81.18,
+  "kdj_j": 108.24,
+  "rsi6": 72.85,
+  "rsi12": 58.59
+ }
+};
 const STOCK_DB = [
   {code:"002837", name:"英维克", industry:"液冷温控", peers:[["300499","高澜股份"],["300990","同飞股份"],["301018","申菱环境"]],
    link:"数据中心资本开支与 AI 算力扩张上行时，液冷/温控需求同步受益；若上游铜、铝等原材料价格大涨，则成本端承压。"},
@@ -232,59 +1246,135 @@ const STOCK_DB = [
 ];
 
 const $ = id => document.getElementById(id);
-const dash = v => v == null || v === "" ? "—" : v;
-
-function peersOf(stock){
-  return [{code:stock.code, name:stock.name, self:true}].concat(stock.peers || []);
-}
+const fmt = (v, d) => v == null || v === "" ? "—" : Number(v).toFixed(d == null ? 2 : d);
+const cls = v => v == null ? "flat" : (v > 0 ? "up" : (v < 0 ? "down" : "flat"));
+const sign = v => v == null ? "" : (v > 0 ? "+" : "");
+const fullCode = c => /^6/.test(c) ? "sh" + c : "sz" + c;
+const qLabel = d => d ? d.slice(0,4) + "Q" + Math.ceil(parseInt(d.slice(5,7),10)/3) : "—";
 
 function applyStock(stock){
+  const d = DATA[fullCode(stock.code)] || {};
   document.title = stock.name + " · 个股深度分析";
   $("secOverview").textContent = stock.name + " · 公司概况与估值";
   $("secPeer").textContent = stock.industry + "同业对比";
   $("secPeerHint").textContent = stock.name + " vs " + (stock.peers || []).map(p => p[1]).join("、");
   $("linkNote").textContent = "行业联动提示：" + stock.link;
 
-  const rows = peersOf(stock).map(p =>
-    "<tr><td>" + (p.self ? "<b>" + p.name + "</b>" : p.name) + "</td><td>" + p.code + "</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>"
-  ).join("");
-  $("peerTable").innerHTML = "<tr><th>公司</th><th>代码</th><th>PE(TTM)</th><th>PB</th><th>ROE</th><th>营收增速</th><th>净利增速</th></tr>" + rows;
+  $("vPrice").textContent = fmt(d.price) + " 元";
+  const chgEl = $("vChg");
+  chgEl.textContent = d.chg == null ? "—" : sign(d.chg) + fmt(d.chg) + "%";
+  chgEl.className = "num " + cls(d.chg);
+  $("vPe").textContent = fmt(d.pe,1);
+  $("vMv").textContent = d.mv == null ? "—" : fmt(d.mv,0) + " 亿";
+
+  $("ovBusiness").textContent = d.business || "—";
+  $("ovIndustry").textContent = stock.industry + (d.industry && d.industry !== stock.industry ? " · " + d.industry : "");
+  $("ovListed").textContent = (d.listed ? d.listed + " 上市" : "—") + (d.chairman ? " · " + d.chairman : "");
+  $("ovShares").textContent = d.shares ? fmt(d.shares,0) + " 亿股" : "—";
+  $("ovPe").textContent = fmt(d.pe,1) + " 倍";
+  $("ovPb").textContent = fmt(d.pb) + " 倍";
+  $("ovMv").textContent = d.mv == null ? "—" : fmt(d.mv,0) + " 亿元";
+  $("ovRange").textContent = fmt(d.low52) + " – " + fmt(d.high52) + " 元";
+  $("posBar").style.width = (d.pos52 == null ? 0 : Math.min(100, d.pos52)) + "%";
+  $("posText").textContent = d.pos52 == null ? "—" : fmt(d.pos52,1) + "%";
+
+  const qs = d.quarters || [];
+  const maxRev = Math.max.apply(null, qs.map(q => q.rev || 0).concat([1]));
+  $("qBars").innerHTML = qs.map(q => {
+    const h = Math.max(4, Math.round((q.rev || 0) / maxRev * 100));
+    return '<div class="bar-col">' +
+      '<div class="bar-track"><div class="bar-fill" style="height:' + h + '%" title="营收 ' + fmt(q.rev,1) + ' 亿"></div></div>' +
+      '<div class="bar-v">' + fmt(q.rev,1) + ' 亿</div>' +
+      '<div class="bar-q">' + qLabel(q.d) + '</div>' +
+      '<div class="bar-s ' + cls(q.np) + '">净利 ' + fmt(q.np,2) + ' 亿</div>' +
+      '<div class="bar-s flat">毛利 ' + fmt(q.gm,1) + '%</div>' +
+      '</div>';
+  }).join("");
+  $("qNote").textContent = qs.length ? "最近四个报告期：" + qs.map(q => qLabel(q.d)).join("、") + "；2025 全年营收 " + fmt(d.rev_ann,1) + " 亿、归母净利 " + fmt(d.np_ann,2) + " 亿、毛利率(TTM) " + fmt(d.gm_ttm,1) + "%。" : "财报数据待接入。";
+
+  const npRate = d.np_ann != null && d.rev_ann ? (d.np_ann / d.rev_ann * 100).toFixed(1) : null;
+  $("finGrid").innerHTML = [
+    ["ROE（2025）", d.roe == null ? "—" : fmt(d.roe,1) + " %"],
+    ["毛利率（TTM）", fmt(d.gm_ttm,1) + " %"],
+    ["净利率（2025）", npRate == null ? "—" : npRate + " %"],
+    ["资产负债率", fmt(d.debt,1) + " %"],
+    ["2025 营收", fmt(d.rev_ann,1) + " 亿"],
+    ["2025 归母净利", fmt(d.np_ann,2) + " 亿"],
+    ["总股本", d.shares ? fmt(d.shares,0) + " 亿股" : "—"],
+    ["52周位置", d.pos52 == null ? "—" : fmt(d.pos52,1) + " %"]
+  ].map(x => '<div class="item"><div class="k">' + x[0] + '</div><div class="v">' + x[1] + '</div></div>').join("");
+
+  const f = v => v == null ? "—" : sign(v) + fmt(v) + " 亿";
+  $("fD1").textContent = f(d.flow_d1); $("fD1").className = cls(d.flow_d1);
+  $("fD5").textContent = f(d.flow_d5); $("fD5").className = cls(d.flow_d5);
+  $("fD10").textContent = f(d.flow_d10); $("fD10").className = cls(d.flow_d10);
+  $("fD20").textContent = f(d.flow_d20); $("fD20").className = cls(d.flow_d20);
+
+  $("tMA").textContent = "MA5 " + fmt(d.ma5,1) + " · MA10 " + fmt(d.ma10,1) + " · MA20 " + fmt(d.ma20,1) + " · MA60 " + fmt(d.ma60,1);
+  $("tMAx").textContent = d.ma20 == null ? "—" : (d.price >= d.ma20 ? "站上 20 日均线，短线偏强" : "仍在 20 日均线下方，中期趋势未扭转");
+  $("tMACD").textContent = "DIF " + fmt(d.macd_dif,2) + " · DEA " + fmt(d.macd_dea,2) + " · 柱 " + fmt(d.macd,2);
+  $("tMACDx").textContent = d.macd == null ? "—" : (d.macd >= 0 ? "红柱，短线动能改善" : "绿柱，短线动能偏弱");
+  $("tKDJ").textContent = "K " + fmt(d.kdj_k,1) + " · D " + fmt(d.kdj_d,1) + " · J " + fmt(d.kdj_j,1);
+  $("tKDJx").textContent = d.kdj_j == null ? "—" : (d.kdj_j >= 90 ? "J 值偏高，短线偏热" : (d.kdj_j <= 20 ? "J 值偏低，接近超卖" : "中性"));
+  $("tRSI").textContent = "RSI6 " + fmt(d.rsi6,1) + " · RSI12 " + fmt(d.rsi12,1);
+  $("tRSIx").textContent = d.rsi6 == null ? "—" : (d.rsi6 >= 70 ? "短线偏强" : (d.rsi6 <= 30 ? "短线偏弱" : "中性"));
+
+  const peerObjs = (stock.peers || []).map(x => ({code: x[0], name: x[1]}));
+  const peers = [{code: stock.code, name: stock.name}].concat(peerObjs);
+  $("peerTable").innerHTML = "<tr><th>公司</th><th>代码</th><th>最新价</th><th>今日涨跌</th><th>PE(TTM)</th><th>PB</th></tr>" +
+    peers.map(p => {
+      const pd = DATA[fullCode(p.code)] || {};
+      const self = p.code === stock.code;
+      const chgTxt = pd.chg == null ? "—" : sign(pd.chg) + fmt(pd.chg) + "%";
+      return "<tr><td>" + (self ? "<b>" + p.name + "</b>" : p.name) + "</td><td>" + p.code + "</td>" +
+        "<td>" + fmt(pd.price) + "</td><td class='" + cls(pd.chg) + "'>" + chgTxt + "</td>" +
+        "<td>" + fmt(pd.pe,1) + "</td><td>" + fmt(pd.pb) + "</td></tr>";
+    }).join("");
+
+  const hl = [], rk = [];
+  if (d.chg != null) (d.chg > 0 ? hl : rk).push("今日" + (d.chg > 0 ? "上涨" : "下跌") + " " + sign(d.chg) + fmt(d.chg) + "%");
+  if (d.flow_d5 != null) (d.flow_d5 > 0 ? hl : rk).push("近5日主力" + (d.flow_d5 > 0 ? "净流入" : "净流出") + " " + fmt(Math.abs(d.flow_d5)) + " 亿");
+  if (d.flow_d20 != null && d.flow_d20 < 0) rk.push("近20日主力净流出 " + fmt(Math.abs(d.flow_d20)) + " 亿");
+  if (d.flow_d20 != null && d.flow_d20 > 0) hl.push("近20日主力净流入 " + fmt(d.flow_d20) + " 亿");
+  if (d.pe != null) (d.pe > 100 ? rk : (d.pe < 30 ? hl : rk)).push("PE(TTM) " + fmt(d.pe,1) + " 倍" + (d.pe > 100 ? "，估值处于高位" : (d.pe < 30 ? "，估值相对合理" : "，估值不低")));
+  if (d.pb != null && d.pb > 10) rk.push("PB " + fmt(d.pb) + " 倍，市净率偏高");
+  if (d.pos52 != null) (d.pos52 < 25 ? hl : rk).push("股价处于 52 周区间 " + fmt(d.pos52,1) + "% 位置" + (d.pos52 < 25 ? "（低位区）" : ""));
+  if (d.ma20 != null) (d.price >= d.ma20 ? hl : rk).push("股价" + (d.price >= d.ma20 ? "站上" : "跌破") + " 20 日均线");
+  if (d.macd != null) (d.macd >= 0 ? hl : rk).push("MACD " + (d.macd >= 0 ? "红柱" : "绿柱"));
+  if (d.kdj_j != null && d.kdj_j >= 90) rk.push("KDJ J 值 " + fmt(d.kdj_j,1) + "，短线偏热");
+  if (d.roe != null) (d.roe >= 15 ? hl : rk).push("ROE " + fmt(d.roe,1) + "%" + (d.roe >= 15 ? "，盈利能力较好" : ""));
+  if (d.debt != null && d.debt > 65) rk.push("资产负债率 " + fmt(d.debt,1) + "%，偏高");
+  if (d.gm_ttm != null) (d.gm_ttm >= 25 ? hl : rk).push("毛利率(TTM) " + fmt(d.gm_ttm,1) + "%" + (d.gm_ttm >= 25 ? "，盈利能力尚可" : "，毛利率偏低"));
+  $("hlList").innerHTML = (hl.slice(0,5).length ? hl.slice(0,5) : ["暂无突出亮点"]).map(x => "<li>" + x + "</li>").join("");
+  $("rkList").innerHTML = (rk.slice(0,6).length ? rk.slice(0,6) : ["暂无明显风险信号"]).map(x => "<li>" + x + "</li>").join("");
+
+  const parts = [];
+  parts.push(stock.name + " 当前价 " + fmt(d.price) + " 元（" + (d.chg == null ? "—" : sign(d.chg) + fmt(d.chg) + "%") + "）。");
+  parts.push(d.pe != null ? (d.pe > 100 ? "估值处于高位（PE " + fmt(d.pe,1) + " 倍），需要业绩持续兑现来消化。" : d.pe < 30 ? "估值相对合理（PE " + fmt(d.pe,1) + " 倍）。" : "估值不低（PE " + fmt(d.pe,1) + " 倍），需结合增速判断。" ) : "");
+  parts.push(d.flow_d20 != null ? (d.flow_d20 > 0 ? "近20日主力资金净流入 " + fmt(d.flow_d20) + " 亿，资金面偏正面。" : "近20日主力资金净流出 " + fmt(Math.abs(d.flow_d20)) + " 亿，资金面偏谨慎。" ) : "");
+  parts.push(d.ma20 != null ? (d.price >= d.ma20 ? "股价站上 20 日均线，短线趋势改善。" : "股价仍在 20 日均线下方，中期趋势尚未扭转。" ) : "");
+  $("verdictText").textContent = parts.filter(Boolean).join(" ");
 }
 
 function initPicker(){
   const sel = $("stockSel");
-  sel.innerHTML = STOCK_DB.map(s => "<option value=\"" + s.code + "\">" + s.name + " " + s.code + "</option>").join("");
-  sel.value = "300750";
-  applyStock(STOCK_DB[0] && STOCK_DB.find(s => s.code === "300750") || STOCK_DB[0]);
+  sel.innerHTML = STOCK_DB.map(s => '<option value="' + s.code + '">' + s.name + ' ' + s.code + '</option>').join("");
+  sel.value = "002837";
+  applyStock(STOCK_DB.find(s => s.code === "002837") || STOCK_DB[0]);
 }
-
-function lookup(code){
-  code = (code || "").trim();
-  return STOCK_DB.find(s => s.code === code);
-}
-
+function lookup(code){ code = (code || "").trim(); return STOCK_DB.find(s => s.code === code); }
 function handleGo(){
   const code = ($("stockCode").value || "").trim() || $("stockSel").value;
   const stock = lookup(code);
-  if (stock){
-    $("stockSel").value = stock.code;
-    $("stockCode").value = "";
-    applyStock(stock);
-  } else if (/^\d{6}$/.test(code)){
-    applyStock({code:code, name:"股票" + code, industry:"自定义", peers:[],
+  if (stock){ $("stockSel").value = stock.code; $("stockCode").value = ""; applyStock(stock); }
+  else if (/^\d{6}$/.test(code)){
+    applyStock({code: code, name: "股票" + code, industry: "自定义", peers: [],
       link:"自定义标的：同业对比与行业联动暂未配置，接入数据源后补充。"});
-  } else {
-    $("stockCode").focus();
-  }
+  } else { $("stockCode").focus(); }
 }
-
-$("stockSel").addEventListener("change", () => {
-  const stock = lookup($("stockSel").value);
-  if (stock) applyStock(stock);
-});
+$("stockSel").addEventListener("change", () => { const s = lookup($("stockSel").value); if (s) applyStock(s); });
 $("stockGo").addEventListener("click", handleGo);
 $("stockCode").addEventListener("keydown", e => { if (e.key === "Enter") handleGo(); });
-
 initPicker();
 </script>
 </body>

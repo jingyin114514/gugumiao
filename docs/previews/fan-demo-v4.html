@@ -244,7 +244,7 @@ if (location.search.indexOf("open=1") !== -1){
 
 // 扇骨：深色细条从中心向外辐射（N+1 条）
 for (let i = 0; i <= N; i++){
-  const a = i * (180 / N) - 90;
+  const a = i * (180 / N) - 180;
   const rib = document.createElement("div");
   rib.className = "rib";
   rib.style.transform = `rotate(${a}deg)`;
@@ -253,7 +253,7 @@ for (let i = 0; i <= N; i++){
 
 // 扇面：每片楔形纸面 + 正立居中文字
 STOCKS.forEach((s, i) => {
-  const a = (i + 0.5) * (180 / N) - 90;
+  const a = (i + 0.5) * (180 / N) - 180;
   const blade = document.createElement("div");
   blade.className = "blade";
   blade.style.setProperty("--a", a + "deg");

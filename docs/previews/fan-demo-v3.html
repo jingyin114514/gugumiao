@@ -35,7 +35,7 @@ h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-
   position:absolute; inset:0; cursor:default; outline:none;
 }
 .fan{
-  position:absolute; left:50%; bottom:42px; width:760px; height:360px;
+  position:absolute; left:50%; bottom:42px; width:760px; height:380px;
   margin-left:-380px;
   transform-origin:50% 100%;
   transform:rotate(-90deg) scaleX(.12);
@@ -45,7 +45,7 @@ h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-
   transform:rotate(0deg) scaleX(1);
 }
 .paper{
-  position:absolute; left:0; top:0; width:760px; height:360px;
+  position:absolute; left:0; top:0; width:760px; height:380px;
   border-radius:380px 380px 0 0;
   background:
     repeating-conic-gradient(from -90deg at 50% 100%,
@@ -65,12 +65,12 @@ h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-
   pointer-events:none;
 }
 .rib{
-  position:absolute; left:380px; top:360px; width:360px; height:1px;
+  position:absolute; left:380px; top:380px; width:380px; height:1px;
   background:rgba(197,167,113,.40);
   transform-origin:left center; pointer-events:none;
 }
 .blade{
-  position:absolute; left:380px; top:360px; width:360px; height:34px;
+  position:absolute; left:380px; top:363px; width:380px; height:34px;
   transform-origin:left center; cursor:pointer; border-radius:3px;
   transition:background .12s;
 }
@@ -80,6 +80,7 @@ h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-
   font-family:"STKaiti","KaiTi",serif; font-size:13px; color:var(--ink);
   letter-spacing:3px; white-space:nowrap;
   writing-mode:vertical-rl; text-orientation:upright;
+  max-height:112px; overflow:hidden;
   opacity:0; transition:opacity .35s ease .25s;
   text-shadow:0 1px 0 rgba(255,255,255,.55);
 }
@@ -87,7 +88,7 @@ h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-
 .blade-name .cd{color:var(--muted); font-size:9.5px; letter-spacing:1px}
 
 .center-pin{
-  position:absolute; left:50%; bottom:34px; width:22px; height:22px;
+  position:absolute; left:50%; bottom:31px; width:22px; height:22px;
   margin-left:-11px; border-radius:50%;
   background:radial-gradient(circle at 34% 30%, #C99F62, var(--wood) 55%, var(--wood-dark));
   box-shadow:0 2px 5px rgba(70,50,20,.45), inset 0 0 0 2px rgba(255,255,255,.28);
@@ -144,7 +145,7 @@ h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-
 .up{color:var(--red)} .down{color:var(--green)}
 
 @media (max-width:860px){
-  .fan-wrapper{transform:scale(.78); transform-origin:top center; height:340px}
+  .fan-wrapper{transform:scale(.72); transform-origin:top center; height:310px; margin-bottom:24px}
 }
 @media (prefers-reduced-motion:reduce){
   .fan{transition:none}
@@ -207,7 +208,7 @@ const STOCKS = [
 ];
 
 const N = STOCKS.length;
-const R = 360, PIN_X = 380, PIN_Y = 360;
+const R = 380, PIN_X = 380, PIN_Y = 380;
 const LIGHT = {green:"🟢", yellow:"🟡", red:"🔴"};
 const fan = document.getElementById("fanContainer");
 const stage = document.getElementById("fanStage");
@@ -248,10 +249,10 @@ STOCKS.forEach((s, i) => {
 
   const label = document.createElement("div");
   label.className = "blade-name";
-  const lr = 232; // 文字所在的半径位置
+  const lr = 240; // 文字所在的半径位置
   label.style.left = (PIN_X + lr * Math.cos(rad)) + "px";
   label.style.top  = (PIN_Y + lr * Math.sin(rad)) + "px";
-  label.style.transform = `translate(-50%,-50%) rotate(${a - 90}deg)`;
+  label.style.transform = `translate(-50%,-50%) rotate(${a + 90}deg)`;
   label.innerHTML = `${s[1]}<span class="cd">${s[0].slice(-4)}</span>`;
   fan.appendChild(label);
 });
@@ -293,6 +294,26 @@ function showDetail(i){
 
 function hideDetail(){
   document.getElementById("detail").classList.remove("show");
+}
+
+// 几何自检：?debug=1 时输出扇骨中心与理论位置的偏差（像素）
+if (location.search.indexOf("debug=1") !== -1){
+  const dbg = [];
+  const pinEl = document.querySelector(".center-pin").getBoundingClientRect();
+  const pin = {x: pinEl.left + pinEl.width / 2, y: pinEl.top + pinEl.height / 2};
+  const paperEl = document.querySelector(".paper").getBoundingClientRect();
+  dbg.push({paper:{w:paperEl.width, h:paperEl.height, left:paperEl.left, top:paperEl.top}, pin:{x:pin.x, y:pin.y}, pinOffset:{dx:pin.x-(paperEl.left+paperEl.width/2), dy:pin.y-(paperEl.top+paperEl.height)}});
+  document.querySelectorAll(".blade").forEach((b, i) => {
+    const r = b.getBoundingClientRect();
+    const a = (i + 0.5) * (180 / N) - 90;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const actual = Math.atan2(cy - pin.y, cx - pin.x) * 180 / Math.PI;
+    dbg.push({i, expected: Math.round(a * 10) / 10, actual: Math.round(actual * 10) / 10, diff: Math.round((actual - a) * 10) / 10});
+  });
+  const pre = document.createElement("pre");
+  pre.id = "dbg";
+  pre.textContent = JSON.stringify(dbg);
+  document.body.appendChild(pre);
 }
 </script>
 </body>

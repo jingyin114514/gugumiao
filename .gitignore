@@ -5,3 +5,4 @@ __pycache__/
 data/
 _probe*.py
 .worktrees/
+config.json

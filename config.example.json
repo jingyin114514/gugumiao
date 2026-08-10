@@ -1,0 +1,84 @@
+{
+  "data": {
+    "history_file": "data/history.csv",
+    "reports_dir": "data/reports",
+    "timeout_seconds": 25,
+    "max_workers": 4,
+    "preferred_fund_flow": "auto"
+  },
+  "market_cap_tiers": [
+    {
+      "name": "小盘",
+      "max_yi": 50,
+      "threshold_wan": 3000
+    },
+    {
+      "name": "中盘",
+      "max_yi": 200,
+      "threshold_wan": 5000
+    },
+    {
+      "name": "大盘",
+      "max_yi": null,
+      "threshold_wan": 10000
+    }
+  ],
+  "valuation": {
+    "percentile_years": 3,
+    "green_max_pct": 50,
+    "red_min_pct": 80,
+    "pe_extreme": 150,
+    "min_data_points": 60
+  },
+  "fundamentals": {
+    "gross_margin_floor_pp": 2.0
+  },
+  "chips": {
+    "inst_count_up": 3,
+    "inst_count_down": -5,
+    "inst_ratio_up_pp": 0.2,
+    "inst_ratio_down_pp": -0.5
+  },
+  "capital": {
+    "green_any_inflow": false
+  },
+  "margin_keywords": {
+    "bullish": [
+      "订单",
+      "中标",
+      "政策",
+      "新品",
+      "预增",
+      "回购",
+      "涨价",
+      "扩产",
+      "放量"
+    ],
+    "bearish": [
+      "解禁",
+      "减持",
+      "暴雷",
+      "立案",
+      "诉讼",
+      "商誉减值",
+      "亏损",
+      "处罚",
+      "仲裁"
+    ]
+  },
+  "build": {
+    "min_green": 4,
+    "max_red": 0
+  },
+  "watchlist": [
+    {
+      "code": "600519",
+      "name": "示例股票",
+      "cost": null,
+      "target_weight": null,
+      "industry_light": "yellow",
+      "industry_note": "",
+      "margin_note": ""
+    }
+  ]
+}

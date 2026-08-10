@@ -74,6 +74,19 @@ h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-
 }
 .blade.sel::after{background:rgba(190,120,40,.26)}
 
+/* 叶片自身包边：悬停突起时沿外弧显示 */
+.blade-rim{
+  position:absolute; left:-380px; top:-342.5px; width:760px; height:380px;
+  border-radius:380px 380px 0 0;
+  border-top:6px solid #C9A96A;
+  box-shadow:
+    inset 0 1px 2px rgba(255,248,225,.75),
+    inset 0 -1px 0 rgba(120,85,35,.35),
+    0 2px 4px rgba(110,80,35,.30);
+  opacity:0; transition:opacity .15s; pointer-events:none;
+}
+.blade:hover .blade-rim, .blade.sel .blade-rim{opacity:1}
+
 /* 文字：正立居中，反向旋转抵消扇面 */
 .blade-text{
   position:absolute; left:253px; top:50%;
@@ -244,7 +257,6 @@ if (location.search.indexOf("open=1") !== -1){
   pinned = true;
   stage.classList.add("open");
 }
-
 // 扇骨：深色细条从中心向外辐射（N+1 条）
 for (let i = 0; i <= N; i++){
   const a = i * (180 / N) - 180;
@@ -275,9 +287,16 @@ STOCKS.forEach((s, i) => {
   const fs = Math.max(8, Math.min(16, Math.floor(44 / nmLen)));
   txt.innerHTML = `<span class="nm" style="font-size:${fs}px">${s[1]}</span>` +
                   `<span class="cd" style="font-size:${Math.max(6, fs - 3)}px">${s[0].slice(-4)}</span>`;
+  const rim = document.createElement("div");
+  rim.className = "blade-rim";
+  blade.appendChild(rim);
   blade.appendChild(txt);
   fan.appendChild(blade);
 });
+
+if (location.search.indexOf("demo=1") !== -1){
+  document.querySelectorAll(".blade")[0].classList.add("sel");
+}
 
 function select(i, blade){
   document.querySelectorAll(".blade.sel").forEach(b => b.classList.remove("sel"));

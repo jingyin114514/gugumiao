@@ -394,6 +394,7 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .fan-scroll{overflow-x:auto;padding-bottom:6px}
 .fan-stage{position:relative;height:400px;cursor:default;outline:none}
 .fan,.fan-rim{position:absolute;left:50%;bottom:14px;width:760px;height:380px;margin-left:-380px;transform-origin:50% 100%;transform:rotate(-90deg) scaleX(.1);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.fan-stage:hover .fan,.fan-stage:hover .fan-rim,
 .fan-stage.open .fan,.fan-stage.open .fan-rim{transform:rotate(0deg) scaleX(1)}
 .fan-rim{border-radius:380px 380px 0 0;border:1px solid rgba(31,41,55,.14);border-bottom:none;pointer-events:none;z-index:6}
 .blade{position:absolute;left:380px;top:342.5px;width:380px;height:75px;transform-origin:left center;transform:rotate(var(--a,0deg));clip-path:path("M 0 37.5 L 378.17 0.254 A 380 380 0 0 1 378.17 74.746 Z");background:repeating-linear-gradient(0deg,rgba(31,41,55,.025) 0 1px,transparent 1px 6px),#fff;cursor:pointer;z-index:1;transition:transform .2s ease-in-out}
@@ -480,7 +481,9 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
     <div class="cards" id="cards"></div>
     <div class="fan-view hidden" id="fanView">
       <div class="fan-scroll">
-        <div class="fan-stage" id="fanStage" tabindex="0">
+        <div class="fan-stage" id="fanStage" tabindex="0"
+             onmouseenter="hoverFan(true)" onmouseleave="hoverFan(false)"
+             onfocus="hoverFan(true)" onblur="hoverFan(false)">
           <div class="fan-rim"></div>
           <div class="fan" id="fanContainer"></div>
           <div class="center-pin"></div>
@@ -488,7 +491,7 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
       </div>
       <div class="fan-hint">
         <button class="toggle" onclick="toggleFan()">展开 / 合拢</button>
-        <span>悬停扇叶凸起 · 点击查看详情</span>
+        <span>悬停展开 · 移开合拢 · 点击查看详情</span>
       </div>
     </div>
   </section>
@@ -632,8 +635,8 @@ function setView(v){
   } else {
     $("fanView").classList.remove("hidden");
     if (!fanBuilt){ buildFan(); fanBuilt = true; }
-    fanPinned = true;
-    $("fanStage").classList.add("open");
+    fanPinned = false;
+    $("fanStage").classList.remove("open");
   }
   $("cards").classList.toggle("hidden", !isCards);
   $("viewCards").classList.toggle("active", isCards);
@@ -643,6 +646,11 @@ function setView(v){
 function toggleFan(){
   fanPinned = !fanPinned;
   $("fanStage").classList.toggle("open", fanPinned);
+}
+
+function hoverFan(on){
+  if (fanPinned) return;
+  $("fanStage").classList.toggle("open", on);
 }
 
 function buildFan(){

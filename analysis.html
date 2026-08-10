@@ -43,6 +43,14 @@ header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdro
 .status.ok{color:var(--green-deep);background:var(--green-bg);border-color:var(--green-line)}
 .status.err{color:var(--red-deep);background:var(--red-bg);border-color:var(--red-line)}
 .status.loading{color:var(--amber-deep);background:var(--amber-bg);border-color:var(--amber-line)}
+.moat{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--radius-md);padding:12px 14px;background:#FFFDF7;margin-bottom:12px}
+.moat-badge{background:var(--amber-bg);color:var(--amber-deep);border:1px solid var(--amber-line);border-radius:999px;padding:4px 12px;font-weight:700;font-size:13px}
+.moat-note{color:var(--ink);font-weight:600;font-size:13px}
+.moat p{flex-basis:100%;font-size:12.5px;color:var(--muted);margin:0}
+.tag{padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.tag.good{background:var(--green-bg);color:var(--green-deep);border:1px solid var(--green-line)}
+.tag.warn{background:var(--amber-bg);color:var(--amber-deep);border:1px solid var(--amber-line)}
+.tag.bad{background:var(--red-bg);color:var(--red-deep);border:1px solid var(--red-line)}
 main{max-width:1080px;margin:0 auto;padding:20px}
 .banner{background:var(--amber-bg);color:var(--amber-deep);border:1px solid var(--amber-line);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12.5px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
@@ -172,7 +180,13 @@ footer{max-width:1080px;margin:0 auto;padding:18px 20px 32px;color:var(--muted);
   </section>
 
   <section class="panel">
-    <h2><span class="no">六</span>亮点与风险<span class="hint">根据当前数据自动归纳，仅供参考</span></h2>
+  <section class="panel">
+    <h2><span class="no">六</span>护城河评级与十分钟测试<span class="hint">《股市真规则》框架 · 定性数据（部分股票待补充）</span></h2>
+    <div class="moat" id="moatBox"></div>
+    <div class="tbl-wrap"><table id="test9Table"><tr><th>#</th><th>测试问题</th><th>公司表现</th><th>结果</th></tr></table></div>
+  </section>
+  <section class="panel">
+    <h2><span class="no">七</span>亮点与风险<span class="hint">根据当前数据自动归纳，仅供参考</span></h2>
     <div class="two">
       <div class="col good"><h3>亮点</h3><ul id="hlList"><li>—</li></ul></div>
       <div class="col bad"><h3>风险</h3><ul id="rkList"><li>—</li></ul></div>
@@ -1258,6 +1272,42 @@ const sign = v => v == null ? "" : (v > 0 ? "+" : "");
 const fullCode = c => /^6/.test(c) ? "sh" + c : "sz" + c;
 const qLabel = d => d ? d.slice(0,4) + "Q" + Math.ceil(parseInt(d.slice(5,7),10)/3) : "—";
 
+const QUAL = {
+  "002837": {
+    moat: "窄护城河",
+    moatNote: "技术领先 + 客户粘性",
+    moatText: "液冷全链条技术布局（冷板/CDU/连接件），数据中心温控系统更换成本高、客户粘性强；但毛利率逐年下滑、台资竞争对手（AVC/CoolerMaster）在英伟达链份额领先，护城河宽度有限，技术优势可持续性约 3-5 年。",
+    test9: [
+      ["公司一直不断地赚取营业利润吗？", "2021-2025 年连续 5 年盈利，归母净利从 2.05 亿增至 5.22 亿", "通过"],
+      ["公司能从经营活动中持续不断地产生现金流吗？", "年度经营现金流波动大（+1.8~+4.8 亿），TTM 为 -0.58 亿（负值），Q1 季节性大幅流出", "勉强"],
+      ["ROE 保持 10% 以上且有合理杠杆？", "ROE 14-17%（>10%），D/E=1.24（合理区间），财务费用极低", "通过"],
+      ["盈利增长协调一致还是飘忽不定？", "营收 CAGR≈27%（稳定），但净利增速波动大（15%-37%），2025 年净利增速(15%)远低于营收增速(32%)", "勉强"],
+      ["资产负债表清白吗？", "商誉连续减值（2.49亿→0.60亿），应收账款占营收 51.5%（回款约 168 天），存货快速增长", "关注"],
+      ["公司产生自由现金流吗？", "FCFF 5 年中有 3 年为负（-1.33/+1.57/+1.96/-1.13/-0.04 亿），5 年均值仅 0.21 亿，FCF/销售 < 0%", "不通过"],
+      ["还有多少“其他”（非经常性损益）？", "非经常性损益占归母净利比例约 15-20%（政府补贴为主），占比可接受", "通过"],
+      ["发行在外的股票数量在过去几年明显增长了吗？", "股本从 3.34 亿股(2021)增至 12.74 亿股(2025)，增幅 281%，年均稀释约 40%，EPS 4 年仅增 12.5%", "不通过"],
+      ["做一个大致的 DCF 估值", "基于保守 FCF 假设内在价值约 8-15 元；基于 2028E 盈利预期折现约 36-45 元；当前 55.9 元安全边际不足", "不通过"]
+    ]
+  }
+};
+function renderMoat(stock){
+  const q = QUAL[stock.code];
+  const box = $("moatBox"), tbl = $("test9Table");
+  if (!q){
+    box.innerHTML = '<div class="flat">该股暂无护城河评级与十分钟测试数据，待深度分析补充。</div>';
+    tbl.innerHTML = "<tr><th>#</th><th>测试问题</th><th>公司表现</th><th>结果</th></tr>";
+    return;
+  }
+  box.innerHTML = '<span class="moat-badge">' + q.moat + '</span>' +
+    '<span class="moat-note">主要优势：' + q.moatNote + '</span>' +
+    '<p>' + q.moatText + '</p>';
+  tbl.innerHTML = "<tr><th>#</th><th>测试问题</th><th>公司表现</th><th>结果</th></tr>" +
+    q.test9.map((r, i) => {
+      const c = r[2] === "通过" ? "good" : (r[2] === "不通过" ? "bad" : "warn");
+      return "<tr><td>" + (i + 1) + "</td><td>" + r[0] + "</td><td>" + r[1] + "</td>" +
+        "<td><span class='tag " + c + "'>" + r[2] + "</span></td></tr>";
+    }).join("");
+}
 const LIVE = {};
 let currentStock = null;
 function merged(code){
@@ -1479,6 +1529,7 @@ function applyStock(stock){
   if (d.roe != null) (d.roe >= 15 ? hl : rk).push("ROE " + fmt(d.roe,1) + "%" + (d.roe >= 15 ? "，盈利能力较好" : ""));
   if (d.debt != null && d.debt > 65) rk.push("资产负债率 " + fmt(d.debt,1) + "%，偏高");
   if (d.gm_ttm != null) (d.gm_ttm >= 25 ? hl : rk).push("毛利率(TTM) " + fmt(d.gm_ttm,1) + "%" + (d.gm_ttm >= 25 ? "，盈利能力尚可" : "，毛利率偏低"));
+  renderMoat(stock);
   $("hlList").innerHTML = (hl.slice(0,5).length ? hl.slice(0,5) : ["暂无突出亮点"]).map(x => "<li>" + x + "</li>").join("");
   $("rkList").innerHTML = (rk.slice(0,6).length ? rk.slice(0,6) : ["暂无明显风险信号"]).map(x => "<li>" + x + "</li>").join("");
 

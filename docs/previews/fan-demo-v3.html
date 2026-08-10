@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>自选股折扇 · 预览 v3</title>
+<style>
+:root{
+  --paper:#FDF6E3; --paper-deep:#F7EDD3; --rib:#E3D5B3;
+  --ink:#3F3A33; --muted:#8A7F6D;
+  --green:#15803D; --red:#B91C1C; --amber:#B45309;
+  --wood-dark:#6E5430; --wood:#B08A52; --wood-light:#E8D5A8;
+  --card:#FFFFFF; --line:#E9E2D0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:linear-gradient(180deg,#FAF5E6 0%,#F1E7D0 100%);
+  color:var(--ink); min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; padding:28px 16px;
+}
+h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-spacing:2px; margin-bottom:4px}
+.caption{color:var(--muted); font-size:12.5px; margin-bottom:18px}
+.controls{display:flex; gap:10px; align-items:center; margin-bottom:10px}
+.controls button{
+  font:inherit; font-size:12.5px; padding:6px 14px; border-radius:999px;
+  border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer;
+  transition:all .15s;
+}
+.controls button:hover{border-color:#C9B98F; background:#FBF6E8}
+.controls .hint{color:var(--muted); font-size:11.5px}
+
+.fan-wrapper{position:relative; width:820px; max-width:96vw; height:430px; margin:0 auto}
+.fan-stage{
+  position:absolute; inset:0; cursor:default; outline:none;
+}
+.fan{
+  position:absolute; left:50%; bottom:42px; width:760px; height:360px;
+  margin-left:-380px;
+  transform-origin:50% 100%;
+  transform:rotate(-90deg) scaleX(.12);
+  transition:transform .7s cubic-bezier(.2,.75,.25,1);
+}
+.fan-stage:hover .fan, .fan-stage.open .fan{
+  transform:rotate(0deg) scaleX(1);
+}
+.paper{
+  position:absolute; left:0; top:0; width:760px; height:360px;
+  border-radius:380px 380px 0 0;
+  background:
+    repeating-conic-gradient(from -90deg at 50% 100%,
+      var(--paper) 0deg 5.625deg,
+      var(--paper-deep) 5.625deg 11.25deg);
+  border:1px solid var(--rib);
+  border-bottom:none;
+  box-shadow:inset 0 -18px 46px rgba(190,160,110,.16);
+}
+.paper::after{
+  content:""; position:absolute; inset:0;
+  border-radius:inherit;
+  background:radial-gradient(circle at 50% 100%,
+    rgba(255,255,255,0) 42%,
+    rgba(196,166,112,.10) 72%,
+    rgba(172,142,92,.18) 100%);
+  pointer-events:none;
+}
+.rib{
+  position:absolute; left:380px; top:360px; width:360px; height:1px;
+  background:rgba(197,167,113,.40);
+  transform-origin:left center; pointer-events:none;
+}
+.blade{
+  position:absolute; left:380px; top:360px; width:360px; height:34px;
+  transform-origin:left center; cursor:pointer; border-radius:3px;
+  transition:background .12s;
+}
+.blade:hover{background:rgba(139,105,52,.10)}
+.blade-name{
+  position:absolute; pointer-events:none;
+  font-family:"STKaiti","KaiTi",serif; font-size:13px; color:var(--ink);
+  letter-spacing:3px; white-space:nowrap;
+  writing-mode:vertical-rl; text-orientation:upright;
+  opacity:0; transition:opacity .35s ease .25s;
+  text-shadow:0 1px 0 rgba(255,255,255,.55);
+}
+.fan-stage:hover .blade-name, .fan-stage.open .blade-name{opacity:1}
+.blade-name .cd{color:var(--muted); font-size:9.5px; letter-spacing:1px}
+
+.center-pin{
+  position:absolute; left:50%; bottom:34px; width:22px; height:22px;
+  margin-left:-11px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #C99F62, var(--wood) 55%, var(--wood-dark));
+  box-shadow:0 2px 5px rgba(70,50,20,.45), inset 0 0 0 2px rgba(255,255,255,.28);
+  z-index:5;
+}
+.center-pin::after{
+  content:""; position:absolute; left:50%; top:50%; width:5px; height:5px;
+  margin:-2.5px 0 0 -2.5px; border-radius:50%; background:#4A3519;
+}
+
+.ribbon{
+  position:absolute; left:50%; bottom:34px; width:34px; height:250px;
+  margin-left:-17px; border-radius:7px;
+  background:linear-gradient(90deg,#C9A96A 0%, #EFDFB2 28%, #D9BC83 62%, #B8965D 100%);
+  border:1px solid #A98B55;
+  box-shadow:0 3px 8px rgba(90,65,25,.25), inset 0 0 12px rgba(120,85,35,.25);
+  display:flex; align-items:center; justify-content:center;
+  font-family:"STKaiti","KaiTi",serif; font-size:13px; letter-spacing:4px; color:#5C4A28;
+  writing-mode:vertical-rl; text-orientation:upright;
+  opacity:1; transition:opacity .3s ease;
+  z-index:4;
+}
+.fan-stage:hover .ribbon, .fan-stage.open .ribbon{opacity:0; pointer-events:none}
+
+.detail{
+  position:absolute; left:50%; bottom:0; transform:translateX(-50%);
+  width:360px; max-width:92vw; background:var(--card);
+  border:1px solid var(--line); border-radius:14px; padding:14px 16px;
+  box-shadow:0 14px 34px rgba(50,40,20,.18);
+  opacity:0; visibility:hidden; transform:translateX(-50%) translateY(8px);
+  transition:all .2s ease; z-index:6;
+}
+.detail.show{opacity:1; visibility:visible; transform:translateX(-50%) translateY(0)}
+.d-head{display:flex; align-items:baseline; gap:8px; margin-bottom:8px; padding-right:26px}
+.d-name{font-family:"STKaiti","KaiTi",serif; font-size:16px; font-weight:600}
+.d-code{color:var(--muted); font-size:11px}
+.d-price{margin-left:auto; font-weight:700; font-size:15px; font-variant-numeric:tabular-nums}
+.d-close{
+  position:absolute; top:10px; right:10px; width:24px; height:24px;
+  border-radius:50%; border:none; background:#F3F0E8; color:var(--muted);
+  cursor:pointer; font-size:13px; line-height:1; display:flex; align-items:center; justify-content:center;
+}
+.d-close:hover{background:#E9E4D8; color:var(--ink)}
+.d-lights{font-size:15px; letter-spacing:1px; margin-bottom:8px}
+.d-row{display:flex; justify-content:space-between; font-size:12.5px; padding:3px 0; color:var(--muted)}
+.d-row b{color:var(--ink); font-variant-numeric:tabular-nums}
+.verdict{
+  display:inline-block; margin-top:8px; padding:2px 10px; border-radius:999px;
+  font-size:11.5px; font-weight:600;
+}
+.v-ok{background:#ECFDF5; color:var(--green); border:1px solid #BBF7D0}
+.v-warn{background:#FFFBEB; color:var(--amber); border:1px solid #FDE68A}
+.v-bad{background:#FEF2F2; color:var(--red); border:1px solid #FECACA}
+.up{color:var(--red)} .down{color:var(--green)}
+
+@media (max-width:860px){
+  .fan-wrapper{transform:scale(.78); transform-origin:top center; height:340px}
+}
+@media (prefers-reduced-motion:reduce){
+  .fan{transition:none}
+  .blade-name,.detail{transition:none}
+}
+</style>
+</head>
+<body>
+<h1>自选股折扇</h1>
+<div class="caption">悬停展开 · 点击扇面查看灯号</div>
+<div class="controls">
+  <button onclick="togglePin()">展开 / 合拢</button>
+  <span class="hint" id="countHint"></span>
+</div>
+
+<div class="fan-wrapper">
+  <div class="fan-stage" id="fanStage" tabindex="0"
+       onmouseenter="hoverOpen(true)" onmouseleave="hoverOpen(false)"
+       onfocus="hoverOpen(true)" onblur="hoverOpen(false)">
+    <div class="fan" id="fanContainer">
+      <div class="paper"></div>
+      <!-- JS 将在这里注入项目 -->
+    </div>
+    <div class="ribbon">自选股</div>
+    <div class="center-pin">✨</div>
+    <div class="detail" id="detail">
+      <button class="d-close" onclick="hideDetail()" aria-label="关闭">×</button>
+      <div class="d-head">
+        <span class="d-name" id="dName"></span>
+        <span class="d-code" id="dCode"></span>
+        <span class="d-price" id="dPrice"></span>
+      </div>
+      <div class="d-lights" id="dLights"></div>
+      <div class="d-row"><span>最新价</span><b id="dPrice2"></b></div>
+      <div class="d-row"><span>今日涨跌</span><b id="dChg"></b></div>
+      <div class="d-row"><span>六维灯号</span><b id="dCount"></b></div>
+      <span class="verdict" id="dVerdict"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const STOCKS = [
+  ["000333","美的集团","85.30","2.16","yellowyellowredgreengreenyellow"],
+  ["000537","绿发电力","8.32","10.05","yellowyellowyellowredredyellow"],
+  ["002371","北方华创","760.00","1.07","yellowgreenredredgreenyellow"],
+  ["002837","英维克","55.24","-1.18","greenyellowyellowyellowgreenyellow"],
+  ["003018","金富科技","38.30","-3.72","yellowyellowredredyellowyellow"],
+  ["300308","中际旭创","864.58","-6.01","yellowgreenyellowgreengreenyellow"],
+  ["300602","飞荣达","36.20","-2.95","greengreenyellowredyellowyellow"],
+  ["300750","宁德时代","393.87","1.86","yellowyellowyellowredgreenyellow"],
+  ["301018","申菱环境","89.42","3.16","yellowredredredgreenyellow"],
+  ["600160","巨化股份","44.26","2.24","yellowgreenyellowredgreenyellow"],
+  ["600487","亨通光电","59.62","0.17","yellowgreenredredredyellow"],
+  ["600721","百花医药","11.59","9.96","yellowredredyellowredyellow"],
+  ["601225","陕西煤业","26.04","3.99","yellowredyellowgreengreenyellow"],
+  ["601628","中国人寿","37.70","-2.26","yellowredgreenyellowredyellow"],
+  ["601899","紫金矿业","35.45","0.85","yellowgreenyellowgreengreenyellow"],
+  ["603259","药明康德","161.34","4.21","yellowgreenredyellowyellowyellow"]
+];
+
+const N = STOCKS.length;
+const R = 360, PIN_X = 380, PIN_Y = 360;
+const LIGHT = {green:"🟢", yellow:"🟡", red:"🔴"};
+const fan = document.getElementById("fanContainer");
+const stage = document.getElementById("fanStage");
+let pinned = false;
+
+document.getElementById("countHint").textContent = `共 ${N} 只 · 每根扇骨一只`;
+if (location.search.indexOf("open=1") !== -1){
+  pinned = true;
+  stage.classList.add("open");
+}
+
+// 扇骨分隔线（N+1 条）
+for (let i = 0; i <= N; i++){
+  const a = i * (180 / N) - 90;
+  const rib = document.createElement("div");
+  rib.className = "rib";
+  rib.style.transform = `rotate(${a}deg)`;
+  fan.appendChild(rib);
+}
+
+// 扇面（每根扇骨对应一只股票）
+STOCKS.forEach((s, i) => {
+  const a = (i + 0.5) * (180 / N) - 90;
+  const rad = a * Math.PI / 180;
+
+  const blade = document.createElement("div");
+  blade.className = "blade";
+  blade.style.transform = `rotate(${a}deg)`;
+  blade.title = `${s[1]} ${s[0]}`;
+  blade.setAttribute("role","button");
+  blade.setAttribute("tabindex","0");
+  blade.setAttribute("aria-label", `${s[1]} ${s[0]}`);
+  blade.addEventListener("click", () => showDetail(i));
+  blade.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " "){ e.preventDefault(); showDetail(i); }
+  });
+  fan.appendChild(blade);
+
+  const label = document.createElement("div");
+  label.className = "blade-name";
+  const lr = 232; // 文字所在的半径位置
+  label.style.left = (PIN_X + lr * Math.cos(rad)) + "px";
+  label.style.top  = (PIN_Y + lr * Math.sin(rad)) + "px";
+  label.style.transform = `translate(-50%,-50%) rotate(${a - 90}deg)`;
+  label.innerHTML = `${s[1]}<span class="cd">${s[0].slice(-4)}</span>`;
+  fan.appendChild(label);
+});
+
+function hoverOpen(on){
+  if (pinned) return;
+  stage.classList.toggle("open", on);
+}
+
+function togglePin(){
+  pinned = !pinned;
+  stage.classList.toggle("open", pinned);
+  if (pinned) stage.focus();
+}
+
+function showDetail(i){
+  const s = STOCKS[i];
+  const lights = s[4].split("").map(c => LIGHT[c] || "🟡").join("");
+  const g = s[4].split("").filter(c => c === "green").length;
+  const r = s[4].split("").filter(c => c === "red").length;
+  const pct = parseFloat(s[3]);
+  const cls = pct > 0 ? "up" : (pct < 0 ? "down" : "");
+  document.getElementById("dName").textContent = s[1];
+  document.getElementById("dCode").textContent = s[0];
+  document.getElementById("dPrice").textContent = s[2];
+  document.getElementById("dPrice").className = cls;
+  document.getElementById("dLights").textContent = lights;
+  document.getElementById("dPrice2").textContent = s[2] + " 元";
+  document.getElementById("dChg").textContent = (pct > 0 ? "+" : "") + pct.toFixed(2) + "%";
+  document.getElementById("dChg").className = cls;
+  document.getElementById("dCount").textContent = `绿 ${g} · 红 ${r}`;
+  const v = document.getElementById("dVerdict");
+  if (g >= 4 && r === 0){ v.textContent = "可建仓"; v.className = "verdict v-ok"; }
+  else if (r >= 2){ v.textContent = "需要关注"; v.className = "verdict v-bad"; }
+  else if (g >= 3){ v.textContent = "接近可建仓"; v.className = "verdict v-warn"; }
+  else { v.textContent = "暂不可建仓"; v.className = "verdict"; }
+  document.getElementById("detail").classList.add("show");
+}
+
+function hideDetail(){
+  document.getElementById("detail").classList.remove("show");
+}
+</script>
+</body>
+</html>

@@ -39,6 +39,10 @@ header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdro
 .picker select:focus,.picker input:focus{outline:none;border-color:var(--line-strong);box-shadow:0 0 0 3px rgba(217,119,6,.12)}
 .picker button{border:1px solid var(--line-strong);background:#fff;color:var(--ink);border-radius:var(--radius-sm);padding:7px 13px;font:inherit;font-size:13px;cursor:pointer;transition:background var(--t-fast),border-color var(--t-fast),transform var(--t-fast)}
 .picker button:hover{background:var(--bg);border-color:var(--amber);transform:translateY(-1px)}
+.status{font-size:12px;color:var(--muted);background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:5px 10px;white-space:nowrap}
+.status.ok{color:var(--green-deep);background:var(--green-bg);border-color:var(--green-line)}
+.status.err{color:var(--red-deep);background:var(--red-bg);border-color:var(--red-line)}
+.status.loading{color:var(--amber-deep);background:var(--amber-bg);border-color:var(--amber-line)}
 main{max-width:1080px;margin:0 auto;padding:20px}
 .banner{background:var(--amber-bg);color:var(--amber-deep);border:1px solid var(--amber-line);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12.5px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
@@ -100,11 +104,13 @@ footer{max-width:1080px;margin:0 auto;padding:18px 20px 32px;color:var(--muted);
       <select id="stockSel" aria-label="选择自选股"></select>
       <input id="stockCode" type="text" inputmode="numeric" maxlength="6" placeholder="或输入6位代码">
       <button id="stockGo" type="button">查看</button>
+      <button id="refreshBtn" type="button">刷新实时</button>
+      <span id="liveStatus" class="status">快照模式</span>
     </div>
   </div>
 </header>
 <main id="main">
-  <div class="banner">数据来源：WeStock Data（行情/财报/资金流/技术指标）+ akshare（估值/52周区间），数据截至 2026-08-10 收盘。切换股票即可查看实时数据。</div>
+  <div class="banner">联网实时模式：行情 / K线 / 主力资金 / 技术指标打开页面即自动联网获取；财报与 ROE 等为 2026-08-10 快照（WeStock + akshare）。离线时自动回退到快照数据。</div>
 
   <div class="stats">
     <div class="stat"><div class="num" id="vPrice">—</div><div class="lbl">最新价</div></div>
@@ -181,7 +187,7 @@ footer{max-width:1080px;margin:0 auto;padding:18px 20px 32px;color:var(--muted);
 </main>
 <footer>
   <div class="footer-quote">不怕新人入行就亏钱，就怕新人入行就挣钱，却误把运气当成实力</div>
-  <div class="footer-note">数据来源：WeStock Data / akshare · 数据截至 2026-08-10 · 仅供个人研究参考，不构成投资建议</div>
+  <div class="footer-note">行情 / 主力资金 / 技术指标联网实时获取 · 财报为 2026-08-10 快照（WeStock + akshare）· 仅供个人研究参考，不构成投资建议</div>
 </footer>
 <script>
 const DATA = {
@@ -1252,8 +1258,136 @@ const sign = v => v == null ? "" : (v > 0 ? "+" : "");
 const fullCode = c => /^6/.test(c) ? "sh" + c : "sz" + c;
 const qLabel = d => d ? d.slice(0,4) + "Q" + Math.ceil(parseInt(d.slice(5,7),10)/3) : "—";
 
+const LIVE = {};
+let currentStock = null;
+function merged(code){
+  const full = fullCode(code);
+  return Object.assign({}, DATA[full] || {}, LIVE[full] || {});
+}
+function updateLiveStatus(txt, cls){
+  const el = $("liveStatus");
+  if (el){ el.textContent = txt; el.className = "status " + (cls || ""); }
+}
+function loadScript(src){
+  return new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = () => res();
+    s.onerror = () => rej(new Error("script load failed"));
+    document.head.appendChild(s);
+  });
+}
+async function fetchQuote(codes){
+  const src = "https://qt.gtimg.cn/q=" + codes.join(",");
+  await loadScript(src);
+  codes.forEach(c => {
+    const raw = window["v_" + c];
+    if (!raw) return;
+    const f = raw.split("~");
+    LIVE[c] = Object.assign(LIVE[c] || {}, {
+      price: parseFloat(f[3]), chg: parseFloat(f[32]),
+      pe: parseFloat(f[39]), pb: parseFloat(f[46]),
+      mv: parseFloat(f[45]), turnover: parseFloat(f[38]),
+      high52: parseFloat(f[67]), low52: parseFloat(f[68]),
+      ytd: parseFloat(f[62])
+    });
+  });
+}
+function emaSeries(arr, n){
+  const k = 2 / (n + 1), out = [arr[0]];
+  for (let i = 1; i < arr.length; i++) out.push(arr[i] * k + out[i-1] * (1 - k));
+  return out;
+}
+function rsiSeries(closes, n){
+  const out = []; let g = 0, l = 0;
+  for (let i = 1; i < closes.length; i++){
+    const d = closes[i] - closes[i-1], up = Math.max(d, 0), dn = Math.max(-d, 0);
+    if (i <= n){ g += up / n; l += dn / n; }
+    else { g = (g * (n - 1) + up) / n; l = (l * (n - 1) + dn) / n; }
+    out.push(l === 0 ? 100 : 100 - 100 / (1 + g / l));
+  }
+  return out;
+}
+function computeIndicators(kl){
+  const n = Math.min(kl.length, 120);
+  const c = kl.slice(-n).map(x => x.c), h = kl.slice(-n).map(x => x.h), l = kl.slice(-n).map(x => x.l);
+  const e12 = emaSeries(c, 12), e26 = emaSeries(c, 26);
+  const dif = c.map((_, i) => e12[i] - e26[i]), dea = emaSeries(dif, 9);
+  const macd = (dif[dif.length-1] - dea[dea.length-1]) * 2;
+  let k = 50, d = 50, j = 50;
+  for (let i = 0; i < c.length; i++){
+    const from = Math.max(0, i - 8);
+    const lo9 = Math.min.apply(null, l.slice(from, i + 1));
+    const hi9 = Math.max.apply(null, h.slice(from, i + 1));
+    const rsv = hi9 === lo9 ? 50 : (c[i] - lo9) / (hi9 - lo9) * 100;
+    k = (2 * k + rsv) / 3; d = (2 * d + k) / 3; j = 3 * k - 2 * d;
+  }
+  const r6 = rsiSeries(c, 6), r12 = rsiSeries(c, 12), r24 = rsiSeries(c, 24);
+  const last = a => a[a.length-1];
+  return {
+    macd_dif: +dif[dif.length-1].toFixed(2), macd_dea: +dea[dea.length-1].toFixed(2), macd: +macd.toFixed(2),
+    kdj_k: +k.toFixed(1), kdj_d: +d.toFixed(1), kdj_j: +j.toFixed(1),
+    rsi6: +last(r6).toFixed(1), rsi12: +last(r12).toFixed(1), rsi24: +last(r24).toFixed(1)
+  };
+}
+let kcbSeq = 0;
+function fetchKline(code){
+  return new Promise((res, rej) => {
+    const cb = "__kcb" + (++kcbSeq);
+    window[cb] = data => {
+      try {
+        const node = data && data.data && data.data[code];
+        const rows = (node && (node.qfqday || node.day)) || [];
+        if (rows.length){
+          const kl = rows.map(r => ({d: r[0], o: +r[1], c: +r[2], h: +r[3], l: +r[4], v: +r[5]}));
+          const high52 = Math.max.apply(null, kl.map(x => x.h));
+          const low52 = Math.min.apply(null, kl.map(x => x.l));
+          const lastC = kl[kl.length-1].c;
+          const closes = kl.map(x => x.c);
+          const ma = n => closes.length >= n ? +(closes.slice(-n).reduce((a,b) => a+b, 0) / n).toFixed(2) : null;
+          Object.assign(LIVE[code] || (LIVE[code] = {}), {
+            kline: kl, high52, low52,
+            pos52: high52 > low52 ? +((lastC - low52) / (high52 - low52) * 100).toFixed(1) : null,
+            ma5: ma(5), ma10: ma(10), ma20: ma(20), ma60: ma(60)
+          }, computeIndicators(kl));
+        }
+        res();
+      } catch(e){ rej(e); }
+      finally { delete window[cb]; }
+    };
+    const s = document.createElement("script");
+    s.src = "https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=" + code + ",day,,,320,qfq&_callback=" + cb;
+    s.onerror = () => { delete window[cb]; rej(new Error("kline load failed")); };
+    document.head.appendChild(s);
+  });
+}
+async function fetchFund(code){
+  const secid = (/^6/.test(code.slice(2)) ? "1." : "0.") + code.slice(2);
+  const r = await fetch("https://push2.eastmoney.com/api/qt/stock/fflow/kline/get?secid=" + secid +
+    "&fields1=f1,f2,f3,f7&fields2=f51,f52&klt=1&lmt=21");
+  const j = await r.json();
+  const kl = (j.data && j.data.klines) || [];
+  const vals = kl.map(s => { const p = s.split(","); return parseFloat(p[1]) || 0; });
+  const sum = n => vals.slice(-n).reduce((a, b) => a + b, 0);
+  Object.assign(LIVE[code] || (LIVE[code] = {}), {
+    flow_d1: +(sum(1) / 1e8).toFixed(2), flow_d5: +(sum(5) / 1e8).toFixed(2),
+    flow_d10: +(sum(10) / 1e8).toFixed(2), flow_d20: +(sum(20) / 1e8).toFixed(2),
+    flowDate: kl.length ? kl[kl.length-1].split(",")[0] : ""
+  });
+}
+async function refreshAllLive(){
+  updateLiveStatus("实时更新中…", "loading");
+  const codes = STOCK_DB.map(s => fullCode(s.code));
+  const jobs = [fetchQuote(codes)];
+  codes.forEach(c => { jobs.push(fetchKline(c)); jobs.push(fetchFund(c)); });
+  const results = await Promise.allSettled(jobs);
+  const ok = results.filter(r => r.status === "fulfilled").length;
+  updateLiveStatus(ok > 0 ? "实时已更新 " + new Date().toTimeString().slice(0,5) : "实时获取失败，显示快照", ok > 0 ? "ok" : "err");
+  if (currentStock) applyStock(currentStock);
+}
 function applyStock(stock){
-  const d = DATA[fullCode(stock.code)] || {};
+  currentStock = stock;
+  const d = merged(stock.code);
   document.title = stock.name + " · 个股深度分析";
   $("secOverview").textContent = stock.name + " · 公司概况与估值";
   $("secPeer").textContent = stock.industry + "同业对比";
@@ -1323,7 +1457,7 @@ function applyStock(stock){
   const peers = [{code: stock.code, name: stock.name}].concat(peerObjs);
   $("peerTable").innerHTML = "<tr><th>公司</th><th>代码</th><th>最新价</th><th>今日涨跌</th><th>PE(TTM)</th><th>PB</th></tr>" +
     peers.map(p => {
-      const pd = DATA[fullCode(p.code)] || {};
+      const pd = merged(p.code);
       const self = p.code === stock.code;
       const chgTxt = pd.chg == null ? "—" : sign(pd.chg) + fmt(pd.chg) + "%";
       return "<tr><td>" + (self ? "<b>" + p.name + "</b>" : p.name) + "</td><td>" + p.code + "</td>" +
@@ -1375,7 +1509,9 @@ function handleGo(){
 $("stockSel").addEventListener("change", () => { const s = lookup($("stockSel").value); if (s) applyStock(s); });
 $("stockGo").addEventListener("click", handleGo);
 $("stockCode").addEventListener("keydown", e => { if (e.key === "Enter") handleGo(); });
+$("refreshBtn").addEventListener("click", refreshAllLive);
 initPicker();
+refreshAllLive();
 </script>
 </body>
 </html>

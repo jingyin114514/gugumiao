@@ -411,9 +411,10 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .blade-text .cd{color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}
 .rib{position:absolute;left:380px;top:380px;width:380px;height:1px;background:rgba(31,41,55,.08);transform-origin:left center;pointer-events:none;z-index:5}
 .center-pin{position:absolute;left:50%;bottom:7px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#8C8377;z-index:7}
-.fan-hint{display:flex;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:12px;margin-top:10px}
+.fan-hint{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;row-gap:6px;color:var(--muted);font-size:12px;margin-top:10px}
 .fan-hint .toggle{font:inherit;font-size:12px;color:var(--muted);background:none;border:none;padding:4px 8px;cursor:pointer;border-radius:6px;min-height:0;transition:color .15s,background .15s}
 .fan-hint .toggle:hover{color:var(--ink);background:rgba(31,41,55,.05)}
+.fan-hint .toggle:disabled{opacity:.4;cursor:default}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (max-width:768px){
   .stats{grid-template-columns:repeat(2,1fr)}
@@ -492,7 +493,10 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
       </div>
       <div class="fan-hint">
         <button class="toggle" onclick="toggleFan()">展开 / 合拢</button>
-        <span>悬停展开 · 移开合拢 · 点击查看详情</span>
+        <button class="toggle" id="fanPrev" onclick="fanGroupNav(-1)">‹ 上一组</button>
+        <span id="fanGroupLabel"></span>
+        <button class="toggle" id="fanNext" onclick="fanGroupNav(1)">下一组 ›</button>
+        <span>悬停展开 · 点击查看详情</span>
       </div>
     </div>
   </section>
@@ -625,6 +629,9 @@ let currentView = "cards";
 let fanBuilt = false;
 let fanPinned = true;
 let fanHideTimer = null;
+const MAX_FAN = 10;
+let fanGroup = 0;
+let fanHoverLock = false;
 
 function setView(v){
   currentView = v;
@@ -638,6 +645,8 @@ function setView(v){
     if (!fanBuilt){ buildFan(); fanBuilt = true; }
     fanPinned = false;
     $("fanStage").classList.remove("open");
+    fanHoverLock = true;
+    setTimeout(() => fanHoverLock = false, 350);
   }
   $("cards").classList.toggle("hidden", !isCards);
   $("viewCards").classList.toggle("active", isCards);
@@ -650,14 +659,20 @@ function toggleFan(){
 }
 
 function hoverFan(on){
-  if (fanPinned) return;
+  if (fanPinned || fanHoverLock) return;
   $("fanStage").classList.toggle("open", on);
 }
 
 function buildFan(){
   const fan = $("fanContainer");
   fan.innerHTML = "";
-  const n = STOCKS.length;
+  const total = STOCKS.length;
+  const groups = Math.max(1, Math.ceil(total / MAX_FAN));
+  if (fanGroup >= groups) fanGroup = groups - 1;
+  if (fanGroup < 0) fanGroup = 0;
+  const start = fanGroup * MAX_FAN;
+  const slice = STOCKS.slice(start, start + MAX_FAN);
+  const n = slice.length;
   for (let i = 0; i <= n; i++){
     const a = i * (180 / n) - 180;
     const rib = document.createElement("div");
@@ -665,8 +680,9 @@ function buildFan(){
     rib.style.transform = `rotate(${a}deg)`;
     fan.appendChild(rib);
   }
-  STOCKS.forEach((s, i) => {
-    const a = (i + 0.5) * (180 / n) - 180;
+  slice.forEach((s, j) => {
+    const gi = start + j;
+    const a = (j + 0.5) * (180 / n) - 180;
     const blade = document.createElement("div");
     blade.className = "blade";
     blade.style.setProperty("--a", a + "deg");
@@ -674,9 +690,9 @@ function buildFan(){
     blade.setAttribute("role","button");
     blade.setAttribute("tabindex","0");
     blade.setAttribute("aria-label", `${s.name} ${s.code}`);
-    blade.addEventListener("click", () => selectBlade(i, blade));
+    blade.addEventListener("click", () => selectBlade(gi, blade));
     blade.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); selectBlade(i, blade); }
+      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); selectBlade(gi, blade); }
     });
     const txt = document.createElement("div");
     txt.className = "blade-text";
@@ -690,6 +706,15 @@ function buildFan(){
     blade.appendChild(txt);
     fan.appendChild(blade);
   });
+  $("fanGroupLabel").textContent = `第 ${fanGroup + 1}/${groups} 组 · ${slice.length} 只`;
+  $("fanPrev").disabled = fanGroup <= 0;
+  $("fanNext").disabled = fanGroup >= groups - 1;
+}
+
+function fanGroupNav(d){
+  const groups = Math.max(1, Math.ceil(STOCKS.length / MAX_FAN));
+  fanGroup = Math.min(groups - 1, Math.max(0, fanGroup + d));
+  buildFan();
 }
 
 function selectBlade(i, blade){

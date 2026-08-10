@@ -54,7 +54,7 @@ h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-
     repeating-linear-gradient(0deg, rgba(120,90,40,.07) 0 1px, transparent 1px 5px),
     linear-gradient(180deg, #FDF6E3 0%, #F6EBD0 100%);
   filter:drop-shadow(0 2px 2px rgba(110,80,35,.28));
-  transition:transform .18s ease, filter .18s ease;
+  transition:transform .2s ease-in-out, filter .2s ease-in-out;
   z-index:1;
 }
 .blade::after{
@@ -74,18 +74,17 @@ h1{font-family:"STKaiti","KaiTi",serif; font-size:19px; font-weight:600; letter-
 }
 .blade.sel::after{background:rgba(190,120,40,.26)}
 
-/* 叶片自身包边：悬停突起时沿外弧显示 */
+/* 叶片自身包边：悬停突起时沿外弧显示（clip-path 圆弧带，不用 border） */
 .blade-rim{
-  position:absolute; left:-380px; top:-342.5px; width:760px; height:380px;
-  border-radius:380px 380px 0 0;
-  border-top:6px solid #C9A96A;
-  box-shadow:
-    inset 0 1px 2px rgba(255,248,225,.75),
-    inset 0 -1px 0 rgba(120,85,35,.35),
-    0 2px 4px rgba(110,80,35,.30);
-  opacity:0; transition:opacity .15s; pointer-events:none;
+  position:absolute; inset:0;
+  clip-path:path("M 376.2 0.45 L 378.17 0.254 A 380 380 0 0 1 378.17 74.746 L 376.2 74.55 A 378 378 0 0 0 376.2 0.45 Z");
+  background:#D4A017;
+  box-shadow:0 0 4px rgba(212,160,23,.75);
+  opacity:0; transition:opacity .2s ease-in-out; pointer-events:none;
 }
 .blade:hover .blade-rim, .blade.sel .blade-rim{opacity:1}
+/* 兜底发光：drop-shadow 跟随扇形轮廓（clip-path 下 outline/box-shadow 会被裁掉） */
+.blade:hover{filter:drop-shadow(0 0 3px rgba(212,160,23,.65)) drop-shadow(0 6px 6px rgba(110,80,35,.35))}
 
 /* 文字：正立居中，反向旋转抵消扇面 */
 .blade-text{

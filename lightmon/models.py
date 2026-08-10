@@ -3,7 +3,6 @@
 
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-from .pinyin_util import initial_of_name, initials_of_name
 
 
 @dataclass
@@ -115,7 +114,4 @@ def stock_to_dict(stock: StockSnapshot) -> Dict[str, Any]:
         "pnl_pct", "inst_count_chg", "inst_ratio_chg",
         "light_changes",
     ]
-    data = {key: getattr(stock, key) for key in keys}
-    data["initial"] = initial_of_name(stock.name)
-    data["pinyin_initials"] = initials_of_name(stock.name)
-    return data
+    return {key: getattr(stock, key) for key in keys}

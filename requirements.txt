@@ -4,4 +4,3 @@ pandas>=2.0.0
 
 # 备选数据源（可装可不装；akshare 全部失败时才启用，如 install 失败可删掉本行）
 yfinance>=0.2.50
-pypinyin>=0.51.0

@@ -392,7 +392,8 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .view-toggle button.active{background:var(--ink);border-color:var(--ink);color:#fff}
 .fan-view{position:relative}
 .fan-scroll{overflow-x:auto;padding-bottom:6px}
-.fan-stage{position:relative;height:400px;cursor:default;outline:none}
+.fan-stage{position:relative;height:400px;cursor:default;outline:none;transition:height .45s ease}
+.fan-stage:not(.open){height:88px}
 .fan,.fan-rim{position:absolute;left:50%;bottom:14px;width:760px;height:380px;margin-left:-380px;transform-origin:50% 100%;transform:rotate(-90deg) scaleX(.1);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
 .fan-stage:hover .fan,.fan-stage:hover .fan-rim,
 .fan-stage.open .fan,.fan-stage.open .fan-rim{transform:rotate(0deg) scaleX(1)}
@@ -405,7 +406,7 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .blade.sel::after{background:rgba(180,83,9,.08)}
 .blade-rim{position:absolute;inset:0;clip-path:path("M 376.2 0.45 L 378.17 0.254 A 380 380 0 0 1 378.17 74.746 L 376.2 74.55 A 378 378 0 0 0 376.2 0.45 Z");background:var(--amber);opacity:0;transition:opacity .2s ease-in-out;pointer-events:none}
 .blade:hover .blade-rim,.blade.sel .blade-rim{opacity:1}
-.blade-text{position:absolute;left:253px;top:50%;transform:translate(-50%,-50%) rotate(calc(-1 * var(--a,0deg)));display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.25;white-space:nowrap;color:var(--ink);pointer-events:none;max-width:48px;overflow:hidden}
+.blade-text{position:absolute;left:300px;top:50%;transform:translate(-50%,-50%) rotate(calc(-1 * var(--a,0deg)));display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.25;white-space:nowrap;color:var(--ink);pointer-events:none;max-width:56px;overflow:hidden}
 .blade-text .nm{font-weight:600}
 .blade-text .cd{color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}
 .rib{position:absolute;left:380px;top:380px;width:380px;height:1px;background:rgba(31,41,55,.08);transform-origin:left center;pointer-events:none;z-index:5}
@@ -680,7 +681,7 @@ function buildFan(){
     const txt = document.createElement("div");
     txt.className = "blade-text";
     const nmLen = [...(s.name || "")].length || 4;
-    const fs = Math.max(11, Math.min(15, Math.floor(40 / nmLen)));
+    const fs = Math.max(10, Math.min(15, Math.floor(52 / nmLen)));
     txt.innerHTML = `<span class="nm" style="font-size:${fs}px">${esc(s.name)}</span>` +
                     `<span class="cd">${esc(String(s.code).slice(-4))}</span>`;
     const rim = document.createElement("div");

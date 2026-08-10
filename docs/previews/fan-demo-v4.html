@@ -78,11 +78,11 @@ h1{font-size:15px; font-weight:600; letter-spacing:4px; margin-bottom:8px}
 
 /* 文字：正立居中 */
 .blade-text{
-  position:absolute; left:253px; top:50%;
+  position:absolute; left:300px; top:50%;
   transform:translate(-50%,-50%) rotate(calc(-1 * var(--a, 0deg)));
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   text-align:center; line-height:1.25; white-space:nowrap;
-  color:var(--ink); pointer-events:none; max-width:48px; overflow:hidden;
+  color:var(--ink); pointer-events:none; max-width:56px; overflow:hidden;
 }
 .blade-text .nm{font-weight:600}
 .blade-text .cd{color:var(--muted); font-size:10px; font-variant-numeric:tabular-nums}
@@ -239,7 +239,7 @@ STOCKS.forEach((s, i) => {
   const txt = document.createElement("div");
   txt.className = "blade-text";
   const nmLen = [...s[1]].length;
-  const fs = Math.max(11, Math.min(15, Math.floor(40 / nmLen)));
+  const fs = Math.max(10, Math.min(15, Math.floor(52 / nmLen)));
   txt.innerHTML = `<span class="nm" style="font-size:${fs}px">${s[1]}</span>` +
                   `<span class="cd">${s[0].slice(-4)}</span>`;
   blade.appendChild(document.createElement("div")).className = "blade-rim";

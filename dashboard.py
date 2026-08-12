@@ -306,20 +306,20 @@ button{font:inherit;border:1px solid transparent;border-radius:8px;padding:7px 1
   transition:box-shadow var(--transition),border var(--transition),background-color var(--transition),opacity .2s;
 }
 .u-btn::before{content:"";position:absolute;top:calc(0px - var(--padding));left:calc(0px - var(--padding));width:calc(100% + var(--padding)*2);height:calc(100% + var(--padding)*2);border-radius:calc(var(--border-radius) + var(--padding));pointer-events:none;background-image:linear-gradient(0deg,#0004,#000a);z-index:-1;transition:box-shadow var(--transition),filter var(--transition);box-shadow:0 -8px 8px -6px #0000 inset,0 -16px 16px -8px #00000000 inset,1px 1px 1px #fff2,2px 2px 2px #fff1,-1px -1px 1px #0002,-2px -2px 2px #0001}
-.u-btn::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;border-radius:inherit;pointer-events:none;background-image:linear-gradient(0deg,#fff,hsl(var(--highlight-color-hue),100%,70%),hsla(var(--highlight-color-hue),100%,70%,50%),8%,transparent);background-position:0 0;opacity:0;transition:opacity var(--transition),filter var(--transition)}
+.u-btn::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;border-radius:inherit;pointer-events:none;background-image:linear-gradient(to top,hsla(var(--highlight-color-hue),92%,44%,.80) 0%,hsla(var(--highlight-color-hue),94%,50%,.46) 26%,hsla(var(--highlight-color-hue),96%,58%,.22) 40%,transparent 52%);background-position:0 0;opacity:0;transition:opacity var(--transition),filter var(--transition)}
 .u-btn .u-label{position:relative;display:inline-block;color:#fff5;animation:u-letter 2s ease-in-out infinite;transition:color var(--transition),text-shadow var(--transition)}
 @keyframes u-letter{50%{text-shadow:0 0 3px #fff8;color:#fff}}
 .u-btn .u-ico{height:16px;width:16px;fill:#e8e8e8;animation:u-flicker 2s linear infinite;animation-delay:.5s;filter:drop-shadow(0 0 2px #fff9);transition:fill var(--transition),filter var(--transition),opacity var(--transition);flex-shrink:0}
 @keyframes u-flicker{50%{opacity:.3}}
-.u-btn:hover{border:1px solid hsla(var(--highlight-color-hue),100%,80%,40%)}
-.u-btn:hover::before{box-shadow:0 -8px 8px -6px #fffa inset,0 -16px 16px -8px hsla(var(--highlight-color-hue),100%,70%,30%) inset,1px 1px 1px #fff2,2px 2px 2px #fff1,-1px -1px 1px #0002,-2px -2px 2px #0001}
-.u-btn:hover::after{opacity:1;mask-image:linear-gradient(0deg,#fff,transparent)}
-.u-btn:hover .u-label{color:#fff;text-shadow:0 0 3px hsla(var(--highlight-color-hue),100%,70%)}
-.u-btn:hover .u-ico{fill:#fff;filter:drop-shadow(0 0 3px hsl(var(--highlight-color-hue),100%,70%)) drop-shadow(0 -4px 6px #0009);animation:none}
-.u-btn:focus-visible{outline:2px solid hsla(var(--highlight-color-hue),100%,70%);outline-offset:2px}
-.u-btn:active{border:1px solid hsla(var(--highlight-color-hue),100%,80%,70%);background-color:hsla(var(--highlight-color-hue),50%,20%,.5)}
-.u-btn:active::after{opacity:1;mask-image:linear-gradient(0deg,#fff,transparent);filter:brightness(200%)}
-.u-btn:active .u-label{text-shadow:0 0 1px hsla(var(--highlight-color-hue),100%,90%,90%);animation:none}
+.u-btn:hover{border:1px solid hsla(var(--highlight-color-hue),90%,62%,45%)}
+.u-btn:hover::before{box-shadow:0 -8px 8px -6px #fffa inset,0 -16px 16px -8px hsla(var(--highlight-color-hue),95%,55%,32%) inset,1px 1px 1px #fff2,2px 2px 2px #fff1,-1px -1px 1px #0002,-2px -2px 2px #0001}
+.u-btn:hover::after{opacity:1}
+.u-btn:hover .u-label{color:#fff;text-shadow:0 0 3px hsla(var(--highlight-color-hue),95%,58%,.95)}
+.u-btn:hover .u-ico{fill:#fff;filter:drop-shadow(0 0 3px hsl(var(--highlight-color-hue),95%,58%)) drop-shadow(0 -4px 6px #0009);animation:none}
+.u-btn:focus-visible{outline:2px solid hsla(var(--highlight-color-hue),95%,58%,.85);outline-offset:2px}
+.u-btn:active{border:1px solid hsla(var(--highlight-color-hue),95%,62%,75%);background-color:hsla(var(--highlight-color-hue),60%,18%,.55)}
+.u-btn:active::after{opacity:1;filter:brightness(160%)}
+.u-btn:active .u-label{text-shadow:0 0 1px hsla(var(--highlight-color-hue),100%,80%,90%);animation:none}
 .u-btn:disabled{opacity:.5;cursor:wait}
 .u-btn--icon{padding:.3em;width:32px;height:32px;min-height:32px;border-radius:50%}
 .u-btn--icon .u-label{animation:none;font-size:14px;line-height:1}

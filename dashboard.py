@@ -334,10 +334,8 @@ button{font:inherit;border:1px solid transparent;border-radius:8px;padding:7px 1
 }
 .u-btn::before{content:"";position:absolute;top:calc(0px - var(--padding));left:calc(0px - var(--padding));width:calc(100% + var(--padding)*2);height:calc(100% + var(--padding)*2);border-radius:calc(var(--border-radius) + var(--padding));pointer-events:none;background-image:linear-gradient(0deg,#0004,#000a);z-index:-1;transition:box-shadow var(--transition),filter var(--transition);box-shadow:0 -8px 8px -6px #0000 inset,0 -16px 16px -8px #00000000 inset,1px 1px 1px #fff2,2px 2px 2px #fff1,-1px -1px 1px #0002,-2px -2px 2px #0001}
 .u-btn::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;border-radius:inherit;pointer-events:none;background-image:linear-gradient(to top,hsla(var(--highlight-color-hue),92%,44%,.80) 0%,hsla(var(--highlight-color-hue),94%,50%,.46) 26%,hsla(var(--highlight-color-hue),96%,58%,.22) 40%,transparent 52%);background-position:0 0;opacity:0;transition:opacity var(--transition),filter var(--transition)}
-.u-btn .u-label{position:relative;display:inline-block;color:#fff5;animation:u-letter 2s ease-in-out infinite;transition:color var(--transition),text-shadow var(--transition)}
-@keyframes u-letter{50%{text-shadow:0 0 3px #fff8;color:#fff}}
-.u-btn .u-ico{height:16px;width:16px;fill:#e8e8e8;animation:u-flicker 2s linear infinite;animation-delay:.5s;filter:drop-shadow(0 0 2px #fff9);transition:fill var(--transition),filter var(--transition),opacity var(--transition);flex-shrink:0}
-@keyframes u-flicker{50%{opacity:.3}}
+.u-btn .u-label{position:relative;display:inline-block;color:#fff5;transition:color var(--transition),text-shadow var(--transition)}
+.u-btn .u-ico{height:16px;width:16px;fill:#e8e8e8;filter:drop-shadow(0 0 2px #fff9);transition:fill var(--transition),filter var(--transition),opacity var(--transition);flex-shrink:0}
 .u-btn:hover{border:1px solid hsla(var(--highlight-color-hue),90%,62%,45%)}
 .u-btn:hover::before{box-shadow:0 -8px 8px -6px #fffa inset,0 -16px 16px -8px hsla(var(--highlight-color-hue),95%,55%,32%) inset,1px 1px 1px #fff2,2px 2px 2px #fff1,-1px -1px 1px #0002,-2px -2px 2px #0001}
 .u-btn:hover::after{opacity:1}
@@ -419,8 +417,8 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .footer-quote{color:var(--amber);font-weight:600;font-size:13.5px;margin-bottom:6px;font-family:var(--font-kai);letter-spacing:.5px}
 .footer-note{color:var(--muted);font-size:11px;opacity:.85}
 .hidden{display:none!important}
-.banner-info{background:var(--ink);color:#F9FAFB;border-radius:12px;padding:16px 56px 16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:4px;font-size:13px;position:relative}
-.u-loader{position:relative;width:80px;height:80px;flex-shrink:0;transform:scale(.32);transform-origin:center}
+.banner-info{background:var(--ink);color:#F9FAFB;border-radius:12px;padding:16px 56px 16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:4px;font-size:13px;position:relative;overflow:hidden}
+.u-loader{position:relative;width:80px;height:80px;flex-shrink:0;transform:translateY(-6px) scale(.32);transform-origin:center}
 .u-loader svg{position:absolute;top:0;left:0}
 .u-loader .u-head{translate:27px -30px;z-index:3;animation:u-bob 1s infinite ease-in}
 .u-loader .u-bod{translate:0 30px;z-index:3;animation:u-bob 1s infinite ease-in-out}

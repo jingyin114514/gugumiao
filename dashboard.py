@@ -6,6 +6,7 @@
 """
 
 import json
+import socket
 import sys
 import threading
 import webbrowser
@@ -950,6 +951,13 @@ def main() -> None:
     cfg = load_config("config.json")
     server = None
     url = f"http://{HOST}:{PORT}"
+    try:
+        with socket.create_connection((HOST, PORT), timeout=0.5):
+            print(f"面板已经在运行中（端口 {PORT} 已被占用），无需重复启动，直接刷新浏览器即可。")
+            webbrowser.open(url)
+            return
+    except OSError:
+        pass
     try:
         server = ThreadingHTTPServer((HOST, PORT), Handler)
     except OSError:

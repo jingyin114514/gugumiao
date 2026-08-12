@@ -295,11 +295,36 @@ header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.95);border-
 .brand .sub .ver{margin-left:8px;font-size:11px;color:var(--muted)}
 .actions{display:flex;gap:8px}
 button{font:inherit;border:1px solid transparent;border-radius:8px;padding:7px 14px;cursor:pointer;min-height:34px;transition:background .15s,border-color .15s,color .15s}
-button.primary{background:var(--ink);color:#fff;font-weight:600}
-button.primary:hover{background:#111827}
-button.primary:disabled{opacity:.5;cursor:wait}
-button.ghost{background:#fff;border-color:var(--line);color:var(--ink)}
-button.ghost:hover{border-color:var(--line-strong);background:#FBFAF7}
+.u-btn{
+  --border-radius:24px;--padding:4px;--transition:.4s;
+  --button-color:#101010;--highlight-color-hue:210deg;
+  position:relative;z-index:0;user-select:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:.5em .95em .5em 1.15em;font-family:"Poppins","Inter","Segoe UI",var(--font);
+  font-size:13px;font-weight:500;letter-spacing:.3px;color:#fff;background:var(--button-color);
+  border:1px solid #fff2;border-radius:var(--border-radius);cursor:pointer;min-height:38px;
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.2),inset 0 2px 2px rgba(255,255,255,.15),inset 0 4px 4px rgba(255,255,255,.1),inset 0 8px 8px rgba(255,255,255,.05),inset 0 16px 16px rgba(255,255,255,.05),0 -1px 1px rgba(0,0,0,.02),0 -2px 2px rgba(0,0,0,.03),0 -4px 4px rgba(0,0,0,.05),0 -8px 8px rgba(0,0,0,.06),0 -16px 16px rgba(0,0,0,.08);
+  transition:box-shadow var(--transition),border var(--transition),background-color var(--transition),opacity .2s;
+}
+.u-btn::before{content:"";position:absolute;top:calc(0px - var(--padding));left:calc(0px - var(--padding));width:calc(100% + var(--padding)*2);height:calc(100% + var(--padding)*2);border-radius:calc(var(--border-radius) + var(--padding));pointer-events:none;background-image:linear-gradient(0deg,#0004,#000a);z-index:-1;transition:box-shadow var(--transition),filter var(--transition);box-shadow:0 -8px 8px -6px #0000 inset,0 -16px 16px -8px #00000000 inset,1px 1px 1px #fff2,2px 2px 2px #fff1,-1px -1px 1px #0002,-2px -2px 2px #0001}
+.u-btn::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;border-radius:inherit;pointer-events:none;background-image:linear-gradient(0deg,#fff,hsl(var(--highlight-color-hue),100%,70%),hsla(var(--highlight-color-hue),100%,70%,50%),8%,transparent);background-position:0 0;opacity:0;transition:opacity var(--transition),filter var(--transition)}
+.u-btn .u-label{position:relative;display:inline-block;color:#fff5;animation:u-letter 2s ease-in-out infinite;transition:color var(--transition),text-shadow var(--transition)}
+@keyframes u-letter{50%{text-shadow:0 0 3px #fff8;color:#fff}}
+.u-btn .u-ico{height:16px;width:16px;fill:#e8e8e8;animation:u-flicker 2s linear infinite;animation-delay:.5s;filter:drop-shadow(0 0 2px #fff9);transition:fill var(--transition),filter var(--transition),opacity var(--transition);flex-shrink:0}
+@keyframes u-flicker{50%{opacity:.3}}
+.u-btn:hover{border:1px solid hsla(var(--highlight-color-hue),100%,80%,40%)}
+.u-btn:hover::before{box-shadow:0 -8px 8px -6px #fffa inset,0 -16px 16px -8px hsla(var(--highlight-color-hue),100%,70%,30%) inset,1px 1px 1px #fff2,2px 2px 2px #fff1,-1px -1px 1px #0002,-2px -2px 2px #0001}
+.u-btn:hover::after{opacity:1;mask-image:linear-gradient(0deg,#fff,transparent)}
+.u-btn:hover .u-label{color:#fff;text-shadow:0 0 3px hsla(var(--highlight-color-hue),100%,70%)}
+.u-btn:hover .u-ico{fill:#fff;filter:drop-shadow(0 0 3px hsl(var(--highlight-color-hue),100%,70%)) drop-shadow(0 -4px 6px #0009);animation:none}
+.u-btn:focus-visible{outline:2px solid hsla(var(--highlight-color-hue),100%,70%);outline-offset:2px}
+.u-btn:active{border:1px solid hsla(var(--highlight-color-hue),100%,80%,70%);background-color:hsla(var(--highlight-color-hue),50%,20%,.5)}
+.u-btn:active::after{opacity:1;mask-image:linear-gradient(0deg,#fff,transparent);filter:brightness(200%)}
+.u-btn:active .u-label{text-shadow:0 0 1px hsla(var(--highlight-color-hue),100%,90%,90%);animation:none}
+.u-btn:disabled{opacity:.5;cursor:wait}
+.u-btn--icon{padding:.3em;width:32px;height:32px;min-height:32px;border-radius:50%}
+.u-btn--icon .u-label{animation:none;font-size:14px;line-height:1}
+.u-btn--on-dark{--button-color:rgba(255,255,255,.10);border-color:#fff3}
+.u-btn--on-dark:hover{--button-color:rgba(255,255,255,.18)}
 main{max-width:1080px;margin:0 auto;padding:20px;scroll-margin-top:70px}
 .meta-line{color:var(--muted);font-size:12.5px;margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap}
 .meta-line b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
@@ -361,8 +386,7 @@ td .cd{color:var(--muted);font-size:12px}
 .wl-item .info{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .wl-item .code{font-weight:650;font-variant-numeric:tabular-nums}
 .wl-item .meta{color:var(--muted);font-size:12px}
-.wl-item .del{background:none;border:none;color:var(--red);cursor:pointer;font-size:15px;padding:2px 7px;border-radius:6px;min-height:0}
-.wl-item .del:hover{background:var(--red-bg)}
+.wl-item .del{width:28px;height:28px;min-height:28px;padding:0;font-size:13px}
 .banner{background:var(--red-bg);color:var(--red);border:1px solid #EAD9D6;border-radius:10px;padding:12px 16px;margin-bottom:16px}
 footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);font-size:12px;text-align:center}
 .footer-quote{color:var(--amber);font-weight:600;font-size:13.5px;margin-bottom:6px;font-family:var(--font-kai);letter-spacing:.5px}
@@ -371,8 +395,7 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .banner-info{background:var(--ink);color:#F9FAFB;border-radius:8px;padding:10px 44px 10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;position:relative}
 .banner-info .spinner-sm{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
 .banner-info .dim{color:#9CA3AF}
-.deep-cancel{position:absolute;top:50%;right:10px;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:none;background:rgba(255,255,255,.16);color:#D1D5DB;cursor:pointer;font-size:14px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;min-height:26px}
-.deep-cancel:hover{background:rgba(255,255,255,.32);color:#fff}
+.deep-cancel{position:absolute;top:50%;right:10px;transform:translateY(-50%);font-size:13px}
 #quoteStatus{margin-top:8px;font-size:12px;color:var(--muted)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(31,41,55,.35);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s}
@@ -382,40 +405,9 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .m-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-right:40px}
 .m-name{font-size:18px;font-weight:700}
 .m-code{color:var(--muted);font-size:12px}
-.m-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;border:none;background:transparent;color:var(--muted);font-size:15px;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:30px;transition:background .15s,color .15s}
-.m-close:hover{background:rgba(31,41,55,.06);color:var(--ink)}
+.m-close{position:absolute;top:12px;right:12px}
 .m-lights{font-size:20px;letter-spacing:3px;background:#F7F5F0;border-radius:8px;padding:8px 12px;margin-bottom:12px}
 .m-body .row{font-size:13px}
-/* 个股明细：卡片 / 折扇 视图切换 */
-.view-toggle{display:flex;gap:6px;margin-bottom:12px}
-.view-toggle button{padding:5px 12px;font-size:12px;border-radius:999px;min-height:28px;background:#fff;border-color:var(--line);color:var(--muted)}
-.view-toggle button:hover{color:var(--ink);border-color:var(--line-strong)}
-.view-toggle button.active{background:var(--ink);border-color:var(--ink);color:#fff}
-.fan-view{position:relative}
-.fan-scroll{overflow-x:auto;padding-bottom:6px}
-.fan-stage{position:relative;height:400px;cursor:default;outline:none;transition:height .45s ease}
-.fan-stage:not(.open){height:88px}
-.fan,.fan-rim{position:absolute;left:50%;bottom:14px;width:760px;height:380px;margin-left:-380px;transform-origin:50% 100%;transform:rotate(-90deg) scaleX(.1);transition:transform .6s cubic-bezier(.2,.7,.2,1)}
-.fan-stage:hover .fan,.fan-stage:hover .fan-rim,
-.fan-stage.open .fan,.fan-stage.open .fan-rim{transform:rotate(0deg) scaleX(1)}
-.fan-rim{border-radius:380px 380px 0 0;border:1px solid rgba(31,41,55,.14);border-bottom:none;pointer-events:none;z-index:6}
-.blade{position:absolute;left:380px;top:342.5px;width:380px;height:75px;transform-origin:left center;transform:rotate(var(--a,0deg));clip-path:path("M 0 37.5 L 378.17 0.254 A 380 380 0 0 1 378.17 74.746 Z");background:repeating-linear-gradient(0deg,rgba(31,41,55,.025) 0 1px,transparent 1px 6px),#fff;cursor:pointer;z-index:1;transition:transform .2s ease-in-out}
-.blade::after{content:"";position:absolute;inset:0;clip-path:inherit;background:transparent;pointer-events:none;transition:background .2s ease-in-out}
-.blade:hover{transform:rotate(var(--a,0deg)) scale(1.03);z-index:30}
-.blade:hover::after{background:rgba(180,83,9,.05)}
-.blade.sel{transform:rotate(var(--a,0deg)) scale(1.03);z-index:40}
-.blade.sel::after{background:rgba(180,83,9,.08)}
-.blade-rim{position:absolute;inset:0;clip-path:path("M 376.2 0.45 L 378.17 0.254 A 380 380 0 0 1 378.17 74.746 L 376.2 74.55 A 378 378 0 0 0 376.2 0.45 Z");background:var(--amber);opacity:0;transition:opacity .2s ease-in-out;pointer-events:none}
-.blade:hover .blade-rim,.blade.sel .blade-rim{opacity:1}
-.blade-text{position:absolute;left:300px;top:50%;transform:translate(-50%,-50%) rotate(calc(-1 * var(--a,0deg)));display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.25;white-space:nowrap;color:var(--ink);pointer-events:none;max-width:56px;overflow:hidden}
-.blade-text .nm{font-weight:600}
-.blade-text .cd{color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}
-.rib{position:absolute;left:380px;top:380px;width:380px;height:1px;background:rgba(31,41,55,.08);transform-origin:left center;pointer-events:none;z-index:5}
-.center-pin{position:absolute;left:50%;bottom:7px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#8C8377;z-index:7}
-.fan-hint{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;row-gap:6px;color:var(--muted);font-size:12px;margin-top:10px}
-.fan-hint .toggle{font:inherit;font-size:12px;color:var(--muted);background:none;border:none;padding:4px 8px;cursor:pointer;border-radius:6px;min-height:0;transition:color .15s,background .15s}
-.fan-hint .toggle:hover{color:var(--ink);background:rgba(31,41,55,.05)}
-.fan-hint .toggle:disabled{opacity:.4;cursor:default}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (max-width:768px){
   .stats{grid-template-columns:repeat(2,1fr)}
@@ -430,14 +422,19 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 </head>
 <body>
 <a class="skip-link" href="#main">跳到主内容</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="u-spark" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"></path>
+  </symbol>
+</svg>
 <header>
   <div class="head-inner">
     <h1 class="brand"><span class="logo"><i class="g"></i><i class="y"></i><i class="r"></i></span>
       灯号监控 <span class="sub">自选股面板<span class="ver">v2.1</span></span></h1>
     <div class="actions">
-      <button class="ghost" onclick="window.open('/report')">查看报告</button>
-      <button id="deepBtn" class="ghost" onclick="deepRefresh()">灯号分析</button>
-      <button id="refreshBtn" class="primary" onclick="loadQuotes()">刷新行情</button>
+      <button class="u-btn" onclick="window.open('/report')"><span class="u-label">查看报告</span></button>
+      <button id="deepBtn" class="u-btn" onclick="deepRefresh()"><svg class="u-ico" aria-hidden="true"><use href="#u-spark"/></svg><span class="u-label">灯号分析</span></button>
+      <button id="refreshBtn" class="u-btn" onclick="loadQuotes()"><svg class="u-ico" aria-hidden="true"><use href="#u-spark"/></svg><span class="u-label">刷新行情</span></button>
     </div>
   </div>
 </header>
@@ -446,7 +443,7 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
   <div id="deepBanner" class="banner-info hidden" role="status" aria-live="polite">
     <span class="spinner-sm"></span>
     <span id="deepText">正在抓取灯号分析数据（约1~2分钟）…</span>
-    <button class="deep-cancel" onclick="cancelDeep()" aria-label="取消等待">×</button>
+    <button class="deep-cancel u-btn u-btn--icon u-btn--on-dark" onclick="cancelDeep()" aria-label="取消等待">×</button>
   </div>
   <section class="panel">
     <h2>今日行情<span class="hint">实时 · 秒级刷新</span></h2>
@@ -460,7 +457,7 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
       <input id="wlName" placeholder="名称（可留空自动识别）">
       <input id="wlCost" placeholder="成本价（选填）" type="number" step="0.01" min="0" inputmode="decimal">
       <input id="wlWeight" placeholder="目标仓位 %（选填）" type="number" step="0.5" min="0" inputmode="decimal">
-      <button class="primary" onclick="addStock()">＋ 添加</button>
+      <button class="u-btn" onclick="addStock()"><svg class="u-ico" aria-hidden="true"><use href="#u-spark"/></svg><span class="u-label">＋ 添加</span></button>
     </div>
     <div id="wlMsg"></div>
     <div id="wlList"></div>
@@ -477,29 +474,7 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
   </section>
   <section class="panel">
     <h2>个股明细<span class="hint">点击查看详情</span></h2>
-    <div class="view-toggle">
-      <button id="viewCards" class="active" onclick="setView('cards')">卡片</button>
-      <button id="viewFan" onclick="setView('fan')">折扇</button>
-    </div>
     <div class="cards" id="cards"></div>
-    <div class="fan-view hidden" id="fanView">
-      <div class="fan-scroll">
-        <div class="fan-stage" id="fanStage" tabindex="0"
-             onmouseenter="hoverFan(true)" onmouseleave="hoverFan(false)"
-             onfocus="hoverFan(true)" onblur="hoverFan(false)">
-          <div class="fan-rim"></div>
-          <div class="fan" id="fanContainer"></div>
-          <div class="center-pin"></div>
-        </div>
-      </div>
-      <div class="fan-hint">
-        <button class="toggle" onclick="toggleFan()">展开 / 合拢</button>
-        <button class="toggle" id="fanPrev" onclick="fanGroupNav(-1)">‹ 上一组</button>
-        <span id="fanGroupLabel"></span>
-        <button class="toggle" id="fanNext" onclick="fanGroupNav(1)">下一组 ›</button>
-        <span>悬停展开 · 点击查看详情</span>
-      </div>
-    </div>
   </section>
   <section class="panel">
     <h2>建仓清单<span class="hint">绿灯 ≥ 4 且无红灯</span></h2>
@@ -516,7 +491,7 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
       <span class="m-name" id="mName"></span>
       <span class="m-code" id="mCode"></span>
       <span id="mBadge"></span>
-      <button class="m-close" id="mClose" onclick="closeModal()" aria-label="关闭详情">×</button>
+      <button class="m-close u-btn u-btn--icon" id="mClose" onclick="closeModal()" aria-label="关闭详情">×</button>
     </div>
     <div class="m-lights" id="mLights"></div>
     <div class="m-body" id="mBody"></div>
@@ -580,7 +555,6 @@ function render(s){
   $("matrix").innerHTML = rows;
   STOCKS = stocks;
   $("cards").innerHTML = stocks.map((x,i) => cardHtml(x,i)).join("");
-  if (fanBuilt) buildFan();
 
   const bHtml = buildable
     ? stocks.filter(x => x.buildable).map(x => `<div class="warn-line">→ ${esc(x.name)} ${esc(x.code)}${x.alert ? " · 状态变化 " + esc(x.alert) : ""}</div>`).join("")
@@ -624,104 +598,6 @@ function cardHtml(x, i){
 
 function cardKey(e, i){
   if (e.key === "Enter" || e.key === " "){ e.preventDefault(); showDetail(i); }
-}
-
-let currentView = "cards";
-let fanBuilt = false;
-let fanPinned = true;
-let fanHideTimer = null;
-const MAX_FAN = 10;
-let fanGroup = 0;
-let fanHoverLock = false;
-
-function setView(v){
-  currentView = v;
-  const isCards = v === "cards";
-  clearTimeout(fanHideTimer);
-  if (isCards){
-    $("fanStage").classList.remove("open");
-    fanHideTimer = setTimeout(() => $("fanView").classList.add("hidden"), 620);
-  } else {
-    $("fanView").classList.remove("hidden");
-    if (!fanBuilt){ buildFan(); fanBuilt = true; }
-    fanPinned = false;
-    $("fanStage").classList.remove("open");
-    fanHoverLock = true;
-    setTimeout(() => fanHoverLock = false, 350);
-  }
-  $("cards").classList.toggle("hidden", !isCards);
-  $("viewCards").classList.toggle("active", isCards);
-  $("viewFan").classList.toggle("active", !isCards);
-}
-
-function toggleFan(){
-  fanPinned = !fanPinned;
-  $("fanStage").classList.toggle("open", fanPinned);
-}
-
-function hoverFan(on){
-  if (fanPinned || fanHoverLock) return;
-  $("fanStage").classList.toggle("open", on);
-}
-
-function buildFan(){
-  const fan = $("fanContainer");
-  fan.innerHTML = "";
-  const total = STOCKS.length;
-  const groups = Math.max(1, Math.ceil(total / MAX_FAN));
-  if (fanGroup >= groups) fanGroup = groups - 1;
-  if (fanGroup < 0) fanGroup = 0;
-  const start = fanGroup * MAX_FAN;
-  const slice = STOCKS.slice(start, start + MAX_FAN);
-  const n = slice.length;
-  for (let i = 0; i <= n; i++){
-    const a = i * (180 / n) - 180;
-    const rib = document.createElement("div");
-    rib.className = "rib";
-    rib.style.transform = `rotate(${a}deg)`;
-    fan.appendChild(rib);
-  }
-  slice.forEach((s, j) => {
-    const gi = start + j;
-    const a = (j + 0.5) * (180 / n) - 180;
-    const blade = document.createElement("div");
-    blade.className = "blade";
-    blade.style.setProperty("--a", a + "deg");
-    blade.title = `${s.name} ${s.code}`;
-    blade.setAttribute("role","button");
-    blade.setAttribute("tabindex","0");
-    blade.setAttribute("aria-label", `${s.name} ${s.code}`);
-    blade.addEventListener("click", () => selectBlade(gi, blade));
-    blade.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " "){ e.preventDefault(); selectBlade(gi, blade); }
-    });
-    const txt = document.createElement("div");
-    txt.className = "blade-text";
-    const nmLen = [...(s.name || "")].length || 4;
-    const fs = Math.max(10, Math.min(15, Math.floor(52 / nmLen)));
-    txt.innerHTML = `<span class="nm" style="font-size:${fs}px">${esc(s.name)}</span>` +
-                    `<span class="cd">${esc(String(s.code).slice(-4))}</span>`;
-    const rim = document.createElement("div");
-    rim.className = "blade-rim";
-    blade.appendChild(rim);
-    blade.appendChild(txt);
-    fan.appendChild(blade);
-  });
-  $("fanGroupLabel").textContent = `第 ${fanGroup + 1}/${groups} 组 · ${slice.length} 只`;
-  $("fanPrev").disabled = fanGroup <= 0;
-  $("fanNext").disabled = fanGroup >= groups - 1;
-}
-
-function fanGroupNav(d){
-  const groups = Math.max(1, Math.ceil(STOCKS.length / MAX_FAN));
-  fanGroup = Math.min(groups - 1, Math.max(0, fanGroup + d));
-  buildFan();
-}
-
-function selectBlade(i, blade){
-  document.querySelectorAll(".blade.sel").forEach(b => b.classList.remove("sel"));
-  blade.classList.add("sel");
-  showDetail(i);
 }
 
 function detailRowsHtml(x){
@@ -787,7 +663,6 @@ function showDetail(i){
 }
 
 function closeModal(){
-  document.querySelectorAll(".blade.sel").forEach(b => b.classList.remove("sel"));
   const ov = $("modal");
   if (ov.classList.contains("hidden")) return;
   ov.classList.remove("open");
@@ -852,7 +727,7 @@ async function loadWatchlist(){
           <span>${esc(w.name || "")}</span>
           <span class="meta">成本 ${w.cost == null ? "--" : w.cost} · 仓位 ${w.target_weight == null ? "--" : w.target_weight}%</span>
         </span>
-        <button class="del" title="移出自选股" onclick="removeStock('${esc(w.code)}')">✕</button>
+        <button class="del u-btn u-btn--icon" title="移出自选股" onclick="removeStock('${esc(w.code)}')">✕</button>
       </div>`).join("")
     : '<span class="warn-line">尚未添加自选股。</span>';
 }
@@ -935,7 +810,6 @@ window.addEventListener("load", async () => {
   loadWatchlist();
   const s = await (await fetch("/api/status")).json();
   render(s);
-  if (location.search.indexOf("view=fan") !== -1) setView("fan");
 });
 </script>
 </body>

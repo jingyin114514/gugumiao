@@ -196,6 +196,8 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/favicon.ico":
             self.send_response(204)
             self.end_headers()
+        elif path.startswith("/static/"):
+            self._serve_static(path)
         else:
             self._json({"error": "not found"}, status=404)
 
@@ -260,6 +262,31 @@ class Handler(BaseHTTPRequestHandler):
             if files:
                 return str(files[0])
         return ""
+
+    def _serve_static(self, path: str) -> None:
+        root = (Path(__file__).resolve().parent / "static").resolve()
+        rel = path[len("/static/"):]
+        target = (root / rel).resolve()
+        if not str(target).startswith(str(root) + "\\"):
+            self._json({"error": "forbidden"}, status=403)
+            return
+        if not target.is_file():
+            self._json({"error": "not found"}, status=404)
+            return
+        suffix = target.suffix.lower()
+        if suffix == ".js":
+            ctype = "application/javascript; charset=utf-8"
+        elif suffix == ".html":
+            ctype = "text/html; charset=utf-8"
+        else:
+            ctype = "application/octet-stream"
+        body = target.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(body)
 
 
 PAGE = """<!doctype html>
@@ -392,12 +419,23 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .footer-quote{color:var(--amber);font-weight:600;font-size:13.5px;margin-bottom:6px;font-family:var(--font-kai);letter-spacing:.5px}
 .footer-note{color:var(--muted);font-size:11px;opacity:.85}
 .hidden{display:none!important}
-.banner-info{background:var(--ink);color:#F9FAFB;border-radius:8px;padding:10px 44px 10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13px;position:relative}
-.banner-info .spinner-sm{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+.banner-info{background:var(--ink);color:#F9FAFB;border-radius:12px;padding:16px 56px 16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:4px;font-size:13px;position:relative}
+.u-loader{position:relative;width:80px;height:80px;flex-shrink:0;transform:scale(.32);transform-origin:center}
+.u-loader svg{position:absolute;top:0;left:0}
+.u-loader .u-head{translate:27px -30px;z-index:3;animation:u-bob 1s infinite ease-in}
+.u-loader .u-bod{translate:0 30px;z-index:3;animation:u-bob 1s infinite ease-in-out}
+.u-loader .u-legr{translate:75px 135px;z-index:0;animation:u-rstep 1s infinite ease-in;animation-delay:.45s}
+.u-loader .u-legl{translate:30px 155px;z-index:3;animation:u-lstep 1s infinite ease-in}
+@keyframes u-bob{0%{transform:translateY(0) rotate(3deg)}5%{transform:translateY(0) rotate(3deg)}25%{transform:translateY(5px) rotate(0)}50%{transform:translateY(0) rotate(-3deg)}70%{transform:translateY(5px) rotate(0)}100%{transform:translateY(0) rotate(3deg)}}
+@keyframes u-lstep{0%{transform:translateY(0) rotate(-5deg)}33%{transform:translateY(-15px) translate(32px) rotate(35deg)}66%{transform:translateY(0) translate(25px) rotate(-25deg)}100%{transform:translateY(0) rotate(-5deg)}}
+@keyframes u-rstep{0%{transform:translateY(0) translate(0) rotate(-5deg)}33%{transform:translateY(-10px) translate(30px) rotate(35deg)}66%{transform:translateY(0) translate(20px) rotate(-25deg)}100%{transform:translateY(0) translate(0) rotate(-5deg)}}
+.u-loader #u-gnd{translate:-140px 0;rotate:10deg;z-index:-1;filter:blur(.5px) drop-shadow(1px 3px 5px #000);opacity:.35;animation:u-scroll 5s infinite linear}
+@keyframes u-scroll{0%{transform:translateY(25px) translate(50px);opacity:0}33%{opacity:.35}66%{opacity:.35}to{transform:translateY(-50px) translate(-100px);opacity:0}}
+.deep-title{font-size:15.5px;font-weight:650;color:#fff;letter-spacing:.3px;line-height:1.4}
+.deep-sub{color:#9CA3AF;font-size:12px;margin-top:3px;line-height:1.5}
 .banner-info .dim{color:#9CA3AF}
 .deep-cancel{position:absolute;top:50%;right:10px;transform:translateY(-50%);font-size:13px}
 #quoteStatus{margin-top:8px;font-size:12px;color:var(--muted)}
-@keyframes spin{to{transform:rotate(360deg)}}
 .modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(31,41,55,.35);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s}
 .modal-overlay.open{opacity:1;visibility:visible}
 .modal{position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(31,41,55,.12);width:min(620px,94vw);max-height:86vh;overflow:auto;padding:20px 22px;transform:translateY(8px);transition:transform .18s ease}
@@ -441,8 +479,11 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 <main id="main">
   <div id="bannerWrap"></div>
   <div id="deepBanner" class="banner-info hidden" role="status" aria-live="polite">
-    <span class="spinner-sm"></span>
-    <span id="deepText">正在抓取灯号分析数据（约1~2分钟）…</span>
+    <div class="u-loader" id="uLoader" aria-hidden="true"></div>
+    <div>
+      <div class="deep-title">财富正顺着网线传过来</div>
+      <div id="deepText" class="deep-sub">正在抓取灯号分析数据（约1~2分钟）…</div>
+    </div>
     <button class="deep-cancel u-btn u-btn--icon u-btn--on-dark" onclick="cancelDeep()" aria-label="取消等待">×</button>
   </div>
   <section class="panel">
@@ -683,7 +724,19 @@ document.addEventListener("keydown", e => {
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-function showDeep(on){ $("deepBanner").classList.toggle("hidden", !on); }
+async function ensureLoader(){
+  const host = $("uLoader");
+  if (!host || host.children.length) return;
+  try {
+    const r = await fetch("/static/kiwi-loader.html");
+    if (r.ok) host.innerHTML = await r.text();
+  } catch (e) {}
+}
+
+function showDeep(on){
+  if (on) ensureLoader();
+  $("deepBanner").classList.toggle("hidden", !on);
+}
 
 function fmtAmount(v){
   if (v == null) return "--";
@@ -806,6 +859,8 @@ function cancelDeep(){
 }
 
 window.addEventListener("load", async () => {
+  ensureLoader();
+  if (location.search.indexOf("loader=1") !== -1) showDeep(true);
   loadQuotes();
   loadWatchlist();
   const s = await (await fetch("/api/status")).json();

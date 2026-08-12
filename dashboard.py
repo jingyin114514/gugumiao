@@ -279,6 +279,8 @@ class Handler(BaseHTTPRequestHandler):
             ctype = "application/javascript; charset=utf-8"
         elif suffix == ".html":
             ctype = "text/html; charset=utf-8"
+        elif suffix == ".css":
+            ctype = "text/css; charset=utf-8"
         else:
             ctype = "application/octet-stream"
         body = target.read_bytes()
@@ -296,6 +298,7 @@ PAGE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>灯号监控面板</title>
+<link rel="stylesheet" href="/static/splash.css">
 <style>
 :root{
   --bg:#F6F4EF; --card:#FFFFFF;
@@ -449,6 +452,40 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 </style>
 </head>
 <body>
+<div id="splash" class="splash" aria-hidden="true">
+  <div class="bg-glow"></div>
+  <div class="bg-noise"></div>
+  <div class="dust-layer"></div>
+  <div class="doodle-layer">
+    <div class="doodle spark d1" style="top:15%;left:20%"></div>
+    <div class="doodle scratch d2" style="top:75%;left:80%"></div>
+    <div class="doodle dot d3" style="top:25%;left:75%"></div>
+    <div class="doodle spark d4" style="top:80%;left:25%"></div>
+    <div class="doodle scratch d5" style="top:45%;left:10%"></div>
+    <div class="doodle dot d6" style="top:55%;left:90%"></div>
+  </div>
+  <div class="title-stage">
+    <div class="neon-line top-line"><div class="neon-line-inner"></div></div>
+    <div class="main-title">
+      <span class="letter" data-char="T" style="--x:-8rem;--y:-7rem;--r:-45deg;--d:.1s">T</span>
+      <span class="letter" data-char="H" style="--x:-4rem;--y:8rem;--r:30deg;--d:.4s">H</span>
+      <span class="letter" data-char="I" style="--x:0rem;--y:-9rem;--r:-15deg;--d:.2s">I</span>
+      <span class="letter" data-char="N" style="--x:4rem;--y:7rem;--r:60deg;--d:.6s">N</span>
+      <span class="letter" data-char="K" style="--x:7rem;--y:-5rem;--r:-25deg;--d:.3s">K</span>
+    </div>
+    <div class="neon-line bottom-line"><div class="neon-line-inner"></div></div>
+    <div class="sub-title">
+      <span class="letter" data-char="S" style="--x:-6rem;--y:5rem;--r:20deg;--d:.8s">S</span>
+      <span class="letter" data-char="E" style="--x:-4rem;--y:-4rem;--r:-30deg;--d:1.1s">E</span>
+      <span class="letter" data-char="N" style="--x:-1rem;--y:6rem;--r:45deg;--d:.9s">N</span>
+      <span class="letter" data-char="S" style="--x:2rem;--y:-6rem;--r:-15deg;--d:1.3s">S</span>
+      <span class="letter" data-char="I" style="--x:4rem;--y:5rem;--r:35deg;--d:1.0s">I</span>
+      <span class="letter" data-char="B" style="--x:6rem;--y:-5rem;--r:-40deg;--d:1.4s">B</span>
+      <span class="letter" data-char="L" style="--x:8rem;--y:4rem;--r:10deg;--d:1.5s">L</span>
+      <span class="letter" data-char="E" style="--x:9rem;--y:-3rem;--r:-20deg;--d:1.6s">E</span>
+    </div>
+  </div>
+</div>
 <a class="skip-link" href="#main">跳到主内容</a>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="u-spark" viewBox="0 0 24 24">
@@ -786,6 +823,18 @@ function cancelDeep(){
 }
 
 window.addEventListener("load", async () => {
+  const splashEl = $("splash");
+  if (splashEl){
+    const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || location.search.indexOf("nosplash=1") !== -1){
+      splashEl.remove();
+    } else {
+      setTimeout(() => {
+        splashEl.classList.add("done");
+        setTimeout(() => splashEl.remove(), 700);
+      }, 3400);
+    }
+  }
   ensureLoader();
   if (location.search.indexOf("loader=1") !== -1) showDeep(true);
   loadQuotes();

@@ -419,7 +419,8 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .footer-note{color:var(--muted);font-size:11px;opacity:.85}
 .hidden{display:none!important}
 .banner-info{background:var(--ink);color:#F9FAFB;border-radius:12px;padding:16px 56px 16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:4px;font-size:13px;position:relative;overflow:hidden}
-.u-loader{position:relative;width:80px;height:80px;flex-shrink:0;transform:translateY(-6px) scale(.32);transform-origin:center}
+.u-loader{position:relative;width:80px;height:80px;flex-shrink:0;transform:translate(-12px,-12px) scale(.24);transform-origin:center}
+.u-loader .u-bird{transform:translate(-25px,-54px)}
 .u-loader svg{position:absolute;top:0;left:0}
 .u-loader .u-head{translate:27px -30px;z-index:3;animation:u-bob 1s infinite ease-in}
 .u-loader .u-bod{translate:0 30px;z-index:3;animation:u-bob 1s infinite ease-in-out}

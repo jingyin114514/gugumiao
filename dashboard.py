@@ -196,8 +196,6 @@ class Handler(BaseHTTPRequestHandler):
         elif path == "/favicon.ico":
             self.send_response(204)
             self.end_headers()
-        elif path.startswith("/static/"):
-            self._serve_static(path)
         else:
             self._json({"error": "not found"}, status=404)
 
@@ -263,27 +261,6 @@ class Handler(BaseHTTPRequestHandler):
                 return str(files[0])
         return ""
 
-    def _serve_static(self, path: str) -> None:
-        root = (Path(__file__).resolve().parent / "static").resolve()
-        rel = path[len("/static/"):]
-        target = (root / rel).resolve()
-        if not str(target).startswith(str(root) + "\\"):
-            self._json({"error": "forbidden"}, status=403)
-            return
-        if not target.is_file():
-            self._json({"error": "not found"}, status=404)
-            return
-        ctype = ("application/javascript; charset=utf-8"
-                 if target.suffix.lower() == ".js"
-                 else "application/octet-stream")
-        body = target.read_bytes()
-        self.send_response(200)
-        self.send_header("Content-Type", ctype)
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-cache")
-        self.end_headers()
-        self.wfile.write(body)
-
 
 PAGE = """<!doctype html>
 <html lang="zh-CN">
@@ -335,14 +312,6 @@ main{max-width:1080px;margin:0 auto;padding:20px;scroll-margin-top:70px}
 .panel h2{font-size:13.5px;font-weight:650;letter-spacing:.5px;margin-bottom:10px}
 .panel h2 .hint{color:var(--muted);font-weight:400;font-size:12px;margin-left:8px}
 .tbl-wrap{overflow-x:auto}
-.wave-wrap{position:relative;height:250px;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:12px;background:linear-gradient(180deg,#FBFAF6 0%,#F5F1E8 100%)}
-.wave-canvas{display:block;width:100%;height:100%;touch-action:pan-y;cursor:crosshair}
-.wave-hint{position:absolute;left:12px;bottom:8px;font-size:11px;color:var(--muted);letter-spacing:.3px;pointer-events:none;user-select:none}
-.wave-tip{position:absolute;top:0;left:0;z-index:5;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 18px rgba(31,41,55,.12);padding:7px 11px;font-size:12px;line-height:1.55;pointer-events:none;opacity:0;transition:opacity .15s ease;max-width:230px}
-.wave-tip.show{opacity:1}
-.wave-tip .t-name{font-weight:650;white-space:nowrap}
-.wave-tip .t-code{color:var(--muted);font-weight:400;font-size:11px;margin-left:4px}
-.wave-tip .t-meta{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 th,td{border-bottom:1px solid #ECE8DE;padding:8px 10px;text-align:center;white-space:nowrap}
 th{font-size:12px;color:#4B5563;font-weight:600;background:#F4F1EA}
@@ -448,7 +417,6 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 .fan-hint .toggle:hover{color:var(--ink);background:rgba(31,41,55,.05)}
 .fan-hint .toggle:disabled{opacity:.4;cursor:default}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-@media (max-width:640px){.wave-wrap{height:180px}}
 @media (max-width:768px){
   .stats{grid-template-columns:repeat(2,1fr)}
   .panel{padding:14px}
@@ -465,7 +433,7 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
 <header>
   <div class="head-inner">
     <h1 class="brand"><span class="logo"><i class="g"></i><i class="y"></i><i class="r"></i></span>
-      灯号监控 <span class="sub">自选股面板<span class="ver">v2.2</span></span></h1>
+      灯号监控 <span class="sub">自选股面板<span class="ver">v2.1</span></span></h1>
     <div class="actions">
       <button class="ghost" onclick="window.open('/report')">查看报告</button>
       <button id="deepBtn" class="ghost" onclick="deepRefresh()">灯号分析</button>
@@ -482,12 +450,6 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
   </div>
   <section class="panel">
     <h2>今日行情<span class="hint">实时 · 秒级刷新</span></h2>
-    <div class="wave-wrap" id="waveGrid">
-      <canvas class="wave-canvas" id="waveCanvas" role="img"
-              aria-label="自选股行情波浪图：每个柱体对应一只自选股，颜色与高度反映当日涨跌，点击柱体查看个股详情"></canvas>
-      <div class="wave-hint">每个柱体一只自选股 · 划过拨动水波 · 点击查看详情</div>
-      <div class="wave-tip" id="waveTip" role="tooltip"></div>
-    </div>
     <div class="tbl-wrap"><table id="quoteTable"></table></div>
     <div id="quoteStatus"></div>
   </section>
@@ -564,8 +526,6 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
   <div class="footer-quote">不怕新人入行就亏钱，就怕新人入行就挣钱，却误把运气当成实力</div>
   <div class="footer-note">数据来自公开接口，仅供个人研究参考，不构成投资建议 · 灯号框架</div>
 </footer>
-<script src="/static/three.min.js"></script>
-<script src="/static/wave.js"></script>
 <script>
 const DIMS = [
   ["industry","产业"],["fundamental","基本面"],["valuation","估值"],
@@ -867,7 +827,6 @@ function renderQuotes(q){
     </tr>`).join("");
   $("quoteTable").innerHTML =
     `<tr><th class="name-cell">股票</th><th>最新价</th><th>涨跌幅</th><th>成交额</th><th>换手率</th><th>总市值</th></tr>` + rows;
-  if (window.setWaveQuotes) window.setWaveQuotes(q.quotes);
   const ok = q.quotes && q.quotes.length;
   $("quoteStatus").textContent = ok ? `更新于 ${q.time} · 数据源 ${q.source}` : "行情加载失败，或自选股暂无行情";
 }

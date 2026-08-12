@@ -403,16 +403,6 @@ td .cd{color:var(--muted);font-size:12px}
 .range-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
 .note{font-size:12px;color:#5B564E;background:#F7F5F0;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:10px}
 .warn-line{color:var(--amber);font-size:12.5px;padding:4px 0}
-.add-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:12px}
-.add-form input{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;color:var(--ink);background:#fff;min-width:0}
-.add-form input:focus{outline:none;border-color:var(--line-strong);box-shadow:0 0 0 3px rgba(180,83,9,.10)}
-.add-form button{white-space:nowrap}
-#wlMsg{color:var(--red);font-size:12px;margin-bottom:8px;min-height:0}
-.wl-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;background:#FBFAF7;font-size:13px}
-.wl-item .info{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.wl-item .code{font-weight:650;font-variant-numeric:tabular-nums}
-.wl-item .meta{color:var(--muted);font-size:12px}
-.wl-item .del{width:28px;height:28px;min-height:28px;padding:0;font-size:13px}
 .banner{background:var(--red-bg);color:var(--red);border:1px solid #EAD9D6;border-radius:10px;padding:12px 16px;margin-bottom:16px}
 footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);font-size:12px;text-align:center}
 .footer-quote{color:var(--amber);font-weight:600;font-size:13.5px;margin-bottom:6px;font-family:var(--font-kai);letter-spacing:.5px}
@@ -490,18 +480,6 @@ footer{max-width:1080px;margin:0 auto;padding:22px 20px 34px;color:var(--muted);
     <h2>今日行情<span class="hint">实时 · 秒级刷新</span></h2>
     <div class="tbl-wrap"><table id="quoteTable"></table></div>
     <div id="quoteStatus"></div>
-  </section>
-  <section class="panel">
-    <h2>自选股管理<span class="hint">输入代码添加 → 自动跑灯号分析</span></h2>
-    <div class="add-form">
-      <input id="wlCode" placeholder="股票代码，如 600519" maxlength="8" inputmode="numeric">
-      <input id="wlName" placeholder="名称（可留空自动识别）">
-      <input id="wlCost" placeholder="成本价（选填）" type="number" step="0.01" min="0" inputmode="decimal">
-      <input id="wlWeight" placeholder="目标仓位 %（选填）" type="number" step="0.5" min="0" inputmode="decimal">
-      <button class="u-btn" onclick="addStock()"><svg class="u-ico" aria-hidden="true"><use href="#u-spark"/></svg><span class="u-label">＋ 添加</span></button>
-    </div>
-    <div id="wlMsg"></div>
-    <div id="wlList"></div>
   </section>
   <div class="meta-line">
     <span>更新于 <b id="updated">--</b></span>
@@ -769,57 +747,6 @@ async function loadQuotes(){
   }
 }
 
-async function loadWatchlist(){
-  const r = await (await fetch("/api/watchlist")).json();
-  const list = r.watchlist || [];
-  $("wlList").innerHTML = list.length
-    ? list.map(w => `
-      <div class="wl-item">
-        <span class="info">
-          <span class="code">${esc(w.code)}</span>
-          <span>${esc(w.name || "")}</span>
-          <span class="meta">成本 ${w.cost == null ? "--" : w.cost} · 仓位 ${w.target_weight == null ? "--" : w.target_weight}%</span>
-        </span>
-        <button class="del u-btn u-btn--icon" title="移出自选股" onclick="removeStock('${esc(w.code)}')">✕</button>
-      </div>`).join("")
-    : '<span class="warn-line">尚未添加自选股。</span>';
-}
-
-async function addStock(){
-  const code = $("wlCode").value.trim();
-  if (!code){ $("wlMsg").textContent = "请填写股票代码"; return; }
-  const body = {
-    code,
-    name: $("wlName").value.trim(),
-    cost: $("wlCost").value,
-    target_weight: $("wlWeight").value,
-  };
-  const res = await (await fetch("/api/watchlist/add", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(body),
-  })).json();
-  if (res.error){ $("wlMsg").textContent = res.error; return; }
-  $("wlMsg").textContent = `已添加 ${code}，正在抓取灯号分析数据（约1~2分钟），稍后即可在下方看到分析结果…`;
-  ["wlCode","wlName","wlCost","wlWeight"].forEach(id => $(id).value = "");
-  await loadWatchlist();
-  await loadQuotes();
-  deepRefresh();
-}
-
-async function removeStock(code){
-  if (!confirm(`确定把 ${code} 移出自选股？`)) return;
-  const res = await (await fetch("/api/watchlist/remove", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({code}),
-  })).json();
-  $("wlMsg").textContent = res.error || `已移除 ${code}，正在重新分析…`;
-  await loadWatchlist();
-  await loadQuotes();
-  deepRefresh();
-}
-
 async function pollDeep(){
   pollCancelled = false;
   for (;;){
@@ -862,7 +789,6 @@ window.addEventListener("load", async () => {
   ensureLoader();
   if (location.search.indexOf("loader=1") !== -1) showDeep(true);
   loadQuotes();
-  loadWatchlist();
   const s = await (await fetch("/api/status")).json();
   render(s);
   if (s.running || s.pending){

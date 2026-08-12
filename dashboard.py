@@ -297,7 +297,7 @@ header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.95);border-
 button{font:inherit;border:1px solid transparent;border-radius:8px;padding:7px 14px;cursor:pointer;min-height:34px;transition:background .15s,border-color .15s,color .15s}
 .u-btn{
   --border-radius:24px;--padding:4px;--transition:.4s;
-  --button-color:#101010;--highlight-color-hue:210deg;
+  --button-color:#101010;--highlight-color-hue:30deg;
   position:relative;z-index:0;user-select:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;
   padding:.5em .95em .5em 1.15em;font-family:"Poppins","Inter","Segoe UI",var(--font);
   font-size:13px;font-weight:500;letter-spacing:.3px;color:#fff;background:var(--button-color);

@@ -294,14 +294,14 @@ html.js .in{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.22,1,.
       <select id="stockSel" aria-label="选择自选股"></select>
       <input id="stockCode" type="text" inputmode="numeric" maxlength="6" placeholder="或输入6位代码">
       <button id="stockGo" type="button">查看</button>
-      <button id="refreshBtn" type="button">刷新实时</button>
+      <button id="refreshBtn" type="button">刷新行情+财报</button>
       <span id="pickerStatus" class="status">快照模式</span>
     </div>
   </div>
 </header>
 <div class="ticker" id="ticker"><div class="ticker-track" id="tickerTrack"></div></div>
 <main id="main">
-  <div class="banner">联网实时模式：行情 / K线 / 主力资金 / 技术指标打开页面即自动联网获取；财报与 ROE 等为 2026-08-10 快照（WeStock + akshare）。离线时自动回退到快照数据。输入任意 6 位代码可实时查看行情 / 主力资金 / 技术指标；行业、同业与护城河等定性内容待分析补充。</div>
+  <div class="banner">联网实时模式：行情 / K线 / 主力资金 / 技术指标自动获取；财报与 ROE 会自动同步最新报告期（当前已含 2026 中报），断网时回退 2026-08-10 快照。内置自选股查看时自动刷新该股财报，点“刷新行情+财报”可同步全部 16 只。输入任意 6 位代码自动补全行情 / 财报 / 行业 / 同业 / 护城河初评。</div>
 
   <section class="hero">
     <div class="hero-main">
@@ -317,7 +317,7 @@ html.js .in{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.22,1,.
     </div>
     <div class="hero-side">
       <div class="live-line"><span class="live-dot"></span><span class="status" id="liveStatus">快照模式</span></div>
-      <div class="hero-meta"><b>数据来源</b>：WeStock Data（行情/资金/技术，联网实时）+ akshare（估值）<br><b>财报快照</b>：2026-08-10 · 输入任意 6 位代码可实时查看</div>
+      <div class="hero-meta"><b>数据来源</b>：WeStock Data（行情/资金/技术，联网实时）+ 东财财报接口<br><b>财报</b>：联网自动同步最新报告期（断网回退 2026-08-10 快照）</div>
     </div>
   </section>
 
@@ -394,7 +394,7 @@ html.js .in{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.22,1,.
 </main>
 <footer>
   <div class="footer-quote">不怕新人入行就亏钱，就怕新人入行就挣钱，却误把运气当成实力</div>
-  <div class="footer-note">行情 / 主力资金 / 技术指标联网实时获取 · 财报为 2026-08-10 快照（WeStock + akshare）· 仅供个人研究参考，不构成投资建议</div>
+  <div class="footer-note">行情 / 资金 / 技术指标联网实时获取 · 财报联网自动同步最新报告期，断网回退 2026-08-10 快照 · 仅供个人研究参考，不构成投资建议</div>
   <div><span id="liveClock">—</span></div>
 </footer>
 <div class="kiwi-overlay" id="kiwiOverlay" aria-hidden="true">
@@ -1893,7 +1893,8 @@ async function fetchFund(code){
     flowDate: kl.length ? kl[kl.length-1].split(",")[0] : ""
   });
 }
-async function refreshAllLive(){
+async function refreshAllLive(deep){
+  setKiwi(!!deep, "正在刷新实时行情…");
   updateLiveStatus("实时更新中…", "loading");
   const codes = STOCK_DB.map(s => fullCode(s.code));
   const jobs = [fetchQuote(codes)];
@@ -1901,8 +1902,19 @@ async function refreshAllLive(){
   const results = await Promise.allSettled(jobs);
   const ok = results.filter(r => r.status === "fulfilled").length;
   updateLiveStatus(ok > 0 ? "实时已更新 " + new Date().toTimeString().slice(0,5) : "实时获取失败，显示快照", ok > 0 ? "ok" : "err");
+  let finOk = 0;
+  if (deep){
+    setKiwi(true, "正在同步全部股票最新财报（2026 中报）…");
+    const list = STOCK_DB.filter(s => !FIN_PENDING[s.code]).map(s => s.code);
+    for (let i = 0; i < list.length; i += 3){
+      const rs = await Promise.allSettled(list.slice(i, i + 3).map(c => refreshStockFin(c)));
+      finOk += rs.filter(r => r.status === "fulfilled" && r.value).length;
+    }
+  }
   if (currentStock) applyStock(currentStock);
   renderTicker();
+  setKiwi(false);
+  updateLiveStatus(finOk > 0 ? "行情与财报已同步（" + finOk + " 只）" + new Date().toTimeString().slice(0,5) : (ok > 0 ? "实时已更新 " + new Date().toTimeString().slice(0,5) : "实时获取失败，显示快照"), finOk > 0 || ok > 0 ? "ok" : "err");
 }
 async function fetchSingleLive(full){
   updateLiveStatus("实时更新中…", "loading");
@@ -2140,6 +2152,54 @@ function setKiwi(on, msg){
   o.classList.toggle("open", !!on);
   o.setAttribute("aria-hidden", on ? "false" : "true");
 }
+/* ---- 内置自选股财报联网自动同步（解决快照不更新） ---- */
+const FIN_FRESH = {};
+const FIN_PENDING = {};
+function stripUndef(o){ const r = {}; Object.keys(o).forEach(k => { if (o[k] !== undefined) r[k] = o[k]; }); return r; }
+async function refreshStockFin(code){
+  const full = fullCode(code);
+  if (FIN_PENDING[code]) return FIN_PENDING[code];
+  const p = (async () => {
+    const rows = await fetchMainFinance(full);
+    if (!rows || !rows.length) return false;
+    const fin = computeAnnual(rows);
+    const qs = buildQuarters(rows);
+    const upd = {
+      finUpdated: new Date().toISOString().slice(0,10),
+      finLatestDate: (rows[0].REPORT_DATE || "").slice(0,10)
+    };
+    if (fin){
+      upd.finYear = (fin.latest.REPORT_DATE || "").slice(0,4);
+      upd.roe = fin.roe;
+      upd.rev_ann = fin.rev_ann;
+      upd.np_ann = fin.np_ann;
+    }
+    upd.debt = rows[0].ZCFZL != null ? rows[0].ZCFZL : (fin && fin.debt);
+    if (qs.length === 4){
+      upd.quarters = qs;
+      const rev = qs.reduce((s, q) => s + (q.rev || 0), 0);
+      const np = qs.reduce((s, q) => s + (q.np || 0), 0);
+      const gm = rev ? qs.reduce((s, q) => s + (q.rev || 0) * (q.gm || 0), 0) / rev : null;
+      upd.gm_ttm = gm != null ? +gm.toFixed(1) : (fin && fin.gm_ttm);
+      upd.rev_ttm = +rev.toFixed(2);
+      upd.np_ttm = +np.toFixed(2);
+    } else if (qs.length){
+      upd.quarters = qs;
+    }
+    if (DATA[full]) Object.assign(DATA[full], stripUndef(upd));
+    Object.assign(LIVE[full] || (LIVE[full] = {}), stripUndef(upd));
+    if (!QUAL[code]){
+      let balRows = [];
+      try { balRows = await fetchBalance(full); } catch(e){}
+      const auto = autoMoat({ annualData: fin, balanceRows: balRows, price: merged(code).price, shares: merged(code).shares });
+      if (auto && auto.test9 && auto.test9.length) QUAL[code] = auto;
+    }
+    return true;
+  })();
+  FIN_PENDING[code] = p;
+  try { return await p; }
+  finally { delete FIN_PENDING[code]; FIN_FRESH[code] = Date.now(); }
+}
 function applyStock(stock){
   currentStock = stock;
   const d = merged(stock.code);
@@ -2188,16 +2248,25 @@ function applyStock(stock){
       '<div class="bar-s flat">毛利 ' + fmt(q.gm,1) + '%</div>' +
       '</div>';
   }).join("");
-  $("qNote").textContent = qs.length ? "最近四个报告期：" + qs.map(q => qLabel(q.d)).join("、") + "；2025 全年营收 " + fmt(d.rev_ann,1) + " 亿、归母净利 " + fmt(d.np_ann,2) + " 亿、毛利率(TTM) " + fmt(d.gm_ttm,1) + "%。" : "财报数据待接入。";
+  const qs4 = qs.length === 4 ? qs : null;
+  const tRev = qs4 ? qs4.reduce((s, q) => s + (q.rev || 0), 0) : null;
+  const tNp = qs4 ? qs4.reduce((s, q) => s + (q.np || 0), 0) : null;
+  const tGm = tRev ? qs4.reduce((s, q) => s + (q.rev || 0) * (q.gm || 0), 0) / tRev : null;
+  const finYr = d.finYear || "2025";
+  $("qNote").textContent = qs.length ? "最近四个报告期：" + qs.map(q => qLabel(q.d)).join("、") +
+    (tRev != null ? "；近四季滚动营收 " + fmt(tRev,1) + " 亿、归母净利 " + fmt(tNp,2) + " 亿、毛利率 " + fmt(tGm,1) + "%" : "") +
+    "；" + finYr + " 年报全年营收 " + fmt(d.rev_ann,1) + " 亿、归母净利 " + fmt(d.np_ann,2) + " 亿" +
+    (d.finLatestDate ? "；财报更新至 " + d.finLatestDate : "") + "。" : "财报数据待接入。";
 
   const npRate = d.np_ann != null && d.rev_ann ? (d.np_ann / d.rev_ann * 100).toFixed(1) : null;
+  const ttmNpRate = tRev && tNp != null ? (tNp / tRev * 100).toFixed(1) : null;
   $("finGrid").innerHTML = [
-    ["ROE（2025）", d.roe == null ? "—" : fmt(d.roe,1) + " %"],
-    ["毛利率（TTM）", fmt(d.gm_ttm,1) + " %"],
-    ["净利率（2025）", npRate == null ? "—" : npRate + " %"],
+    ["ROE（" + finYr + " 年报）", d.roe == null ? "—" : fmt(d.roe,1) + " %"],
+    ["毛利率（近四季滚动）", tGm != null ? fmt(tGm,1) + " %" : (d.gm_ttm == null ? "—" : fmt(d.gm_ttm,1) + " %")],
+    ["净利率（近四季滚动）", ttmNpRate != null ? ttmNpRate + " %" : (npRate == null ? "—" : npRate + " %")],
     ["资产负债率", fmt(d.debt,1) + " %"],
-    ["2025 营收", fmt(d.rev_ann,1) + " 亿"],
-    ["2025 归母净利", fmt(d.np_ann,2) + " 亿"],
+    ["近四季营收（滚动）", tRev != null ? fmt(tRev,1) + " 亿" : (d.rev_ann == null ? "—" : fmt(d.rev_ann,1) + " 亿")],
+    ["近四季归母净利", tNp != null ? fmt(tNp,2) + " 亿" : (d.np_ann == null ? "—" : fmt(d.np_ann,2) + " 亿")],
     ["总股本", d.shares ? fmt(d.shares,0) + " 亿股" : "—"],
     ["52周位置", d.pos52 == null ? "—" : fmt(d.pos52,1) + " %"]
   ].map(x => '<div class="item"><div class="k">' + x[0] + '</div><div class="v">' + x[1] + '</div></div>').join("");
@@ -2255,6 +2324,16 @@ function applyStock(stock){
   const mq = QUAL[stock.code];
   if (mq && mq.auto) parts.push("护城河自动初评：" + mq.moat + "（9 问通过 " + mq.passCount + " 项）。");
   $("verdictText").textContent = parts.filter(Boolean).join(" ");
+  const stFull = fullCode(stock.code);
+  if (DATA[stFull] && !FIN_PENDING[stock.code] && !FIN_FRESH[stock.code]){
+    updateLiveStatus("正在同步最新财报…", "loading");
+    refreshStockFin(stock.code).then(ok => {
+      if (!ok || !currentStock || currentStock.code !== stock.code) return;
+      applyStock(currentStock);
+      const nd = merged(stock.code);
+      updateLiveStatus("财报已更新至 " + (nd.finLatestDate || "") + " · " + new Date().toTimeString().slice(0,5), "ok");
+    }).catch(() => {});
+  }
 }
 
 function initPicker(){
@@ -2316,11 +2395,11 @@ async function loadCustomStock(code){
 $("stockSel").addEventListener("change", () => { const s = lookup($("stockSel").value); if (s) applyStock(s); });
 $("stockGo").addEventListener("click", handleGo);
 $("stockCode").addEventListener("keydown", e => { if (e.key === "Enter") handleGo(); });
-$("refreshBtn").addEventListener("click", refreshAllLive);
+$("refreshBtn").addEventListener("click", () => refreshAllLive(true));
 initReveal();
 startClock();
 initPicker();
-refreshAllLive();
+refreshAllLive(false);
 if (location.search.indexOf("kiwi=1") >= 0) setKiwi(true, "测试模式：奇异鸟等待提示");
 </script>
 </body>

@@ -276,6 +276,297 @@ html.js .in{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.22,1,.
 @keyframes u-lstep{0%{transform:translateY(0) rotate(-5deg)}33%{transform:translateY(-15px) translate(32px) rotate(35deg)}66%{transform:translateY(0) translate(25px) rotate(-25deg)}100%{transform:translateY(0) rotate(-5deg)}}
 @keyframes u-rstep{0%{transform:translateY(0) translate(0) rotate(-5deg)}33%{transform:translateY(-10px) translate(30px) rotate(35deg)}66%{transform:translateY(0) translate(20px) rotate(-25deg)}100%{transform:translateY(0) translate(0) rotate(-5deg)}}
 @keyframes u-scroll{0%{transform:translateY(25px) translate(50px);opacity:0}33%{opacity:.35}66%{opacity:.35}to{transform:translateY(-50px) translate(-100px);opacity:0}}
+/* ============================================================
+   Liquid Glass 材质层（三层视觉系统：Background → Glass → Content）
+   玻璃内部：Face / Inner Rim / Outer Rim；分级：一级 Hero · 二级指标卡 · 三级信息区
+   仅视觉层：不改结构、不改数据、不改文字、不改 API、不改业务与图表逻辑
+   ============================================================ */
+:root{
+  /* ---- Glass Material Tokens ---- */
+  --glass-bg:linear-gradient(180deg,rgba(255,255,255,.80),rgba(250,251,252,.58));
+  --glass-bg-strong:linear-gradient(180deg,rgba(255,255,255,.92),rgba(252,252,252,.70));
+  --glass-bg-light:linear-gradient(180deg,rgba(255,255,255,.66),rgba(250,251,252,.46));
+  --glass-bg-quiet:linear-gradient(180deg,rgba(255,255,255,.54),rgba(250,251,252,.38));
+  --glass-tint:linear-gradient(120deg,rgba(255,255,255,.35),rgba(255,255,255,0) 42%,rgba(166,138,91,.045));
+  --glass-border:rgba(255,255,255,.66);
+  --glass-outer:rgba(32,36,40,.075);
+  --glass-inner-highlight:rgba(255,255,255,.82);
+  --glass-inner-shadow:rgba(50,55,60,.06);
+  --glass-shadow:0 20px 55px rgba(30,35,40,.10),0 2px 6px rgba(30,35,40,.05);
+  --glass-shadow-soft:0 12px 32px rgba(30,35,40,.075),0 1px 3px rgba(30,35,40,.04);
+  --glass-shadow-lg:0 34px 90px rgba(30,35,40,.13),0 4px 12px rgba(30,35,40,.05);
+  --glass-blur:22px; --glass-blur-mid:16px; --glass-blur-light:12px;
+  --glass-radius-hero:20px; --glass-radius:16px; --glass-radius-sm:12px; --glass-radius-xs:8px;
+  /* ---- 浅色环境色（高级灰白 + 香槟金 + 低饱和涨跌色）---- */
+  --lg-bg:#E9ECEF; --lg-bg-2:#F3F4F5;
+  --ink:#1A1C1E; --ink2:#4A4F55; --mut:#6B7178;
+  --gold:#A68A5B; --goldHi:#B29A72; --goldDim:rgba(166,138,91,.12); --goldInk:#8A7047;
+  --verm:#B4574E; --vermHi:#B4574E; --vermDim:rgba(180,87,78,.10);
+  --green:#3E7A63; --greenHi:#3E7A63; --greenDim:rgba(62,122,99,.10);
+  --line:rgba(32,36,40,.07); --line2:rgba(32,36,40,.10);
+  --card:#FFFFFF; --card2:#FBFAF8; --card3:#F5F4F2;
+  --bg0:#E7EAED; --bg1:var(--lg-bg); --bg2:var(--lg-bg-2);
+  --surface:rgba(255,255,255,.55); --surface-soft:rgba(255,255,255,.68); --surface-strong:rgba(255,255,255,.82);
+  --shadow-1:var(--glass-shadow-soft); --shadow-2:var(--glass-shadow);
+  --radius-card:var(--glass-radius); --radius-sm:var(--glass-radius-xs);
+}
+/* ---- LAYER 01 · BACKGROUND：高级浅灰白 + 极弱空间层次（让玻璃有东西可透）---- */
+body{
+  background:
+    radial-gradient(1100px 640px at 14% -6%, rgba(255,255,255,.90), transparent 62%),
+    radial-gradient(900px 600px at 92% 2%, rgba(166,138,91,.06), transparent 62%),
+    radial-gradient(1200px 800px at 50% 104%, rgba(70,80,90,.07), transparent 66%),
+    linear-gradient(180deg,var(--lg-bg-2),var(--lg-bg));
+  color:var(--ink2);font-weight:400
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;animation:none;
+  background:
+    radial-gradient(760px 420px at 22% 16%, rgba(255,255,255,.78), transparent 66%),
+    radial-gradient(680px 380px at 80% 30%, rgba(166,138,91,.055), transparent 68%),
+    radial-gradient(900px 520px at 46% 88%, rgba(70,80,90,.06), transparent 70%)
+}
+body::after{content:none}
+.scan-band{display:none}
+::selection{background:rgba(166,138,91,.20);color:var(--ink)}
+:focus-visible{outline:2px solid rgba(166,138,91,.55);outline-offset:2px;box-shadow:none}
+::-webkit-scrollbar-track{background:var(--lg-bg)}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#D6D3CC,#BFBCB4);border:2px solid var(--lg-bg)}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#C4BEB2,#A9A296)}
+/* ---- Content：文字层级（主数字/标题 → 正文 → 辅助）---- */
+h1,h2,h3{font-weight:600;letter-spacing:-.012em}
+.brand{font-weight:600;letter-spacing:-.01em}
+.brand .sub{color:var(--mut);font-weight:400;letter-spacing:0}
+.hero-name{font-weight:600;letter-spacing:-.02em;color:var(--ink)}
+.hero-price #vPrice{font-weight:600;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+td,.kv .v,.bar-v,.chip b,.ticker-item,#liveClock{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.panel h2{font-size:17px;font-weight:600;letter-spacing:-.012em;color:var(--ink)}
+.panel h2 .hint{font-size:13px;font-weight:400;color:var(--mut);letter-spacing:0}
+.kv .k{font-size:13px;font-weight:400;color:var(--mut);letter-spacing:0}
+.kv .v{font-weight:600;color:var(--ink);text-shadow:none}
+.col li,.col h3,.note,.banner,.hero-meta,.footer-note,.moat p{font-weight:400}
+/* ---- 顶栏 / 走马灯：薄玻璃条 ---- */
+header{
+  background:var(--glass-bg-light);backdrop-filter:blur(var(--glass-blur-light)) saturate(135%);
+  -webkit-backdrop-filter:blur(var(--glass-blur-light)) saturate(135%);
+  border-bottom:1px solid rgba(255,255,255,.60);
+  box-shadow:0 1px 0 var(--glass-outer),0 8px 24px rgba(30,35,40,.035)
+}
+header::after{height:1px;background:linear-gradient(90deg,transparent,rgba(166,138,91,.35),transparent);animation:none}
+.brand .logo{background:var(--glass-bg);border:1px solid var(--glass-border);box-shadow:inset 0 1px 0 var(--glass-inner-highlight),var(--glass-shadow-soft)}
+.brand .logo i{animation:none;box-shadow:none}
+.ticker{
+  background:var(--glass-bg-quiet);backdrop-filter:blur(var(--glass-blur-light)) saturate(130%);
+  -webkit-backdrop-filter:blur(var(--glass-blur-light)) saturate(130%);
+  border-bottom:1px solid rgba(255,255,255,.55);box-shadow:0 1px 0 var(--glass-outer)
+}
+.ticker::before{background:linear-gradient(180deg,transparent,rgba(166,138,91,.45),transparent);box-shadow:none;width:1px}
+.ticker::after{content:none}
+.ticker-item{border-right:1px solid var(--line);font-weight:400}
+.ticker-item::before{color:rgba(166,138,91,.55);text-shadow:none}
+.ticker-item:hover{background:rgba(255,255,255,.45)}
+.ticker-item .t-name{color:var(--mut)}
+.ticker-item .t-price{color:var(--ink);font-weight:600;text-shadow:none}
+.ticker-item .t-price.up,.ticker-item .t-chg.up{color:var(--verm);text-shadow:none}
+.ticker-item .t-price.down,.ticker-item .t-chg.down{color:var(--green);text-shadow:none}
+/* ---- 提示条：薄玻璃说明条 ---- */
+.banner{
+  background:var(--glass-bg-light);border:1px solid var(--glass-border);border-left:1px solid rgba(166,138,91,.42);
+  border-radius:var(--glass-radius-sm);color:var(--ink2);padding:10px 16px;
+  box-shadow:inset 0 1px 0 var(--glass-inner-highlight),var(--glass-shadow-soft)
+}
+.banner::after{content:none}
+/* ---- 一级 Glass · Hero 主行情卡（最精致：Face + Inner Rim + Outer Rim + 边缘折射）---- */
+.hero-main{
+  background:var(--glass-tint),var(--glass-bg-strong);
+  border:1px solid var(--glass-border);border-radius:var(--glass-radius-hero);
+  box-shadow:
+    var(--glass-shadow-lg),
+    0 0 0 1px var(--glass-outer),
+    inset 0 1px 0 var(--glass-inner-highlight),
+    inset 0 0 0 1px rgba(255,255,255,.34),
+    inset 0 -22px 40px rgba(50,55,60,.045);
+  backdrop-filter:blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%)
+}
+.hero-main::before{ /* 边缘折射（只在玻璃边缘，不动内容） */
+  content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;padding:18px;background:none;
+  pointer-events:none;backdrop-filter:blur(5px) saturate(150%);-webkit-backdrop-filter:blur(5px) saturate(150%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
+  animation:none;opacity:1
+}
+.hero-main::after{ /* 顶部柔光（静态） */
+  content:"";position:absolute;inset:0 0 auto 0;z-index:0;width:auto;height:44%;border:0;opacity:1;
+  border-radius:var(--glass-radius-hero) var(--glass-radius-hero) 0 0;
+  background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 72%);box-shadow:none
+}
+@keyframes price-blast{0%{transform:scale(1)}32%{transform:scale(1.02)}100%{transform:scale(1)}}
+.hero-code{color:rgba(26,28,30,.035);animation:none}
+.hero-name.glitch{animation:none}
+.hero-name.glitch::before,.hero-name.glitch::after{opacity:0;animation:none}
+.chip{
+  background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--glass-radius-xs);
+  box-shadow:inset 0 1px 0 var(--glass-inner-highlight),0 1px 2px rgba(30,35,40,.03);color:var(--mut);font-weight:400
+}
+.chip b{color:var(--ink);font-weight:600;text-shadow:none}
+.chip:hover{border-color:rgba(255,255,255,.85);box-shadow:inset 0 1px 0 var(--glass-inner-highlight),var(--glass-shadow-soft)}
+.hero-chg{font-weight:600}
+.hero-chg.num.up{color:var(--verm);background:var(--vermDim);border:1px solid rgba(180,87,78,.24);box-shadow:none}
+.hero-chg.num.down{color:var(--green);background:var(--greenDim);border:1px solid rgba(62,122,99,.24);box-shadow:none}
+.hero-chg.num.flat{color:var(--mut);background:rgba(255,255,255,.45);border:1px solid var(--glass-border)}
+/* ---- 二级 Glass · 侧栏 / 指标卡 ---- */
+.hero-side{
+  background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--glass-radius);
+  box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-inner-highlight),inset 0 -14px 26px rgba(50,55,60,.035);
+  backdrop-filter:blur(var(--glass-blur-mid)) saturate(135%);-webkit-backdrop-filter:blur(var(--glass-blur-mid)) saturate(135%)
+}
+.hero-meta{border-top:1px solid rgba(32,36,40,.07);color:var(--mut)}
+.live-dot{background:var(--gold);box-shadow:0 0 0 4px rgba(166,138,91,.12)}
+.live-dot::after{content:none}
+.status{
+  background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--mut);font-weight:400;
+  box-shadow:inset 0 1px 0 var(--glass-inner-highlight)
+}
+.status.ok{color:var(--green);background:var(--greenDim);border-color:rgba(62,122,99,.24);text-shadow:none}
+.status.err{color:var(--verm);background:var(--vermDim);border-color:rgba(180,87,78,.24);text-shadow:none}
+.status.loading{color:var(--goldInk);background:var(--goldDim);border-color:rgba(166,138,91,.26);animation:none}
+.kv .item{
+  background:var(--glass-bg);border:1px solid var(--glass-border);border-left:1px solid var(--glass-border);
+  border-radius:var(--glass-radius-sm);box-shadow:inset 0 1px 0 var(--glass-inner-highlight),var(--glass-shadow-soft)
+}
+.kv .item:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.88);border-left-color:rgba(166,138,91,.45);box-shadow:inset 0 1px 0 var(--glass-inner-highlight),var(--glass-shadow)}
+/* ---- 三级 Glass · 章节 / 表格 / 信息区（很轻的材质，不做大面积 blur）---- */
+.panel{
+  background:var(--glass-bg-light);border:1px solid var(--glass-border);border-radius:var(--glass-radius);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72),inset 0 -18px 34px rgba(50,55,60,.028),var(--glass-shadow-soft)
+}
+.panel::before{ /* 极轻边缘折射 */
+  content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;padding:12px;background:none;
+  pointer-events:none;backdrop-filter:blur(2.5px) saturate(140%);-webkit-backdrop-filter:blur(2.5px) saturate(140%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
+  height:auto;left:0;right:0;top:0;box-shadow:none;animation:none
+}
+.panel::after{ /* 香槟金细角标（保留终端气质，极轻） */
+  content:"";position:absolute;top:12px;right:14px;width:20px;height:20px;opacity:.5;
+  border-top:1px solid rgba(166,138,91,.45);border-right:1px solid rgba(166,138,91,.45);box-shadow:none
+}
+.panel h2 .no{
+  background:var(--glass-bg);border:1px solid rgba(166,138,91,.28);color:var(--goldInk);border-radius:var(--glass-radius-xs);
+  box-shadow:inset 0 1px 0 var(--glass-inner-highlight);font-family:var(--font-sans);font-weight:600
+}
+/* 表格：整块薄玻璃 + 发丝线，不做逐行卡片 */
+.tbl-wrap{
+  background:rgba(255,255,255,.34);border:1px solid var(--glass-border);border-radius:var(--glass-radius-sm);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.70)
+}
+th{background:rgba(255,255,255,.42);color:var(--mut);font-weight:500;font-size:12px;letter-spacing:.06em;border-bottom:1px solid var(--line)}
+td{border-bottom:1px solid var(--line);color:var(--ink2);font-weight:400}
+tbody tr:hover{background:rgba(255,255,255,.52);box-shadow:inset 2px 0 0 rgba(166,138,91,.45)}
+/* 亮点 / 风险 · 护城河 · 说明 */
+.col{
+  background:var(--glass-bg-quiet);border:1px solid var(--glass-border);border-radius:var(--glass-radius-sm);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.70),var(--glass-shadow-soft)
+}
+.col::after{bottom:auto;top:0;height:1px}
+.col.good::after{background:linear-gradient(90deg,rgba(62,122,99,.45),transparent 85%);box-shadow:none}
+.col.bad::after{background:linear-gradient(90deg,rgba(180,87,78,.45),transparent 85%);box-shadow:none}
+.col.good h3{color:var(--green);text-shadow:none}
+.col.bad h3{color:var(--verm);text-shadow:none}
+.col.good li::before{color:var(--green);text-shadow:none}
+.col.bad li::before{color:var(--verm);text-shadow:none}
+.moat{
+  background:var(--glass-bg-quiet);border:1px solid var(--glass-border);border-radius:var(--glass-radius-sm);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.70)
+}
+.moat::before{height:1px;background:linear-gradient(90deg,rgba(166,138,91,.35),transparent);box-shadow:none}
+.moat-badge{background:rgba(166,138,91,.10);color:var(--goldInk);border:1px solid rgba(166,138,91,.26);border-radius:var(--glass-radius-xs);box-shadow:inset 0 1px 0 rgba(255,255,255,.60);font-weight:600;animation:none}
+.moat-note{color:var(--ink);font-weight:500}
+.tag{border-radius:var(--glass-radius-xs);font-weight:500}
+.tag.good{background:var(--greenDim);color:var(--green);border:1px solid rgba(62,122,99,.24);box-shadow:none}
+.tag.warn{background:var(--goldDim);color:var(--goldInk);border:1px solid rgba(166,138,91,.26);box-shadow:none}
+.tag.bad{background:var(--vermDim);color:var(--verm);border:1px solid rgba(180,87,78,.24);box-shadow:none}
+.note{background:rgba(255,255,255,.34);border-left:1px solid rgba(166,138,91,.42);border-radius:0 var(--glass-radius-xs) var(--glass-radius-xs) 0;color:var(--mut);box-shadow:none}
+/* ---- 二级 Glass · 结论卡 ---- */
+.verdict{
+  background:var(--glass-tint),var(--glass-bg);
+  border:1px solid var(--glass-border);border-radius:var(--glass-radius);
+  box-shadow:var(--glass-shadow),0 0 0 1px var(--glass-outer),inset 0 1px 0 var(--glass-inner-highlight),inset 0 -18px 34px rgba(50,55,60,.035);
+  backdrop-filter:blur(var(--glass-blur-mid)) saturate(135%);-webkit-backdrop-filter:blur(var(--glass-blur-mid)) saturate(135%)
+}
+.verdict::before{color:var(--gold);opacity:.26;text-shadow:none}
+.verdict::after{content:none}
+.verdict h2{color:var(--goldInk);font-weight:600;text-shadow:none}
+.verdict p{color:var(--ink2)}
+/* ---- 图表：嵌在玻璃里的专业图表（数据不动）---- */
+.bars{gap:18px}
+.bar-track{background:rgba(255,255,255,.38);border:1px solid var(--glass-border);border-radius:var(--glass-radius-xs);box-shadow:inset 0 1px 0 rgba(255,255,255,.65)}
+.bar-track::before{background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(32,36,40,.035) 30px 31px)}
+.bar-fill{background:linear-gradient(180deg,#C1A87C,#A68A5B 58%,#8A7047);border-radius:4px 4px 0 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.bar-col:hover .bar-fill{filter:brightness(1.04);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.bar-v{color:var(--ink);font-weight:600;text-shadow:none}
+.bar-q,.bar-s{color:var(--mut)}
+.posbar-wrap{background:rgba(32,36,40,.06);border:1px solid var(--glass-border);border-radius:var(--glass-radius-xs);box-shadow:inset 0 1px 0 rgba(255,255,255,.60)}
+.posbar{background:linear-gradient(90deg,rgba(180,87,78,.80),rgba(166,138,91,.90));box-shadow:none}
+/* ---- 控件：墨色主按钮 + 玻璃次按钮 / 玻璃输入 ---- */
+.picker select,.picker input{
+  background:rgba(255,255,255,.58);border:1px solid var(--glass-border);color:var(--ink);font-weight:400;
+  box-shadow:inset 0 1px 0 var(--glass-inner-highlight)
+}
+.picker select:hover,.picker input:hover{background:rgba(255,255,255,.76);border-color:rgba(255,255,255,.85)}
+.picker select:focus,.picker input:focus{background:#FFFEFC;border-color:rgba(166,138,91,.45);box-shadow:0 0 0 3px rgba(166,138,91,.10),inset 0 1px 0 var(--glass-inner-highlight)}
+.picker button{
+  background:#1B1A18;color:#F7F4ED;border:1px solid rgba(255,255,255,.10);font-weight:500;letter-spacing:.02em;
+  box-shadow:0 6px 18px rgba(25,23,20,.14),inset 0 1px 0 rgba(255,255,255,.08)
+}
+.picker button::after{content:none}
+.picker button:hover{transform:translateY(-1px);background:#232120;filter:none;box-shadow:0 8px 22px rgba(25,23,20,.18)}
+.picker button:active{transform:translateY(0);background:#151413}
+#refreshBtn{
+  background:var(--glass-bg);color:var(--ink);border:1px solid var(--glass-border);
+  box-shadow:inset 0 1px 0 var(--glass-inner-highlight),var(--glass-shadow-soft)
+}
+#refreshBtn:hover{background:#FFFEFC;border-color:rgba(255,255,255,.88);box-shadow:inset 0 1px 0 var(--glass-inner-highlight),var(--glass-shadow)}
+/* ---- 页脚 ---- */
+footer{border-top:1px solid rgba(32,36,40,.06);color:var(--mut)}
+footer::before{background:linear-gradient(90deg,transparent,rgba(166,138,91,.40),transparent);box-shadow:none}
+.footer-quote{color:var(--goldInk);font-weight:500;text-shadow:none;animation:none}
+#liveClock{background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--mut);box-shadow:inset 0 1px 0 var(--glass-inner-highlight)}
+/* ---- 浮层：深色亚克力（白色奇异鸟在浅底不可见）---- */
+.kiwi-overlay{background:rgba(20,22,26,.42);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%)}
+.kiwi-panel{
+  background:linear-gradient(180deg,rgba(42,45,50,.96),rgba(28,31,35,.96));border:1px solid rgba(255,255,255,.12);
+  border-radius:var(--glass-radius);
+  box-shadow:0 30px 80px rgba(20,24,30,.38),inset 0 1px 0 rgba(255,255,255,.14)
+}
+.kiwi-title{color:#DCC08A;font-weight:500;text-shadow:none}
+.kiwi-status{color:rgba(255,255,255,.72);font-weight:400}
+/* ---- 交互：只保留 hover / focus / pressed，幅度 ≤1px，无发光无持续动画 ---- */
+.panel,.col,.kv .item,.verdict,.chip,.picker button,.picker select,.picker input{
+  transition:background 200ms ease,border-color 200ms ease,box-shadow 200ms ease,transform 200ms ease
+}
+@media (hover:hover) and (pointer:fine){
+  .hero-main:hover{transform:none;border-color:rgba(255,255,255,.85)}
+  .col:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.70),var(--glass-shadow)}
+  .kv .item:hover{transform:translateY(-1px)}
+  .chip:hover{transform:none}
+  .picker button:hover{transform:translateY(-1px)}
+}
+@media (hover:none){
+  .hero-main:hover,.kv .item:hover,.col:hover,.chip:hover,.picker button:hover{transform:none}
+}
+/* ---- 响应式：小屏削减 blur 与装饰高光，保持信息密度 ---- */
+@media (max-width:900px){
+  :root{--glass-blur:14px;--glass-blur-mid:10px;--glass-blur-light:8px}
+  .panel::before,.hero-main::before{backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+  .ticker{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(255,255,255,.52)}
+}
+@media (max-width:560px){
+  :root{--glass-blur:10px;--glass-blur-mid:8px;--glass-blur-light:6px}
+  .panel::before,.hero-main::before{content:none}
+  .hero-main,.verdict{box-shadow:inset 0 1px 0 var(--glass-inner-highlight),0 10px 30px rgba(30,35,40,.06)}
+}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   html.js .panel,html.js .hero,html.js .verdict,html.js .tbl-wrap,html.js .col,html.js .moat{opacity:1;transform:none}

@@ -393,6 +393,81 @@ footer::before{background:linear-gradient(90deg,transparent,rgba(198,164,104,.35
 .kiwi-panel{background:linear-gradient(180deg,#181510,#121110);border:1px solid var(--line2);box-shadow:var(--shadow-2)}
 .kiwi-title{color:var(--goldHi);text-shadow:none}
 .kiwi-status{color:var(--ink2)}
+/* ============================================================
+   第 2 轮 · 卡片层级与轻玻璃质感
+   只改：卡片材质 / 边缘 / 阴影 / 数字亮度 / 极小留白
+   分档：A 主卡（股票主卡）· B 次卡（指标格·侧栏·结论）· C 信息卡（面板·亮点风险·护城河·表格）· D 浮层（奇异鸟）
+   不改结构、不改数据、不改功能；不新增装饰与动画
+   ============================================================ */
+:root{
+  /* A 主卡：略亮 + 略明显玻璃感 */
+  --a-bg:rgba(255,255,255,.062); --a-bg2:rgba(255,255,255,.038);
+  --a-line:rgba(255,255,255,.11); --a-edge:rgba(255,255,255,.075);
+  /* B 次卡：权重低于主卡 */
+  --b-bg:rgba(255,255,255,.045); --b-bg2:rgba(255,255,255,.028);
+  --b-line:rgba(255,255,255,.075); --b-edge:rgba(255,255,255,.055);
+  /* C 信息卡：更安静，不做玻璃叠加 */
+  --c-bg:rgba(255,255,255,.026); --c-bg2:rgba(255,255,255,.015); --c-line:rgba(255,255,255,.055);
+  /* D 浮层 */
+  --d-bg:rgba(255,255,255,.075); --d-line:rgba(255,255,255,.12);
+  /* 顶部高光：极淡，正常看不出来，细看才觉得顶部稍亮 */
+  --shine:linear-gradient(180deg,rgba(255,255,255,.038),rgba(255,255,255,0) 44%);
+  /* 阴影：柔和低强度，卡片浮起来但不抢眼 */
+  --sh-a:0 8px 30px rgba(0,0,0,.20); --sh-a-hi:0 10px 34px rgba(0,0,0,.24);
+  --sh-b:0 6px 22px rgba(0,0,0,.15); --sh-b-hi:0 8px 26px rgba(0,0,0,.19);
+  --sh-c:0 3px 14px rgba(0,0,0,.10);
+  --t-hover:200ms;
+  /* 数字亮度阶梯：主价格 > 重要数据 > 普通数据(--ink2) > 辅助数据(--mut) */
+  --num-1:rgba(255,255,255,.96); --num-2:rgba(255,255,255,.88);
+}
+/* 背景与玻璃的关系：仍只保留上一轮的两处光晕，把第二处从暖红收成极淡冷灰（不新增光源） */
+body{
+  background:
+    radial-gradient(1200px 760px at 50% -12%, rgba(206,192,166,.050), transparent 62%),
+    radial-gradient(900px 620px at 98% 6%, rgba(214,222,232,.024), transparent 58%),
+    linear-gradient(180deg,var(--bg1),var(--bg0));
+}
+/* ---- A · 主卡（英维克 002837 / 57.22 / -6.58% 这一张）---- */
+.hero-main{
+  background:var(--shine),linear-gradient(180deg,var(--a-bg),var(--a-bg2));
+  border:1px solid var(--a-line);
+  box-shadow:var(--sh-a),inset 0 1px 0 var(--a-edge);
+  backdrop-filter:blur(18px) saturate(112%);-webkit-backdrop-filter:blur(18px) saturate(112%);
+  transition:transform var(--t-hover),border-color var(--t-hover),box-shadow var(--t-hover)
+}
+.hero-main:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.16);box-shadow:var(--sh-a-hi),inset 0 1px 0 rgba(255,255,255,.095)}
+.hero-main::before{background:linear-gradient(90deg,rgba(255,255,255,.10),rgba(255,255,255,.02) 55%,transparent 85%)}
+.hero-main::after{border-top:1px solid rgba(255,255,255,.075);border-right:1px solid rgba(255,255,255,.075)}
+.hero-price #vPrice{color:var(--num-1);letter-spacing:1px}
+.chip{background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.085);transition:transform var(--t-hover),border-color var(--t-hover),box-shadow var(--t-hover)}
+.chip:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.chip b{color:var(--num-2)}
+/* ---- B · 次卡（PE/PB/总市值/52周位置、关键财务指标、右侧实时栏、综合评价）---- */
+.kv .item{
+  background:linear-gradient(180deg,var(--b-bg),var(--b-bg2));
+  border:1px solid var(--b-line);border-left:2px solid rgba(255,255,255,.09);
+  padding:16px 18px;
+  box-shadow:var(--sh-b),inset 0 1px 0 var(--b-edge);
+  transition:transform var(--t-hover),border-color var(--t-hover),box-shadow var(--t-hover)
+}
+.kv .item:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.12);border-left-color:rgba(198,164,104,.38);box-shadow:var(--sh-b-hi),inset 0 1px 0 rgba(255,255,255,.07)}
+.kv .v{color:var(--num-2)}
+.hero-side{background:linear-gradient(180deg,var(--b-bg),var(--b-bg2));border:1px solid var(--b-line);box-shadow:var(--sh-b),inset 0 1px 0 var(--b-edge)}
+.verdict{background:var(--shine),linear-gradient(180deg,var(--b-bg),var(--b-bg2));border:1px solid rgba(198,164,104,.18);box-shadow:var(--sh-b),inset 0 1px 0 var(--b-edge)}
+/* ---- C · 信息卡（面板 / 亮点风险 / 护城河 / 表格 / 说明）：更安静，不做玻璃叠加 ---- */
+.panel{background:linear-gradient(180deg,var(--c-bg),var(--c-bg2));border:1px solid var(--c-line);box-shadow:var(--sh-c)}
+.panel::before{background:linear-gradient(90deg,rgba(255,255,255,.10),transparent 55%)}
+.col{background:var(--c-bg);border:1px solid var(--c-line);box-shadow:none}
+.col:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.09);box-shadow:var(--sh-b)}
+.col.good::after{background:linear-gradient(90deg,rgba(111,196,155,.40),transparent 85%)}
+.col.bad::after{background:linear-gradient(90deg,rgba(228,116,95,.40),transparent 85%)}
+.moat{background:var(--c-bg);border:1px solid var(--c-line);box-shadow:none}
+.moat::before{background:linear-gradient(90deg,rgba(255,255,255,.07),transparent)}
+.tbl-wrap{background:rgba(0,0,0,.16);border:1px solid var(--c-line);box-shadow:none}
+.note{background:rgba(255,255,255,.024);border-left:2px solid rgba(198,164,104,.38)}
+/* ---- D · 浮层（奇异鸟等待层）：全页允许比主卡更玻璃的唯一位置 ---- */
+.kiwi-overlay{background:rgba(6,5,4,.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.kiwi-panel{background:var(--shine),linear-gradient(180deg,var(--d-bg),rgba(255,255,255,.035));border:1px solid var(--d-line);box-shadow:0 20px 60px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.085)}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   html.js .panel,html.js .hero,html.js .verdict,html.js .tbl-wrap,html.js .col,html.js .moat{opacity:1;transform:none}

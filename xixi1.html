@@ -535,6 +535,158 @@ html.js .in{transition:opacity .3s ease-out,transform .3s ease-out,filter .3s ea
 @keyframes item-in{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}}
 .kv .item{animation-duration:.32s}
 @keyframes bar-in{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:none}}
+/* ============================================================
+   第 4 轮 · 浅色主题（深色玻璃 → 高级浅色玻璃）
+   只换材质与配色：背景 / 卡片 / 边框 / 阴影 / 文字层级 / 语义色
+   不改数据、不改结构、不改功能、不改图表数据；交互反馈全部保留并重新适配
+   ============================================================ */
+:root{
+  /* 浅灰白背景（不用纯白铺满整页） */
+  --bg0:#F1F2F3; --bg1:#FAFAF9; --bg2:#FFFFFF;
+  --card:#FFFFFF; --card2:#FBFBFA; --card3:#F5F5F3;
+  /* 表面 / 文字 / 线 */
+  --surface:rgba(255,255,255,.55); --surface-soft:rgba(255,255,255,.68); --surface-strong:rgba(255,255,255,.82);
+  --ink:#17191C; --ink2:#4B4F55; --mut:#73777D; --mut-soft:#969AA0;
+  --line:rgba(0,0,0,.055); --line2:rgba(0,0,0,.085);
+  /* 品牌与涨跌色（浅底适配，保留原语义） */
+  --gold:#B8965A; --goldHi:#8A6A2E; --goldDim:rgba(184,150,90,.12);
+  --verm:#C94B4B; --vermHi:#C94B4B; --vermDim:rgba(201,75,75,.10);
+  --green:#16805C; --greenHi:#16805C; --greenDim:rgba(22,128,92,.10);
+  /* 卡片四档材质：A 主卡最亮最实，C 信息卡最轻 */
+  --a-bg:rgba(255,255,255,.80); --a-bg2:rgba(255,255,255,.64); --a-line:rgba(0,0,0,.07); --a-edge:rgba(255,255,255,.85);
+  --b-bg:rgba(255,255,255,.62); --b-bg2:rgba(255,255,255,.48); --b-line:rgba(0,0,0,.05); --b-edge:rgba(255,255,255,.75);
+  --c-bg:rgba(255,255,255,.46); --c-bg2:rgba(255,255,255,.30); --c-line:rgba(0,0,0,.045);
+  --d-bg:rgba(255,255,255,.90); --d-line:rgba(0,0,0,.08);
+  --shine:linear-gradient(180deg,rgba(255,255,255,.60),rgba(255,255,255,0) 46%);
+  /* 阴影：浅色下靠阴影拉层次，全部柔和、无彩色 */
+  --shadow-1:0 6px 22px rgba(20,30,40,.06);
+  --shadow-2:0 10px 34px rgba(20,30,40,.09);
+  --sh-a:0 8px 30px rgba(20,30,40,.08); --sh-a-hi:0 10px 34px rgba(20,30,40,.11);
+  --sh-b:0 6px 22px rgba(20,30,40,.055); --sh-b-hi:0 8px 26px rgba(20,30,40,.08);
+  --sh-c:0 3px 14px rgba(20,30,40,.04);
+  /* 数字亮度阶梯（浅色：越深越重要） */
+  --num-1:#17191C; --num-2:#33373D;
+}
+/* ---- 背景：浅灰白空间 + 极弱层次（白 + 一点青绿，不出现彩色光晕）---- */
+body{
+  background:
+    radial-gradient(1200px 760px at 50% -12%, rgba(255,255,255,.80), transparent 62%),
+    radial-gradient(900px 620px at 98% 4%, rgba(22,128,92,.028), transparent 58%),
+    linear-gradient(180deg,var(--bg1),var(--bg0));
+}
+body::before{background:repeating-linear-gradient(0deg, transparent 0 46px, rgba(0,0,0,.015) 46px 47px),repeating-linear-gradient(90deg, transparent 0 46px, rgba(0,0,0,.015) 46px 47px)}
+body::after{content:none}
+.scan-band{display:none}
+::-webkit-scrollbar-track{background:#F2F2F1}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#D8D8D4,#C3C3BF);border:2px solid #F2F2F1}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#C4C0B6,#AFA99F)}
+/* ---- 顶栏与控件 ---- */
+header{background:rgba(255,255,255,.72);border-bottom:1px solid var(--line);backdrop-filter:blur(14px) saturate(120%);-webkit-backdrop-filter:blur(14px) saturate(120%)}
+header::after{background:linear-gradient(90deg,transparent,rgba(184,150,90,.35),transparent)}
+.brand .logo{background:rgba(255,255,255,.72);border:1px solid var(--line2)}
+.picker select,.picker input{background:rgba(255,255,255,.62);border:1px solid var(--line2);color:var(--ink)}
+.picker input::placeholder{color:#A3A7AC}
+.picker button{background:linear-gradient(180deg,#E1C995,#C6A468);border:1px solid rgba(0,0,0,.07);color:#2A2314;box-shadow:0 2px 8px rgba(20,30,40,.08)}
+#refreshBtn{background:rgba(255,255,255,.72);border:1px solid var(--line2);color:var(--ink);box-shadow:0 2px 8px rgba(20,30,40,.05)}
+.status{background:rgba(255,255,255,.62);border:1px solid var(--line);color:var(--ink2)}
+.status.ok{color:var(--green);background:var(--greenDim);border-color:rgba(22,128,92,.28)}
+.status.err{color:var(--verm);background:var(--vermDim);border-color:rgba(201,75,75,.28)}
+.status.loading{color:var(--goldHi);background:var(--goldDim);border-color:rgba(184,150,90,.28)}
+/* ---- 走马灯 / 提示条 ---- */
+.ticker{background:rgba(255,255,255,.55);border-bottom:1px solid var(--line)}
+.ticker-item::before{color:rgba(184,150,90,.75)}
+.banner{background:rgba(184,150,90,.09);border:1px solid var(--line);color:var(--ink2)}
+/* ---- A 主卡：浅色页面里的视觉中心（最亮 + 一点玻璃 + 柔和阴影）---- */
+.hero-main{
+  background:
+    radial-gradient(420px 300px at var(--mx,50%) var(--my,0%), rgba(38,52,66,calc(var(--sheen,0) * .045)), transparent 70%),
+    var(--shine),
+    linear-gradient(180deg,var(--a-bg),var(--a-bg2));
+  border:1px solid var(--a-line);
+  box-shadow:0 1px 2px rgba(20,30,40,.04),var(--sh-a);
+  backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%)
+}
+.hero-main::before{background:linear-gradient(90deg,rgba(255,255,255,.95),rgba(255,255,255,0) 70%)}
+.hero-main::after{border-top:1px solid rgba(0,0,0,.06);border-right:1px solid rgba(0,0,0,.06);box-shadow:none;opacity:1}
+.hero-code{color:rgba(23,25,28,.035)}
+.hero-price #vPrice{color:var(--num-1)}
+@keyframes price-blast{0%{transform:scale(1)}32%{transform:scale(1.025)}100%{transform:scale(1)}}
+.chip{background:rgba(255,255,255,.72);border:1px solid rgba(0,0,0,.05)}
+.chip b{color:var(--num-2)}
+.hero-chg.num.up{color:var(--verm);background:rgba(201,75,75,.09);border:1px solid rgba(201,75,75,.26)}
+.hero-chg.num.down{color:var(--green);background:rgba(22,128,92,.09);border:1px solid rgba(22,128,92,.26)}
+.hero-chg.num.flat{color:var(--mut);background:rgba(0,0,0,.035);border:1px solid var(--line)}
+.hero-side{background:rgba(255,255,255,.66);border:1px solid var(--line);box-shadow:0 1px 2px rgba(20,30,40,.03),var(--sh-b)}
+.hero-meta{border-top:1px solid var(--line);color:var(--mut)}
+/* ---- C 信息卡（面板 / 表格 / 亮点风险 / 护城河 / 说明 / 结论）---- */
+.panel{background:linear-gradient(180deg,var(--c-bg),var(--c-bg2));border:1px solid var(--c-line);box-shadow:0 1px 2px rgba(20,30,40,.03),var(--sh-c)}
+.panel::before{background:linear-gradient(90deg,rgba(255,255,255,.95),rgba(255,255,255,0) 55%)}
+.panel::after{border-top:1px solid rgba(0,0,0,.05);border-right:1px solid rgba(0,0,0,.05);box-shadow:none}
+.panel h2 .no{background:rgba(184,150,90,.14);color:var(--goldHi);border:1px solid rgba(184,150,90,.26);box-shadow:none}
+.tbl-wrap{background:rgba(255,255,255,.42);border:1px solid var(--c-line);box-shadow:none}
+th{color:var(--mut);background:rgba(0,0,0,.025);border-bottom:1px solid rgba(0,0,0,.07);text-shadow:none}
+td{border-bottom:1px solid var(--line)}
+.col{background:var(--c-bg);border:1px solid var(--c-line)}
+.col.good::after{background:linear-gradient(90deg,rgba(22,128,92,.45),transparent 85%)}
+.col.bad::after{background:linear-gradient(90deg,rgba(201,75,75,.45),transparent 85%)}
+.col.good h3{color:var(--green)}
+.col.bad h3{color:var(--verm)}
+.col.good li::before{color:var(--green)}
+.col.bad li::before{color:var(--verm)}
+.moat{background:var(--c-bg);border:1px solid var(--c-line);box-shadow:none}
+.moat::before{background:linear-gradient(90deg,rgba(255,255,255,.95),transparent)}
+.moat-badge{background:rgba(184,150,90,.14);color:var(--goldHi);border:1px solid rgba(184,150,90,.26);box-shadow:none}
+.tag.good{background:var(--greenDim);color:var(--green);border:1px solid rgba(22,128,92,.28)}
+.tag.warn{background:var(--goldDim);color:var(--goldHi);border:1px solid rgba(184,150,90,.28)}
+.tag.bad{background:var(--vermDim);color:var(--verm);border:1px solid rgba(201,75,75,.28)}
+.note{background:rgba(0,0,0,.028);border-left:2px solid rgba(184,150,90,.5);color:var(--ink2)}
+.verdict{background:var(--shine),linear-gradient(180deg,var(--b-bg),var(--b-bg2));border:1px solid rgba(184,150,90,.22);box-shadow:0 1px 2px rgba(20,30,40,.03),var(--sh-b)}
+.verdict::before{opacity:.22;text-shadow:none}
+.verdict h2{color:var(--goldHi);text-shadow:none}
+.verdict p{color:var(--ink2)}
+/* ---- B 次卡（指标格）---- */
+.kv .item{background:linear-gradient(180deg,var(--b-bg),var(--b-bg2));border:1px solid var(--b-line);border-left:2px solid rgba(0,0,0,.06);box-shadow:0 1px 2px rgba(20,30,40,.03),var(--sh-b)}
+.kv .k{color:var(--mut)}
+.kv .v{color:var(--num-2)}
+.kv{gap:16px}
+/* ---- 图表只换主题（数据与结构不动）：浅色底、极淡网格 ---- */
+.posbar-wrap{background:rgba(0,0,0,.055);border:1px solid var(--line);box-shadow:none}
+.bar-track{background:rgba(0,0,0,.035);border:1px solid var(--line);box-shadow:none}
+.bar-track::before{background:repeating-linear-gradient(0deg,transparent 0 30px,rgba(0,0,0,.04) 30px 31px)}
+.bar-v{color:var(--ink)}
+.bar-q,.bar-s{color:var(--mut-soft)}
+/* ---- 页脚 ---- */
+footer{border-top:1px solid var(--line)}
+footer::before{background:linear-gradient(90deg,transparent,rgba(184,150,90,.40),transparent)}
+.footer-quote{color:var(--goldHi);text-shadow:none}
+.footer-note{color:var(--mut-soft)}
+#liveClock{background:rgba(255,255,255,.60);border:1px solid var(--line);color:var(--ink2);box-shadow:none}
+/* ---- D 浮层：加载用的模态保持深色玻璃（白色奇异鸟插画在浅底上会看不见）---- */
+.kiwi-overlay{background:rgba(24,26,30,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.kiwi-panel{background:linear-gradient(180deg,#2A2D31,#1E2124);border:1px solid rgba(255,255,255,.10);box-shadow:0 20px 60px rgba(20,30,40,.35),inset 0 1px 0 rgba(255,255,255,.10)}
+.kiwi-title{color:#E4C88F;text-shadow:none}
+.kiwi-status{color:rgba(255,255,255,.74)}
+/* ---- 交互：浅色下的 hover（卡片轻微上浮，阴影微增，边框微亮）---- */
+@media (hover:hover) and (pointer:fine){
+  .hero-main:hover{transform:none;border-color:rgba(0,0,0,.10);box-shadow:0 2px 4px rgba(20,30,40,.05),var(--sh-a-hi)}
+  .picker select:hover,.picker input:hover{border-color:rgba(0,0,0,.14);background:rgba(255,255,255,.82)}
+  .picker select:focus,.picker input:focus{border-color:rgba(184,150,90,.55);background:#fff;box-shadow:0 0 0 3px rgba(184,150,90,.12)}
+  .picker button:hover{transform:none;filter:brightness(1.03);border-color:rgba(0,0,0,.10);box-shadow:0 6px 18px rgba(20,30,40,.10)}
+  #refreshBtn:hover{transform:none;filter:none;background:#fff;border-color:rgba(0,0,0,.14);box-shadow:0 6px 18px rgba(20,30,40,.07)}
+  .kv .item:hover{transform:translateY(-1px);border-color:rgba(0,0,0,.08);border-left-color:rgba(184,150,90,.45);box-shadow:0 2px 4px rgba(20,30,40,.04),var(--sh-b-hi)}
+  .col:hover{transform:translateY(-1px);border-color:rgba(0,0,0,.08);box-shadow:var(--sh-b)}
+  .chip:hover{transform:none;border-color:rgba(0,0,0,.09);background:rgba(255,255,255,.86);box-shadow:0 2px 8px rgba(20,30,40,.06)}
+  .ticker-item:hover{background:rgba(0,0,0,.028)}
+  tbody tr:hover{background:rgba(0,0,0,.03);box-shadow:inset 2px 0 0 rgba(184,150,90,.5)}
+}
+@media (hover:none){
+  .hero-main:hover{border-color:var(--a-line);box-shadow:0 1px 2px rgba(20,30,40,.04),var(--sh-a)}
+  .picker button:hover{filter:none;box-shadow:0 2px 8px rgba(20,30,40,.08)}
+  .kv .item:hover{border-color:var(--b-line);border-left-color:rgba(0,0,0,.06);box-shadow:0 1px 2px rgba(20,30,40,.03),var(--sh-b)}
+  .col:hover{border-color:var(--c-line);box-shadow:none}
+  .chip:hover{border-color:rgba(0,0,0,.05);background:rgba(255,255,255,.72);box-shadow:none}
+  .kv .item:active,.col:active{border-color:rgba(0,0,0,.09)}
+}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   html.js .panel,html.js .hero,html.js .verdict,html.js .tbl-wrap,html.js .col,html.js .moat{opacity:1;transform:none}

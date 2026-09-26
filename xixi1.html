@@ -468,6 +468,73 @@ body{
 /* ---- D · 浮层（奇异鸟等待层）：全页允许比主卡更玻璃的唯一位置 ---- */
 .kiwi-overlay{background:rgba(6,5,4,.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .kiwi-panel{background:var(--shine),linear-gradient(180deg,var(--d-bg),rgba(255,255,255,.035));border:1px solid var(--d-line);box-shadow:0 20px 60px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.085)}
+/* ============================================================
+   第 3 轮 · 交互反馈（只做已有元素的 hover / focus / active / 数值变化过渡）
+   原则：短、轻、自然；只有真能操作的元素才做位移反馈，信息卡不做假可点击
+   不改数据、不改结构、不改功能；触摸设备不残留 hover
+   ============================================================ */
+:root{ --t-press:100ms; }
+@property --sheen{syntax:"<number>";initial-value:0;inherits:false}
+/* ---- 主卡鼠标光泽：全页只有这一张卡跟随鼠标（触摸设备与减少动画时自动不启用）---- */
+.hero-main{
+  background:
+    radial-gradient(420px 300px at var(--mx,50%) var(--my,0%), rgba(255,255,255,calc(var(--sheen,0) * .04)), transparent 70%),
+    var(--shine),
+    linear-gradient(180deg,var(--a-bg),var(--a-bg2));
+  transition:transform var(--t-hover) ease-out,border-color var(--t-hover) ease-out,box-shadow var(--t-hover) ease-out,--sheen 220ms ease-out
+}
+/* ---- 表单：默认 / Hover / Focus（玻璃被轻轻点亮，不用大发光）---- */
+.picker select,.picker input{
+  transition:border-color var(--t-hover) ease-out,background var(--t-hover) ease-out,box-shadow var(--t-hover) ease-out
+}
+.picker input::placeholder{color:rgba(255,255,255,.32)}
+.picker select:focus,.picker input:focus{
+  border-color:rgba(198,164,104,.42);background:rgba(255,255,255,.052);
+  box-shadow:0 0 0 3px rgba(198,164,104,.09),inset 0 1px 0 rgba(255,255,255,.05)
+}
+/* ---- 按钮：Hover 只提亮压边，Pressed 只下沉 1px ---- */
+.picker button{transition:transform var(--t-press) ease-out,filter var(--t-hover) ease-out,box-shadow var(--t-hover) ease-out,border-color var(--t-hover) ease-out}
+.picker button::after{content:none}
+.picker button:active,#refreshBtn:active{transform:translateY(1px);filter:brightness(.965);box-shadow:0 2px 8px rgba(0,0,0,.30)}
+/* ---- 悬停态（只在精确指针设备生效，避免触摸端残留）---- */
+@media (hover:hover) and (pointer:fine){
+  .hero-main:hover{transform:none;border-color:rgba(255,255,255,.16);box-shadow:var(--sh-a-hi),inset 0 1px 0 rgba(255,255,255,.095)}
+  .picker select:hover,.picker input:hover{border-color:rgba(255,255,255,.13);background:rgba(255,255,255,.045)}
+  .picker button:hover{transform:none;filter:brightness(1.055);border-color:rgba(255,255,255,.20);box-shadow:0 6px 18px rgba(0,0,0,.30)}
+  #refreshBtn:hover{transform:none;filter:brightness(1.05);box-shadow:0 6px 18px rgba(0,0,0,.30)}
+  /* 信息卡不做位移（避免看起来能点），只让边缘亮一点点 */
+  .kv .item:hover{transform:none;border-color:rgba(255,255,255,.13);border-left-color:rgba(198,164,104,.34);box-shadow:var(--sh-b),inset 0 1px 0 rgba(255,255,255,.07)}
+  .col:hover{transform:none;border-color:rgba(255,255,255,.10);box-shadow:none}
+  .chip:hover{transform:none;border-color:rgba(255,255,255,.14);background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.038));box-shadow:none}
+  .ticker-item:hover{background:rgba(255,255,255,.028)}
+  tbody tr:hover{background:rgba(255,255,255,.045);box-shadow:inset 2px 0 0 rgba(198,164,104,.32)}
+}
+/* ---- 触摸端：清掉悬停残留，改用按下反馈 ---- */
+@media (hover:none){
+  .hero-main:hover,.picker button:hover,.kv .item:hover,.col:hover,.chip:hover{transform:none;filter:none}
+  .kv .item:hover{border-color:var(--b-line);border-left-color:rgba(255,255,255,.09);box-shadow:var(--sh-b),inset 0 1px 0 var(--b-edge)}
+  .col:hover{border-color:var(--c-line);box-shadow:none}
+  .chip:hover{border-color:rgba(255,255,255,.085);background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.03));box-shadow:none}
+  .ticker-item:hover{background:transparent}
+  tbody tr:hover{background:transparent;box-shadow:none}
+  .kv .item:active,.col:active{border-color:rgba(255,255,255,.13)}
+}
+/* ---- 数值变化：价格跳一下（短、轻微），股票名不再做 RGB 撕裂 ---- */
+@keyframes price-blast{0%{transform:scale(1)}32%{transform:scale(1.025);color:#fff}100%{transform:scale(1)}}
+.hero-price #vPrice.blast{animation:price-blast .34s ease-out both}
+@keyframes glitch{0%{opacity:.6;filter:blur(3px);transform:translateY(2px)}100%{opacity:1;filter:blur(0);transform:none}}
+.hero-name.glitch{animation:glitch .26s ease-out both}
+.hero-name.glitch::before,.hero-name.glitch::after{opacity:0;animation:none}
+/* ---- 入场：幅度与时长收到"几乎察觉不到" ---- */
+@keyframes text-focus-in{0%{opacity:0;filter:blur(4px);letter-spacing:3px}100%{opacity:1;filter:blur(0);letter-spacing:2px}}
+.hero-name{animation:text-focus-in .38s cubic-bezier(.22,1,.36,1) both}
+@keyframes price-in{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:none}}
+.hero-price #vPrice{animation:price-in .34s cubic-bezier(.22,1,.36,1) both}
+html.js .panel,html.js .hero,html.js .verdict,html.js .tbl-wrap,html.js .col,html.js .moat{transform:translateY(10px)}
+html.js .in{transition:opacity .3s ease-out,transform .3s ease-out,filter .3s ease-out}
+@keyframes item-in{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}}
+.kv .item{animation-duration:.32s}
+@keyframes bar-in{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   html.js .panel,html.js .hero,html.js .verdict,html.js .tbl-wrap,html.js .col,html.js .moat{opacity:1;transform:none}
@@ -2593,6 +2660,32 @@ startClock();
 initPicker();
 refreshAllLive(false);
 if (location.search.indexOf("kiwi=1") >= 0) setKiwi(true, "测试模式：奇异鸟等待提示");
+/* ============================================================
+   第 3 轮 · 主卡鼠标光泽（纯视觉：只给 .hero-main 一张卡喂鼠标坐标）
+   不读不改任何行情/财报数据；触摸设备与"减少动画"偏好下自动不启用
+   ============================================================ */
+(function(){
+  const card = document.querySelector(".hero-main");
+  if (!card) return;
+  const fine = window.matchMedia("(hover:hover) and (pointer:fine)");
+  const still = window.matchMedia("(prefers-reduced-motion:reduce)");
+  if (!fine.matches || still.matches) return;
+  let frame = 0, px = 50, py = 0;
+  const paint = () => {
+    frame = 0;
+    card.style.setProperty("--mx", px.toFixed(1) + "%");
+    card.style.setProperty("--my", py.toFixed(1) + "%");
+  };
+  card.addEventListener("pointermove", e => {
+    const r = card.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    px = (e.clientX - r.left) / r.width * 100;
+    py = (e.clientY - r.top) / r.height * 100;
+    if (!frame) frame = requestAnimationFrame(paint);
+  }, {passive:true});
+  card.addEventListener("pointerenter", () => card.style.setProperty("--sheen", "1"));
+  card.addEventListener("pointerleave", () => card.style.setProperty("--sheen", "0"));
+})();
 </script>
 </body>
 </html>
